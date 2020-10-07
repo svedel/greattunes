@@ -1,11 +1,9 @@
 from botorch.models.gpytorch import GPyTorchModel
 from gpytorch.distributions import MultivariateNormal
+from gpytorch.kernels import MaternKernel, ScaleKernel
+from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.means import ConstantMean
 from gpytorch.models import ExactGP
-from gpytorch.kernels import RBFKernel, ScaleKernel, MaternKernel
-from gpytorch.likelihoods import GaussianLikelihood
-from gpytorch.mlls import ExactMarginalLogLikelihood
-from gpytorch.priors import GammaPrior
 
 
 class SimpleCustomMaternGP(ExactGP, GPyTorchModel):
@@ -22,7 +20,9 @@ class SimpleCustomMaternGP(ExactGP, GPyTorchModel):
 
         if nu is not None:
             self.covar_module = ScaleKernel(
-                base_kernel=MaternKernel(nu=nu, ard_num_dims=train_X.shape[-1]),  # set parameter nu in Matern kernel
+                base_kernel=MaternKernel(
+                    nu=nu, ard_num_dims=train_X.shape[-1]
+                ),  # set parameter nu in Matern kernel
             )
         else:
             self.covar_module = ScaleKernel(
