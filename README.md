@@ -7,8 +7,8 @@ Need to install the `torch`-libraries outside normal bulk `pip install`.
 
 To find the right installation command for `torch`, use [this link](https://pytorch.org/get-started/locally/)
 to determine the details and add as a separate command in the `github` actions yaml. As an example, the following is the 
-install command on my local system (an Ubuntu-based system with 
-pip and without CUDA access)
+install command on my local system (an `Ubuntu`-based system with 
+`pip` and without `CUDA` access)
 ```python
 pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 ```
@@ -25,17 +25,17 @@ the terminal from the project root folder (`creative-brain`), will run the check
 needed
 ```python
 ### linting
-flake8 src/
+~/creative-brain$ flake8 src/
 
 ### code style
-black src --check # checks for fixes needed
-black src --diff # shows suggested edits
-black src # makes the edits (only command needed to update the code)
+~/creative-brain$ black src --check # checks for fixes needed
+~/creative-brain$ black src --diff # shows suggested edits
+~/creative-brain$ black src # makes the edits (only command needed to update the code)
 
 ### sort imports
-/bin/sh -c "isort src/**/*.py --check-only" # checks for sorting opportunities
-/bin/sh -c "isort src/**/*.py --diff" # shows changes that could be done
-/bin/sh -c "isort src/**/*.py" # makes the changes (only command needed to update the code)
+~/creative-brain$ /bin/sh -c "isort src/**/*.py --check-only" # checks for sorting opportunities
+~/creative-brain$ /bin/sh -c "isort src/**/*.py --diff" # shows changes that could be done
+~/creative-brain$ /bin/sh -c "isort src/**/*.py" # makes the changes (only command needed to update the code)
 ```
 
 ## References
