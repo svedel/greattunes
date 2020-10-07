@@ -1,6 +1,6 @@
 # CI/CD pipeline
 
-name: CI/CD workflow
+name: CI CD workflow
 
 on:
   push:

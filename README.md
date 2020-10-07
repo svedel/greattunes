@@ -1,4 +1,7 @@
-# explore-create
+# Creative brain
+
+![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
+
 Library with Bayesian Optimization made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
