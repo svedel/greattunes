@@ -12,6 +12,31 @@ pip and without CUDA access)
 pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
+## Testing 
+The `pytest` framework is used for this library, with all tests residing in `creative-brain\tests`. To execute all tests, 
+run the following from the terminal from the project root folder (`creative-brain`)
+```python
+python -m pytest tests/
+```
+
+In addition, linting, code style checking and sorting of imports is also covered. The following commands, executed in
+the terminal from the project root folder (`creative-brain`), will run the checks and perform style corrections if 
+needed
+```python
+### linting
+flake8 src/
+
+### code style
+black src --check # checks for fixes needed
+black src --diff # shows suggested edits
+black src # makes the edits (only command needed to update the code)
+
+### sort imports
+/bin/sh -c "isort src/**/*.py --check-only" # checks for sorting opportunities
+/bin/sh -c "isort src/**/*.py --diff" # shows changes that could be done
+/bin/sh -c "isort src/**/*.py" # makes the changes (only command needed to update the code)
+```
+
 ## References
 A list of Bayesian optimization references for later use
 * [borealis.ai](https://www.borealisai.com/en/blog/tutorial-8-bayesian-optimization/)
