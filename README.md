@@ -1,5 +1,6 @@
 # explore-create
-Library with Bayesian Optimization made available for either closed-loop or user-driven (manual) optimization of either known or unknown objective functions. Drawing on PyTorch (GPyTorch), BOTorch and with proprietary extensions.
+Library with Bayesian Optimization made available for either closed-loop or user-driven (manual) optimization of either 
+known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
 ## Start-up notes
 Need to install the `torch`-libraries outside normal bulk `pip install`.
