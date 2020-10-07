@@ -1,0 +1,56 @@
+# CI/CD pipeline
+
+name: CI/CD workflow
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+
+  tests:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+          with:
+            python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # install pytorch for ubuntu without CUDA
+          pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+          pip install -r requirements.txt
+          pip install flake8 pytest
+      - name: linting
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --statistics
+      - name: code style/format check
+        run: |
+          # first check files
+          black src/ --check
+          # run check
+          black src/
+      - name: check for sorted imports
+        run: |
+          # just check
+          /bin/sh -c "isort src/**/*.py --check-only"
+          # execute
+          /bin/sh -c "isort src/**/*.py"
+      - name: run tests
+        run: |
+          python -m pytest tests/
+
