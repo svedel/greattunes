@@ -20,3 +20,15 @@ def custom_models_simple_training_data():
     train_X = torch.tensor([[-1.0]], dtype=torch.double)
     train_Y = torch.tensor([[0.2]], dtype=torch.double)
     return train_X, train_Y
+
+
+@pytest.fixture(scope="class")
+def custom_models_simple_training_data_4elements():
+    """
+    defines very simple dataset for training of custom GP models. Defined in torch.tensor format
+    :return: train_X (torch.tensor)
+    :return: train_Y (torch.tensor)
+    """
+    train_X = torch.tensor([[-1.0], [-1.1], [-0.5], [1.0]], dtype=torch.double)
+    train_Y = torch.tensor([[0.2], [0.15], [0.5], [2.0]], dtype=torch.double)
+    return train_X, train_Y
