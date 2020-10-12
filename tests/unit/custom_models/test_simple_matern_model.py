@@ -2,7 +2,7 @@ from botorch.fit import fit_gpytorch_model
 from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
 import pytest
-from src.custom_models.simple_matern_model import SimpleCustomMaternGP
+from creative_project.custom_models.simple_matern_model import SimpleCustomMaternGP
 
 def test_SimpleCustomMaternGP_definitions(custom_models_simple_training_data):
     """
@@ -66,7 +66,7 @@ def test_SimpleCustomMaternGP_train(custom_models_simple_training_data, nu):
     [
         [None, 1.410078151215117, 2.5620788497306233, 3.474197969189694],
         [2.5, 1.410078151215117, 2.5620788497306233, 3.474197969189694],
-        [1.5,1.2549585734844588, 2.482677418030433, 4.427168437270844],
+        [1.5, 1.2549585734844588, 2.482677418030433, 4.427168437270844],
     ]
 )
 def test_SimpleCustomMaternGP_train_4elements(custom_models_simple_training_data_4elements, nu, mean_const, covar_raw_outputscale, covar_raw_lenghtscale):
