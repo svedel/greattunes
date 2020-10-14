@@ -36,9 +36,9 @@ needed
 ~/creative-brain$ black src # makes the edits (only command needed to update the code)
 
 ### sort imports
-~/creative-brain$ /bin/sh -c "isort src/**/*.py --check-only" # checks for sorting opportunities
-~/creative-brain$ /bin/sh -c "isort src/**/*.py --diff" # shows changes that could be done
-~/creative-brain$ /bin/sh -c "isort src/**/*.py" # makes the changes (only command needed to update the code)
+~/creative-brain$ /bin/sh -c "isort creative_project/**/*.py --check-only" # checks for sorting opportunities
+~/creative-brain$ /bin/sh -c "isort creative_project/**/*.py --diff" # shows changes that could be done
+~/creative-brain$ /bin/sh -c "isort creative_project/**/*.py" # makes the changes (only command needed to update the code)
 ```
 
 ## References
