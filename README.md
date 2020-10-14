@@ -28,12 +28,12 @@ the terminal from the project root folder (`creative-brain`), will run the check
 needed
 ```python
 ### linting
-~/creative-brain$ flake8 src/
+~/creative-brain$ flake8 creative_project/
 
 ### code style
-~/creative-brain$ black src --check # checks for fixes needed
-~/creative-brain$ black src --diff # shows suggested edits
-~/creative-brain$ black src # makes the edits (only command needed to update the code)
+~/creative-brain$ black creative_project --check # checks for fixes needed
+~/creative-brain$ black creative_project --diff # shows suggested edits
+~/creative-brain$ black creative_project # makes the edits (only command needed to update the code)
 
 ### sort imports
 ~/creative-brain$ /bin/sh -c "isort creative_project/**/*.py --check-only" # checks for sorting opportunities
