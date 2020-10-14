@@ -35,21 +35,21 @@ jobs:
       - name: linting
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 creative_project --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --statistics
       - name: code style/format check
         run: |
           # first check files
-          black src/ --check
+          black creative_project/ --check
           # run check
-          black src/
+          black creative_project/
       - name: check for sorted imports
         run: |
           # just check
-          /bin/sh -c "isort src/**/*.py --check-only"
+          /bin/sh -c "isort creative_project/**/*.py --check-only"
           # execute
-          /bin/sh -c "isort src/**/*.py"
+          /bin/sh -c "isort creative_project/**/*.py"
       - name: run tests
         run: |
           python -m pytest tests/
