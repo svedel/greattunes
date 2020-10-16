@@ -1,5 +1,5 @@
 import torch
-
+from ._max_response import find_max_response_value
 
 class Initializers:
     """
