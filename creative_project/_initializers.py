@@ -40,3 +40,29 @@ class Initializers:
                 [lower_bounds, upper_bounds], device=self.device, dtype=self.dtype
             ),
         )
+
+
+    def __initialize_best_response(self):
+        """
+        initialize best response. Only applicable if data is provided at beginning
+        """
+
+        self.covars_best_response_value = None
+        self.best_response_value = None
+        first = True
+
+        if self.train_Y is not None:
+            for it in range(self.train_Y.shape[0]):
+
+                print("it: " + str(it))
+                print("train_Y")
+                print(self.train_Y[:it])
+
+                max_X, max_Y = find_max_response_value(self.train_X[:it, :], self.train_Y[:it])
+                if first:
+                    self.covars_best_response_value = max_X
+                    self.best_response_value = max_Y
+                    first = False
+                else:
+                    self.covars_best_response_value = torch.cat((self.covars_best_response_value, max_X), dim=0)
+                    self.best_response_value = torch.cat((self.best_response_value, max_Y), dim=0)

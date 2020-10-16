@@ -83,4 +83,4 @@ class CreativeProject(Initializers):
 
         # best observed candidate (best response) [self.best_response_value 1 X num_obs tensor], together with
         # corresponding covariates [self.covariates_best_response_value num_covars X num_obs tensor]
-        # self.__initialize_best_response()
+        self.__initialize_best_response()
