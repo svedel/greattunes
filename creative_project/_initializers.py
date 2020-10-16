@@ -52,11 +52,7 @@ class Initializers:
         first = True
 
         if self.train_Y is not None:
-            for it in range(self.train_Y.shape[0]):
-
-                print("it: " + str(it))
-                print("train_Y")
-                print(self.train_Y[:it])
+            for it in range(1,self.train_Y.shape[0]+1):
 
                 max_X, max_Y = find_max_response_value(self.train_X[:it, :], self.train_Y[:it])
                 if first:
