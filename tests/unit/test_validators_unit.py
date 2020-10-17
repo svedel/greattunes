@@ -13,7 +13,6 @@ def test_Validators__validate_num_covars(covars_initialization_data, dataset_id)
 
     covars = covars_initialization_data[dataset_id]
     covars_array = torch.tensor([[g[0]] for g in covars], dtype=torch.double)
-    # covars__array_wrong = torch.tensor([[g[0] for g in covars] + [22.0]], dtype=torch.double)
     covars_array_wrong = torch.cat((covars_array, torch.tensor([[22.0]], dtype=torch.double)))
 
     # instatiate Validators class
