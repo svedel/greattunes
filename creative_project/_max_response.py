@@ -10,8 +10,6 @@ def find_max_response_value(train_X, train_Y):
 
     idmax = train_Y.argmax().item()
 
-    print(idmax)
-
     max_X = train_X[idmax]
     max_Y = train_Y[idmax]
 
