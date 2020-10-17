@@ -35,3 +35,50 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
     for it in range(train_X.shape[0]):
         assert cls.covars_best_response_value[it].item() == test_max_covars_test[it].item()
         assert cls.best_response_value[it].item() == test_max_response_test[it].item()
+
+
+def test_Initializers__initialize_training_data_functional(custom_models_simple_training_data_4elements):
+    """
+    test private method initialize_training_data which depends on private method from parent class Validators. Test
+    only functional and non-functional via provided initial data train_X, train_Y
+    """
+
+    # data
+    train_X = custom_models_simple_training_data_4elements[0]
+    train_Y = custom_models_simple_training_data_4elements[1]
+
+    ### First test: it passes (use train_X, train_Y)
+    # initialize class and register required attributes
+    cls = Initializers()
+    cls.model = {  # set required attributes
+        "covars_sampled_iter": 0,
+        "response_sampled_iter": 0
+    }
+    cls.initial_guess = torch.tensor([[x.item() for x in train_X]], dtype=torch.double)
+
+    # run the method
+    cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)
+
+    # assert that the data has been validated and stored in right places
+    assert cls.start_from_guess == False
+    for it in range(train_X.shape[0]):
+        assert cls.train_X[it].item() == train_X[it].item()
+        assert cls.train_Y[it].item() == train_Y[it].item()
+        assert cls.proposed_X[it].item() == train_X[it].item()
+
+    ### First test: it passes (use train_X, train_Y)
+    # initialize class and register required attributes
+    cls = Initializers()
+    cls.model = {  # set required attributes
+        "covars_sampled_iter": 0,
+        "response_sampled_iter": 0
+    }
+
+    # run the method
+    cls._Initializers__initialize_training_data(train_X=None, train_Y=None)
+
+    # assert that nothing has run
+    assert cls.start_from_guess == True
+    assert cls.train_X == None
+    assert cls.train_Y == None
+    assert cls.proposed_X == None
