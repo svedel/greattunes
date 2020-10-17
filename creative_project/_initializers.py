@@ -1,5 +1,6 @@
 import torch
-from ._max_response import find_max_response_value
+import creative_project._max_response
+
 
 class Initializers:
     """
@@ -41,10 +42,10 @@ class Initializers:
             ),
         )
 
-
     def __initialize_best_response(self):
         """
-        initialize best response. Only applicable if data is provided at beginning
+        initialize best response. If no data present sets to None, otherwise identifies best response up to each data
+        point.
         """
 
         self.covars_best_response_value = None
@@ -52,13 +53,21 @@ class Initializers:
         first = True
 
         if self.train_Y is not None:
-            for it in range(1,self.train_Y.shape[0]+1):
+            for it in range(1, self.train_Y.shape[0] + 1):
+                # for monkeypatching during unit testing to work, it is required that the full path is added to this
+                # import (monkeypatching this function)
+                max_X, max_Y = creative_project._max_response.find_max_response_value(
+                    self.train_X[:it, :], self.train_Y[:it]
+                )
 
-                max_X, max_Y = find_max_response_value(self.train_X[:it, :], self.train_Y[:it])
                 if first:
                     self.covars_best_response_value = max_X
                     self.best_response_value = max_Y
                     first = False
                 else:
-                    self.covars_best_response_value = torch.cat((self.covars_best_response_value, max_X), dim=0)
-                    self.best_response_value = torch.cat((self.best_response_value, max_Y), dim=0)
+                    self.covars_best_response_value = torch.cat(
+                        (self.covars_best_response_value, max_X), dim=0
+                    )
+                    self.best_response_value = torch.cat(
+                        (self.best_response_value, max_Y), dim=0
+                    )

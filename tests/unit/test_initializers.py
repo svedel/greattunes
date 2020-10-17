@@ -2,11 +2,10 @@
 This file contains a helper class with initializer methods. It is only wrapped as a class for convenience. Will
 therefore only test individual functions
 """
-
 import pytest
 import torch
 from creative_project._initializers import Initializers
-
+import creative_project._max_response
 
 @pytest.mark.parametrize("dataset_id",[0, 1])
 def test_Initializers__initialize_from_covars(covars_initialization_data, dataset_id):
@@ -51,21 +50,27 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
 
+    # monkeypatch function call
+    tmp_output = 1.0
+    def mock_find_max_response_value(train_X, train_Y):
+        return torch.tensor([[tmp_output]], dtype=torch.double), torch.tensor([[tmp_output]], dtype=torch.double)
+    monkeypatch.syspath_prepend("..")
+    monkeypatch.setattr(
+        creative_project._max_response, "find_max_response_value", mock_find_max_response_value
+    )
+
     # initialize class and register required attributes
     cls = Initializers()
     cls.train_X = train_X
     cls.train_Y = train_Y
 
-    # monkeypatch function call
-    tmp_output = 1.0
-    def mock_find_max_response_value(train_X, train_Y):
-        return torch.tensor([[tmp_output]], dtype=torch.double), torch.tensor([[tmp_output]], dtype=torch.double)
-    monkeypatch.setattr(
-        kre8_core.creative_project._max_response, "find_max_response_value", mock_find_max_response_value
-    )
-
-    # run the function
+    # run the functio(
     cls._Initializers__initialize_best_response()
+
+    print("returned covars")
+    print(cls.covars_best_response_value)
+    print("returned resp")
+    print(cls.best_response_value)
 
     # assert that the function has been applied
     assert isinstance(cls.covars_best_response_value, torch.Tensor)
@@ -73,10 +78,9 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
 
     # check size
     assert cls.covars_best_response_value.shape[0] == train_X.shape[0]
-    assert cls.covars_best_response_value.shape[1] == train_X.shape[1]
     assert cls.best_response_value.shape[0] == train_Y.shape[0]
-    assert cls.best_response_value.shape[1] == train_Y.shape[1]
 
     # check values, compare to mock_find_max_response_value
     for it in range(train_X.shape[0]):
-        assert cls.covars_best_response_value[it].item() == tmp_output & cls.best_response_value[it].item() == tmp_output
+        assert cls.covars_best_response_value[it].item() == tmp_output
+        assert cls.best_response_value[it].item() == tmp_output
