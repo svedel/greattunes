@@ -70,8 +70,3 @@ def ref_model_and_training_data(custom_models_simple_training_data_4elements):
     ll = ExactMarginalLogLikelihood(lh, model_obj)
 
     return train_X, train_Y, model_obj, lh, ll
-
-    # return model + likelihood
-    #self.model["model"] = model_obj
-    #self.model["likelihood"] = lh
-    #self.model["loglikelihood"] = ll
