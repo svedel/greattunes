@@ -31,20 +31,21 @@ class Initializers(Validators):
         """
 
         # verify datatype of covars (pending)
+        if self._Validators__validate_covars(covars=covars):
 
-        # extract initial guesses
-        guesses = [[g[0] for g in covars]]
+            # extract initial guesses
+            guesses = [[g[0] for g in covars]]
 
-        # bounds
-        lower_bounds = [g[1] for g in covars]
-        upper_bounds = [g[2] for g in covars]
+            # bounds
+            lower_bounds = [g[1] for g in covars]
+            upper_bounds = [g[2] for g in covars]
 
-        return (
-            torch.tensor(guesses, device=self.device, dtype=self.dtype),
-            torch.tensor(
-                [lower_bounds, upper_bounds], device=self.device, dtype=self.dtype
-            ),
-        )
+            return (
+                torch.tensor(guesses, device=self.device, dtype=self.dtype),
+                torch.tensor(
+                    [lower_bounds, upper_bounds], device=self.device, dtype=self.dtype
+                ),
+            )
 
     def __initialize_best_response(self):
         """
