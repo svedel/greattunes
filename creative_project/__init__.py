@@ -1,11 +1,15 @@
 import torch
 from ._initializers import Initializers
+from ._acq_func import AcqFunction
 
 
-class CreativeProject(Initializers):
+class CreativeProject(Initializers, AcqFunction):
     """
-    Class of user-facing functionality to handle creative projects.
+    user-facing functionality to balance exploration and exploitation for creative projects.
     """
+
+    # setting version number
+    #__version__ = 0.0.1
 
     # Initialize class instance
     def __init__(self, covars, model="SingleTaskGP", acq_func="EI", **kwargs):
@@ -77,10 +81,13 @@ class CreativeProject(Initializers):
         # None
         # !!! ADD STANDARDIZATION !!!
         # !!! CONSIDER CREATING A DICT OF DATA INSTEAD OF THREE SEPARATE ATTRIBUTES !!!
-        self.__initialize_training_data(
+        self._Initializers__initialize_training_data(
             train_X=kwargs.get("train_X"), train_Y=kwargs.get("train_Y")
         )
 
         # best observed candidate (best response) [self.best_response_value 1 X num_obs tensor], together with
         # corresponding covariates [self.covariates_best_response_value num_covars X num_obs tensor]
-        self.__initialize_best_response()
+        self._Initializers__initialize_best_response()
+
+    # import methods
+    from ._campaign import auto
