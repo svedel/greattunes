@@ -62,3 +62,36 @@ def test_unit_Validators__validate_training_data(custom_models_simple_training_d
     # change number of entries to train_Y, will fail
     new_train_Y = torch.cat((train_Y, torch.tensor([[22.0]], dtype=torch.double)))
     assert not cls._Validators__validate_training_data(train_X=train_X, train_Y=new_train_Y)
+
+
+@pytest.mark.parametrize(
+    "covars, error_msg",
+    [
+        [None, "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"],  # checks no covars data provided
+        [(1, 2, 3), "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)"],  # checks fail if covars not a list of tuples
+        [[1, 2, 3], "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple"],  # checks that covars is a list of tuples
+        [[("hej", 2, 3)], "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element hej in covars list is neither of type float or int"]  # test that all elements in tuples are of type int or float
+    ])
+def test_Validators__validate_covars_exceptions(covars, error_msg):
+    """
+    test conditions under which private method __validate_covars fails, check exceptions raised
+    """
+
+    cls = Validators()
+
+    with pytest.raises(Exception) as e:
+        # set up class
+        assert cls._Validators__validate_covars(covars=covars)
+    assert str(e.value) == error_msg
+
+
+def test_Validators__validate_covars_passes(covars_for_custom_models_simple_training_data_4elements):
+    """
+    test conditions under which private method __validate_covars passes
+    """
+
+    covars = covars_for_custom_models_simple_training_data_4elements
+
+    cls = Validators()
+
+    assert cls._Validators__validate_covars(covars=covars)

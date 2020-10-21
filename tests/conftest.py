@@ -37,6 +37,16 @@ def custom_models_simple_training_data_4elements():
 
 
 @pytest.fixture(scope="class")
+def covars_for_custom_models_simple_training_data_4elements():
+    """
+    defines initial covars compatible with custom_models_simple_training_data_4elements above
+    :return: covars (list of tuple)
+    """
+    covars = [(0.0, -2.0, 2.0)]
+    return covars
+
+
+@pytest.fixture(scope="class")
 def covars_initialization_data():
     """
     defines simple and more complex initial covariate datasets to test initialization method

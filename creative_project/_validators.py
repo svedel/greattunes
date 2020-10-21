@@ -59,3 +59,33 @@ class Validators:
             valid = True
 
         return valid
+
+    def __validate_covars(self, covars):
+        """
+        validate that covars is a list of tuples of floats
+        :param covars: object, only accepted if covars is list of tuples of floats
+        :return: valid (bool
+        """
+
+        valid = False
+
+        if covars is None:
+            raise ValueError("kre8_core.creative_project._validators.Validator.__validate_covars: covars is None")
+
+        if not isinstance(covars, list):
+            raise TypeError("kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)")
+
+        for entry in covars:
+            if not isinstance(entry, tuple):
+                raise TypeError(
+                    "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple")
+
+        for entry in covars:
+            for el in entry:
+                if not isinstance(el, (float, int)):
+                    raise TypeError(
+                        "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element " + str(el) + " in covars list is neither of type float or int")
+
+        valid = True
+
+        return valid
