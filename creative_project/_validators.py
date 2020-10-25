@@ -55,12 +55,6 @@ class Validators:
 
         valid = False
 
-        #print("covars.shape")
-        #print(covars_array.shape)
-        #print("initial_guess.shape")
-        #print(self.initial_guess.shape)
-        #print(self.initial_guess)
-
         # with one column per covariate in covars_array, and one column per covariate in initial_guess, makes sure that
         # same amount of covariates present in both
         if covars_array.shape[1] == self.initial_guess.shape[1]:
