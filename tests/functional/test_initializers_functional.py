@@ -37,7 +37,8 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
         assert cls.best_response_value[it].item() == test_max_response_test[it].item()
 
 
-def test_Initializers__initialize_training_data_functional(custom_models_simple_training_data_4elements):
+def test_Initializers__initialize_training_data_functional(custom_models_simple_training_data_4elements,
+                                                           covars_for_custom_models_simple_training_data_4elements):
     """
     test private method initialize_training_data which depends on private method from parent class Validators. Test
     only functional and non-functional via provided initial data train_X, train_Y
@@ -46,6 +47,7 @@ def test_Initializers__initialize_training_data_functional(custom_models_simple_
     # data
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
+    covars = covars_for_custom_models_simple_training_data_4elements
 
     ### First test: it passes (use train_X, train_Y)
     # initialize class and register required attributes
@@ -54,7 +56,7 @@ def test_Initializers__initialize_training_data_functional(custom_models_simple_
         "covars_sampled_iter": 0,
         "response_sampled_iter": 0
     }
-    cls.initial_guess = torch.tensor([[x.item() for x in train_X]], dtype=torch.double)
+    cls.initial_guess = torch.tensor([[g[0] for g in covars]], dtype=torch.double)
 
     # run the method
     cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)

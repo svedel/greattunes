@@ -3,7 +3,7 @@ from creative_project._validators import Validators
 from creative_project._initializers import Initializers
 
 
-def test_functional_Validators__validate_training_data(custom_models_simple_training_data_4elements):
+def test_functional_Validators__validate_training_data(custom_models_simple_training_data_4elements, covars_for_custom_models_simple_training_data_4elements):
     """
     functional test of private method __validate_training_data, relying on all embedded function calls as-is
     """
@@ -11,7 +11,8 @@ def test_functional_Validators__validate_training_data(custom_models_simple_trai
     # data
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
-    covars = [(x[0], x[0]-1.0, x[0]+1.0) for x in train_X.numpy()]  # create covars in right format from train_X
+    #covars = [(x[0], x[0]-1.0, x[0]+1.0) for x in train_X.numpy()]  # create covars in right format from train_X
+    covars = covars_for_custom_models_simple_training_data_4elements
 
     # initialize the class
     cls = Validators()

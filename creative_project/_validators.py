@@ -46,7 +46,7 @@ class Validators:
         """
         validate that entries in "covars_array" is equal to number of covars provided to "covars" during
         class instance initialization of CreativeProject (from creative_project.__init__.py)
-        :param covars_array (torch.tensor, pandas dataframe, numpy array)
+        :param covars_array (torch.tensor, pandas dataframe, numpy array; shape needs to be num_observations X num_covariates)
         :param
             - state of initialized class:
                 - self.initial_guess (torch.tensor)
@@ -55,7 +55,15 @@ class Validators:
 
         valid = False
 
-        if covars_array.shape[0] == self.initial_guess.shape[1]:
+        #print("covars.shape")
+        #print(covars_array.shape)
+        #print("initial_guess.shape")
+        #print(self.initial_guess.shape)
+        #print(self.initial_guess)
+
+        # with one column per covariate in covars_array, and one column per covariate in initial_guess, makes sure that
+        # same amount of covariates present in both
+        if covars_array.shape[1] == self.initial_guess.shape[1]:
             valid = True
 
         return valid
