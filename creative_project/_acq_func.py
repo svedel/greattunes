@@ -1,4 +1,3 @@
-import torch
 from botorch.acquisition import ExpectedImprovement
 
 
@@ -6,6 +5,7 @@ class AcqFunction:
     """
     all functionality for acquisition functions
     """
+
     def set_acq_func(self):
         """
         set the acquisition function
@@ -14,13 +14,20 @@ class AcqFunction:
         """
 
         if self.model["model"] is None:
-            raise Exception("kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no surrogate model set (self.model['model'] is None)")
+            raise Exception(
+                "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no surrogate model set "
+                "(self.model['model'] is None)"
+            )
         if self.train_Y is None:
-            raise Exception("kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no training data provided (self.train_Y is None")
+            raise Exception(
+                "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no training data provided "
+                "(self.train_Y is None"
+            )
 
         if self.acq_func["type"] == "EI":
-            self.acq_func["object"] = ExpectedImprovement(model=self.model["model"],
-                                                          best_f=self.train_Y.max().item())
+            self.acq_func["object"] = ExpectedImprovement(
+                model=self.model["model"], best_f=self.train_Y.max().item()
+            )
 
     def __initialize_acq_func(self):
         """

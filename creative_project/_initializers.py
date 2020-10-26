@@ -66,8 +66,12 @@ class Initializers(Validators):
                 )
 
                 # converting to row tensors
-                max_X = torch.tensor([max_X.numpy()], dtype=self.dtype, device=self.device)
-                max_Y = torch.tensor([max_Y.numpy()], dtype=self.dtype, device=self.device)
+                max_X = torch.tensor(
+                    [max_X.numpy()], dtype=self.dtype, device=self.device
+                )
+                max_Y = torch.tensor(
+                    [max_Y.numpy()], dtype=self.dtype, device=self.device
+                )
 
                 if first:
                     self.covars_best_response_value = max_X
@@ -85,10 +89,13 @@ class Initializers(Validators):
         """
         determine whether training data and response data have been added as part of initialization of class instance.
         Set attribute "start_from_guess"
-        :param train_X (torch.tensor): design matrix of covariates (batch_shape X num_obs X num_training_features OR num_obs X num_training_features)
-        :param train_Y (torch.tensor): observations (batch_shape X num_obs X num_output_models [allows for batched models] OR num_obs X num_output_models)
+        :param train_X (torch.tensor): design matrix of covariates (batch_shape X num_obs X num_training_features OR
+        num_obs X num_training_features)
+        :param train_Y (torch.tensor): observations (batch_shape X num_obs X num_output_models
+        [allows for batched models] OR num_obs X num_output_models)
         :return (creates class attributes):
-            - start_from_guess (bool): determines whether can start from provided training data (False if no/invalid/inconsistent data provided)
+            - start_from_guess (bool): determines whether can start from provided training data (False if
+            no/invalid/inconsistent data provided)
             - train_X (tensor): design matrix of covariates
             - train_Y (tensor): corresponding observations
             - proposed_X (tensor): the covariates proposed for analysis. Set to train_X
@@ -103,7 +110,9 @@ class Initializers(Validators):
         self.train_Y = None
 
         # only take action if no iterations have been taken in model
-        if (self.model["covars_sampled_iter"] == 0) & (self.model["response_sampled_iter"] == 0):
+        if (self.model["covars_sampled_iter"] == 0) & (
+            self.model["response_sampled_iter"] == 0
+        ):
 
             # check if data has been supplied via kwargs, otherwise train_X, train_Y will be None
             if (train_X is not None) & (train_Y is not None):

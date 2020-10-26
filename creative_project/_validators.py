@@ -46,7 +46,8 @@ class Validators:
         """
         validate that entries in "covars_array" is equal to number of covars provided to "covars" during
         class instance initialization of CreativeProject (from creative_project.__init__.py)
-        :param covars_array (torch.tensor, pandas dataframe, numpy array; shape needs to be num_observations X num_covariates)
+        :param covars_array (torch.tensor, pandas dataframe, numpy array; shape needs to be
+        num_observations X num_covariates)
         :param
             - state of initialized class:
                 - self.initial_guess (torch.tensor)
@@ -72,21 +73,31 @@ class Validators:
         valid = False
 
         if covars is None:
-            raise ValueError("kre8_core.creative_project._validators.Validator.__validate_covars: covars is None")
+            raise ValueError(
+                "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"
+            )
 
         if not isinstance(covars, list):
-            raise TypeError("kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)")
+            raise TypeError(
+                "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list "
+                "of tuples (not list)"
+            )
 
         for entry in covars:
             if not isinstance(entry, tuple):
                 raise TypeError(
-                    "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple")
+                    "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not "
+                    "tuple"
+                )
 
         for entry in covars:
             for el in entry:
                 if not isinstance(el, (float, int)):
                     raise TypeError(
-                        "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element " + str(el) + " in covars list is neither of type float or int")
+                        "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element "
+                        + str(el)
+                        + " in covars list is neither of type float or int"
+                    )
 
         valid = True
 

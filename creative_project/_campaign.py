@@ -26,7 +26,7 @@ def auto(self, response_samp_func, max_iter=100):
         # update counter
         it += 1
 
-        print('ITERATION ' + str(it) + ': Identify new covariate datapoint...', end=" ")
+        print("ITERATION " + str(it) + ": Identify new covariate datapoint...", end=" ")
 
         # initialize acquisition function (if first time data present, otherwise don't do anything)
         self.__initialize_acq_func()

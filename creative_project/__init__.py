@@ -8,9 +8,6 @@ class CreativeProject(Initializers, AcqFunction):
     user-facing functionality to balance exploration and exploitation for creative projects.
     """
 
-    # setting version number
-    #__version__ = 0.0.1
-
     # Initialize class instance
     def __init__(self, covars, model="SingleTaskGP", acq_func="EI", **kwargs):
         """
