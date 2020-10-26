@@ -75,11 +75,11 @@ def training_data_covar_complex(covars_initialization_data):
 
     return covars, train_X, train_Y
 
-### Simple trained GP model
+### Trained GP model
 @pytest.fixture(scope="class")
 def ref_model_and_training_data(custom_models_simple_training_data_4elements):
     """
-    defines a simple GP model and the data it is defined by
+    defines a simple, univariate GP model and the data it is defined by
     :return: train_X, train_Y (training data, from custom_models_simple_training_data_4elements above)
     :return: model_obj (model object, SingleTaskGP)
     :return: lh, ll (model likelihood and marginal log-likelihood)
@@ -98,3 +98,29 @@ def ref_model_and_training_data(custom_models_simple_training_data_4elements):
     ll = ExactMarginalLogLikelihood(lh, model_obj)
 
     return train_X, train_Y, model_obj, lh, ll
+
+
+@pytest.fixture(scope="class")
+def ref_model_and_multivariate_training_data(training_data_covar_complex):
+    """
+    defines a multivariate GP model and the data it is defined by
+    :return: covars
+    :return: train_X, train_Y (training data, from custom_models_simple_training_data_4elements above)
+    :return: model_obj (model object, SingleTaskGP)
+    :return: lh, ll (model likelihood and marginal log-likelihood)
+    """
+
+    covars = training_data_covar_complex[0]
+    train_X = training_data_covar_complex[1]
+    train_Y = training_data_covar_complex[2]
+
+    # set up the model
+    model_obj = SingleTaskGP(train_X, train_Y)
+
+    # the likelihood
+    lh = model_obj.likelihood
+
+    # define the "loss" function
+    ll = ExactMarginalLogLikelihood(lh, model_obj)
+
+    return covars, train_X, train_Y, model_obj, lh, ll

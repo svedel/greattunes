@@ -1,4 +1,5 @@
 from botorch.acquisition import ExpectedImprovement
+from botorch.optim import optimize_acqf
 
 
 class AcqFunction:
@@ -40,3 +41,48 @@ class AcqFunction:
 
         if self.train_Y is not None:
             self.set_acq_func()
+
+
+    def identify_new_candidate(self):
+        """
+        identify next candidate covars datapoint. Special case for first iteration: in case no training
+        data provided, will start from initial guess provided via "covars" during class instance
+        initialization.
+        assumes:
+            - class instance initialized (specifically have run methods __initialize_from_covars(covars),
+            __initialize_training_data())
+            - acquisition function self.acq_func["object"] has been initialized via method __initialize_acq_func if
+            response data is stored (more specifically self.model["covars_sampled_iter"] > 0).
+        :input:
+            - self.start_from_guess (bool)
+            - self.model["covars_sampled_iter"] (int)
+            - self.initial_guess
+            - self.acq_func["object"]
+            - self.covars_bounds
+        :return candidate (1 x num_covars tensor)
+        """
+
+        # special case of first iteration.
+        # if no training data provided, will start from initial guess provided as part of "covars" in
+        # class instance initialization
+        if (self.start_from_guess) and (self.model["covars_sampled_iter"] == 0):
+
+            #print('INSIDE INITIAL GUESS. covars_sampled_iter=' + str(self.model["covars_sampled_iter"]))
+
+            candidate = self.initial_guess
+
+        else:
+
+            # optimize acquisition function
+            BATCH_SIZE = 1
+
+            candidate, _ = optimize_acqf(
+                acq_function=self.acq_func["object"],
+                bounds=self.covar_bounds,
+                q=BATCH_SIZE,
+                num_restarts=10,
+                raw_samples=512,  # used for intialization heuristic
+                options={"maxiter": 200},
+            )
+
+        return candidate
