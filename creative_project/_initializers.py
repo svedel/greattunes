@@ -65,6 +65,10 @@ class Initializers(Validators):
                     self.train_X[:it, :], self.train_Y[:it]
                 )
 
+                # converting to row tensors
+                max_X = torch.tensor([max_X.numpy()], dtype=self.dtype, device=self.device)
+                max_Y = torch.tensor([max_Y.numpy()], dtype=self.dtype, device=self.device)
+
                 if first:
                     self.covars_best_response_value = max_X
                     self.best_response_value = max_Y

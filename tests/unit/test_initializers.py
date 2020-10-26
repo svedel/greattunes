@@ -65,6 +65,10 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
     cls.train_X = train_X
     cls.train_Y = train_Y
 
+    # define required attributes for test to pass (IRL set in CreativeProject which is a child of Initializers)
+    cls.dtype = torch.double
+    cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     # run the functio(
     cls._Initializers__initialize_best_response()
 
