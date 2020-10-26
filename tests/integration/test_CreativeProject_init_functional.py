@@ -1,14 +1,22 @@
 import pytest
+import torch
 from creative_project import CreativeProject
 
 
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [None, "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"],  # checks no covars data provided
-        [(1, 2, 3), "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)"],  # checks fail if covars not a list of tuples
-        [[1, 2, 3], "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple"],  # checks that covars is a list of tuples
-        [[("hej", 2, 3)], "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element hej in covars list is neither of type float or int"]  # test that all elements in tuples are of type int or float
+        [None, "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"],
+        # checks no covars data provided
+        [(1, 2, 3),
+         "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)"],
+        # checks fail if covars not a list of tuples
+        [[1, 2, 3],
+         "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple"],
+        # checks that covars is a list of tuples
+        [[("hej", 2, 3)],
+         "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element hej in covars list is neither of type float or int"]
+        # test that all elements in tuples are of type int or float
     ])
 def test_CreativeProject__init__covars_notrainingdata_fails_functional(covars, error_msg):
     """
@@ -21,8 +29,9 @@ def test_CreativeProject__init__covars_notrainingdata_fails_functional(covars, e
     assert str(e.value) == error_msg
 
 
-def test_CreativeProject__init__covars_trainingdata_works_functional(covars_for_custom_models_simple_training_data_4elements,
-                                                          custom_models_simple_training_data_4elements):
+def test_CreativeProject__init__covars_trainingdata_works_functional(
+        covars_for_custom_models_simple_training_data_4elements,
+        custom_models_simple_training_data_4elements):
     """
     tests class initialization with training data provided
     """
@@ -51,10 +60,10 @@ def test_CreativeProject__init__covars_trainingdata_works_functional(covars_for_
     assert cls.best_response_value[3].item() == 2.0
 
 
-# passing test with multivariate initialization, multiple observations
 def test_CreativeProject__init__covars_trainingdata_multivariate_works_functional(training_data_covar_complex):
     """
-    test that class initialization works with multivariate train_X data (3 covars) with multiple observations (3)
+    passing test with multivariate initialization, multiple observations. test that class initialization works with
+    multivariate train_X data (3 covars) with multiple observations (3)
     """
 
     # data
@@ -87,3 +96,22 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_works_functiona
     for it in range(train_X.shape[1]):
         assert cls.covars_best_response_value[2, it].item() == train_X[1, it].item()
     assert cls.best_response_value[2].item() == train_Y[1].item()
+
+
+def test_CreativeProject__init__covars_trainingdata_multivariate_fails_functional(training_data_covar_complex):
+    """
+    failing test with multivariate initialization, multiple observations. test that class initialization fails with
+    multivariate train_X data (4 covars, expect 3) with multiple observations (3)
+    """
+
+    # data
+    covars = training_data_covar_complex[0]
+    train_X_tmp = training_data_covar_complex[1]
+
+    train_Y = training_data_covar_complex[2]
+    train_X = torch.cat((train_X_tmp, torch.tensor([[-1.1], [-0.5], [-2.2]], dtype=torch.double)), dim=1)
+
+    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+
+    assert cls.train_X is None
+    assert cls.train_Y is None

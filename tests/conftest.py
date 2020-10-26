@@ -58,6 +58,24 @@ def covars_initialization_data():
     covar_complex = [(0.5, 0, 1), (12.5, 8, 15), (-2, -4, 1.1)]
     return covar_simple, covar_complex
 
+
+@pytest.fixture(scope="class")
+def training_data_covar_complex(covars_initialization_data):
+    """
+    defines simple training data that corresponds to covar_complex (covars_initialization_data[1]), where covar_complex
+    is the right format for initialization of the full user-facing class CreativeProject
+    (creative_project.CreativeProject)
+    """
+
+    covars = covars_initialization_data[1]
+
+    # the covar training data: building it by taking the covars and in each row adding the factor from the y vector
+    train_X = torch.tensor([[x[0]+y for x in covars] for y in [0, -0.5, 1.2]], dtype=torch.double)
+    train_Y = torch.tensor([[1.1], [5.5], [0.1]], dtype=torch.double)
+
+    return covars, train_X, train_Y
+
+### Simple trained GP model
 @pytest.fixture(scope="class")
 def ref_model_and_training_data(custom_models_simple_training_data_4elements):
     """
