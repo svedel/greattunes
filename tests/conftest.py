@@ -124,3 +124,25 @@ def ref_model_and_multivariate_training_data(training_data_covar_complex):
     ll = ExactMarginalLogLikelihood(lh, model_obj)
 
     return covars, train_X, train_Y, model_obj, lh, ll
+
+### initiated classes for testing
+@pytest.fixture(scope="module")
+def tmp_observe_class():
+    """
+    temporary class to allow testing of methods from creative_project._observe
+    """
+
+    # define class
+    class TmpClass:
+        def __init__(self):
+            self.sampling = {"method": None,
+                             "response_func": None}
+            self.dtype = torch.double
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        from creative_project._observe import _get_and_verify_response_input, _get_response_function_input, \
+            _read_response_manual_input
+
+    cls = TmpClass()
+
+    return cls
