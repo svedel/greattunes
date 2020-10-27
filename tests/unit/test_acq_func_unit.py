@@ -35,7 +35,7 @@ def test_acq_func_set_acq_func_fails(custom_models_simple_training_data_4element
     with pytest.raises(Exception) as e:
         assert cls.set_acq_func()
     assert str(e.value) == "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no training data provided " \
-                           "(self.train_Y is None"
+                           "(self.train_Y is None)"
 
     # set attributes needed for test: train_Y to not None, model to None. Model exception should fire first
     cls.train_Y = None
@@ -45,6 +45,40 @@ def test_acq_func_set_acq_func_fails(custom_models_simple_training_data_4element
         assert cls.set_acq_func()
     assert str(e.value) == "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no surrogate model set " \
                            "(self.model['model'] is None)"
+
+def test_acq_func_set_acq_func_fails_wrong_acqfunc_name(ref_model_and_training_data):
+    """
+    test that set_acq_func does not set acquisition function if wrong name chosen
+    """
+
+    # load data and model
+    train_X = ref_model_and_training_data[0]
+    train_Y = ref_model_and_training_data[1]
+
+    # load pretrained model
+    model_obj = ref_model_and_training_data[2]
+    lh = ref_model_and_training_data[3]
+    ll = ref_model_and_training_data[4]
+
+    # the acq func
+    cls = AcqFunction()
+    cls.acq_func = {
+        "type": "WRONG",  # define the type of acquisition function
+        "object": None
+    }
+
+    # set attributes needed for test: train_Y to not None, model to None
+    cls.train_Y = train_Y
+    cls.model = {"model": model_obj,
+                 "likelihood": lh,
+                 "loglikelihood": ll,
+                 }
+
+    with pytest.raises(Exception) as e:
+        assert cls.set_acq_func()
+    assert str(e.value) == "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: unsupported acquisition " \
+                           "function name provided. '" + cls.acq_func["type"] + "' not in list of supported " \
+                           "acquisition functions [EI]."
 
 
 def test_acq_func_set_acq_func_works(ref_model_and_training_data):

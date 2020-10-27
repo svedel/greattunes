@@ -22,7 +22,15 @@ class AcqFunction:
         if self.train_Y is None:
             raise Exception(
                 "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no training data provided "
-                "(self.train_Y is None"
+                "(self.train_Y is None)"
+            )
+
+        LIST_ACQ_FUNCS = ["EI"]
+        if not self.acq_func["type"] in LIST_ACQ_FUNCS:
+            raise Exception(
+                "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: unsupported acquisition function " \
+                "name provided. '" + self.acq_func["type"] + "' not in list of supported acquisition functions [" \
+                + ", ".join(LIST_ACQ_FUNCS) + "]."
             )
 
         if self.acq_func["type"] == "EI":
