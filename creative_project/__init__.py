@@ -5,6 +5,7 @@ from ._acq_func import AcqFunction
 # import version (perhaps move outside class?)
 from ._version import __version__
 
+
 class CreativeProject(Initializers, AcqFunction):
     """
     user-facing functionality to balance exploration and exploitation for creative projects.
@@ -90,4 +91,8 @@ class CreativeProject(Initializers, AcqFunction):
 
     # import methods
     from ._campaign import auto
-    from ._observe import _get_and_verify_response_input, _get_response_function_input, _read_response_manual_input
+    from ._observe import (
+        _get_and_verify_response_input,
+        _get_response_function_input,
+        _read_response_manual_input,
+    )

@@ -24,11 +24,16 @@ def _get_and_verify_response_input(self):
         response_datapoint = self._get_response_function_input()
 
     else:
-        raise Exception("creative_project._observe._get_and_verify_response_input: class attribute "
-                        "self.sampling['method'] has non-permissable value " + str(self.sampling["method"]) + ", must"
-                        " be in ['manual', 'functions'].")
+        raise Exception(
+            "creative_project._observe._get_and_verify_response_input: class attribute "
+            "self.sampling['method'] has non-permissable value "
+            + str(self.sampling["method"])
+            + ", must"
+            " be in ['manual', 'functions']."
+        )
 
     return response_datapoint
+
 
 def _get_response_function_input(self):
     """
@@ -45,7 +50,9 @@ def _get_response_function_input(self):
 
     # the corresponding response
     resp = self.sampling["response_func"](covars)
-    response_candidate_float_tensor = torch.tensor([[resp]], device=self.device, dtype=self.dtype)
+    response_candidate_float_tensor = torch.tensor(
+        [[resp]], device=self.device, dtype=self.dtype
+    )
 
     return response_candidate_float_tensor
 
@@ -59,9 +66,16 @@ def _read_response_manual_input(self, additional_text):
 
     # read candidate datapoint
     response_candidate_string = input(
-        "ITERATION " + str(self.model["covars_proposed_iter"]) + additional_text + " - Please provide response: ")
-    response_candidate_float_tensor = torch.tensor([[float(z) for z in response_candidate_string.split(',')]],
-                                                    device=self.device,
-                                                    dtype=self.dtype)  # assumes only a single response provided (i.e. not providing input on multiple parameters and weighing)
+        "ITERATION "
+        + str(self.model["covars_proposed_iter"])
+        + additional_text
+        + " - Please provide response: "
+    )
+    # assumes only a single response provided (i.e. not providing input on multiple parameters and weighing)
+    response_candidate_float_tensor = torch.tensor(
+        [[float(z) for z in response_candidate_string.split(",")]],
+        device=self.device,
+        dtype=self.dtype,
+    )
 
     return response_candidate_float_tensor

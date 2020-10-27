@@ -33,7 +33,7 @@ def auto(self, response_samp_func, max_iter=100):
 
         # get new datapoint according to acquisition function
         # special case of first iteration.
-        candidate = self._identify_new_candidate()
+        candidate = self.identify_new_candidate()  # defined in _acq_func.AcqFunc
 
         # store candidate, update counters
         if self.proposed_X is None:  # use proposed_X as proxy also for train_X
