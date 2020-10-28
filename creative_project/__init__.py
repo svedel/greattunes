@@ -96,3 +96,4 @@ class CreativeProject(Initializers, AcqFunction):
         _get_response_function_input,
         _read_response_manual_input,
     )
+    from ._modeling import _set_GP_model

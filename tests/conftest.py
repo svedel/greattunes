@@ -146,3 +146,30 @@ def tmp_observe_class():
     cls = TmpClass()
 
     return cls
+
+
+@pytest.fixture(scope="module")
+def tmp_modeling_class():
+    """
+    temporary class to allow testing of methods from creative_project._modeling
+    """
+
+    class TmpClass:
+        def __init__(self):
+            self.train_X = None
+            self.proposed_X = None
+            self.train_Y = None
+
+            self.model = {"model_type": None,
+                          "likelihood": None,
+                          "loglikelihood": None,
+                          "response_sampled_iter": 0
+                          }
+
+        # import method
+        from creative_project._modeling import _set_GP_model
+
+    # initialize class
+    cls = TmpClass()
+
+    return cls
