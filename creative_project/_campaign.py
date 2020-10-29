@@ -29,7 +29,7 @@ def auto(self, response_samp_func, max_iter=100):
         print("ITERATION " + str(it) + ": Identify new covariate datapoint...", end=" ")
 
         # initialize acquisition function (if first time data present, otherwise don't do anything)
-        self.__initialize_acq_func()
+        self._AcqFunction__initialize_acq_func()
 
         # get new datapoint according to acquisition function
         # special case of first iteration.
@@ -40,8 +40,6 @@ def auto(self, response_samp_func, max_iter=100):
             self.proposed_X = candidate
             self.train_X = candidate
         else:
-            # self.proposed_X.append(candidate)
-            # self.train_X.append(candidate)
             self.proposed_X = torch.cat((self.proposed_X, candidate), dim=0)
             self.train_X = torch.cat((self.train_X, candidate), dim=0)
 
@@ -62,7 +60,7 @@ def auto(self, response_samp_func, max_iter=100):
         # update surrogate model
         # self.nu is None except for case where self.model["model_type"] = "Custom", however is not called for any
         # other case
-        model_retrain_success_str = self.__set_GP_model(nu=self.nu)
+        model_retrain_success_str = self._set_GP_model(nu=self.nu)
         print(model_retrain_success_str + "...", end=" ")
 
         print("Finish iteration...")
