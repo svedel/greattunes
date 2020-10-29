@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 import torch
 from gpytorch.mlls import ExactMarginalLogLikelihood
+from creative_project._initializers import Initializers
 
 ### Fixing state of random number generators for test reproducibility
 @pytest.fixture(autouse=True)
@@ -170,6 +171,44 @@ def tmp_modeling_class():
         from creative_project._modeling import _set_GP_model
 
     # initialize class
+    cls = TmpClass()
+
+    return cls
+
+@pytest.fixture(scope="function")
+def tmp_best_response_class():
+    """
+    temporary class to test methods stored in _best_response.py
+    """
+
+    # test class
+    class TmpClass:
+        def __init__(self):
+            self.train_X = None
+            self.train_Y = None
+            self.proposed_X = None
+
+            self.covars_best_response_value = None
+            self.best_response_value = None
+
+        # import methods
+        from creative_project._best_response import _find_max_response_value, _update_max_response_value
+
+    cls = TmpClass()
+
+    return cls
+
+
+@pytest.fixture(scope="module")
+def tmp_Initializers_with_find_max_response_value_class():
+    """
+    test version of Initializers to endow it with the property from _find_max_response_value, which is
+    otherwise defined as a static method in ._best_response
+    """
+
+    class TmpClass(Initializers):
+        from creative_project._best_response import _find_max_response_value
+
     cls = TmpClass()
 
     return cls

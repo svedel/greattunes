@@ -1,8 +1,10 @@
 from creative_project._initializers import Initializers
+from creative_project._best_response import _find_max_response_value
 import torch
 
 
-def test_Initializers__initialize_best_response_functional(custom_models_simple_training_data_4elements):
+def test_Initializers__initialize_best_response_functional(custom_models_simple_training_data_4elements,
+                                                           tmp_Initializers_with_find_max_response_value_class):
     """
     test initialization of best response data structures based on input data
     """
@@ -11,8 +13,19 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
 
+    # create test version of Initializers to endow it with the property from _find_max_response_value, which is
+    # otherwise defined as a static method in ._best_response
+    #class TmpClass(Initializers):
+    #    from creative_project._best_response import _find_max_response_value
+    #cls = TmpClass()
+    cls = tmp_Initializers_with_find_max_response_value_class
+
     # initialize class and register required attributes
-    cls = Initializers()
+    #cls = Initializers()
+    #
+    # add validation method, only needed for test purposes
+    #cls._find_max_response_value = _find_max_response_value
+
     cls.train_X = train_X
     cls.train_Y = train_Y
 

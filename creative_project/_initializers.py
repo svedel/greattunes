@@ -1,5 +1,5 @@
 import torch
-import creative_project._max_response
+import creative_project._best_response
 from creative_project._validators import Validators
 
 
@@ -59,19 +59,7 @@ class Initializers(Validators):
 
         if self.train_Y is not None:
             for it in range(1, self.train_Y.shape[0] + 1):
-                # for monkeypatching during unit testing to work, it is required that the full path is added to this
-                # import (monkeypatching this function)
-                max_X, max_Y = creative_project._max_response.find_max_response_value(
-                    self.train_X[:it, :], self.train_Y[:it]
-                )
-
-                # converting to row tensors
-                max_X = torch.tensor(
-                    [max_X.numpy()], dtype=self.dtype, device=self.device
-                )
-                max_Y = torch.tensor(
-                    [max_Y.numpy()], dtype=self.dtype, device=self.device
-                )
+                max_X, max_Y = self._find_max_response_value(self.train_X[:it, :], self.train_Y[:it])
 
                 if first:
                     self.covars_best_response_value = max_X

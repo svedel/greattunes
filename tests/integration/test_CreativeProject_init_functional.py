@@ -85,6 +85,9 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_works_functiona
     assert cls.train_Y is not None
     assert cls.train_Y[1].item() == train_Y[1].item()
 
+    print("cls.covars_best_response_value")
+    print(cls.covars_best_response_value)
+
     # assert best response initialized; look at two different spots (rows)
     # with multivariate train_X, "covars_best_response_value" is a row at each iteration.
     # Best response is at index 1 (second element in train_Y), so best train_X and best train_Y at last element (index

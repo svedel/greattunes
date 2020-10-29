@@ -5,7 +5,7 @@ therefore only test individual functions
 import pytest
 import torch
 from creative_project._initializers import Initializers
-import creative_project._max_response
+import creative_project._best_response
 
 
 @pytest.mark.parametrize("dataset_id",[0, 1])
@@ -42,7 +42,9 @@ def test_Initializers__initialize_from_covars(covars_initialization_data, datase
     assert shape_bounds[1] == num_cols
 
 
-def test_Initializers__initialize_best_response_first_add(custom_models_simple_training_data_4elements, monkeypatch):
+def test_Initializers__initialize_best_response_first_add(custom_models_simple_training_data_4elements,
+                                                          tmp_Initializers_with_find_max_response_value_class,
+                                                          monkeypatch):
     """
     test initialization of best response data structures based on input data
     """
@@ -51,17 +53,22 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
 
+    # create test version of Initializers to endow it with the property from _find_max_response_value, which is
+    # otherwise defined as a static method in ._best_response
+    cls = tmp_Initializers_with_find_max_response_value_class
+
     # monkeypatch function call
     tmp_output = 1.0
     def mock_find_max_response_value(train_X, train_Y):
         return torch.tensor([[tmp_output]], dtype=torch.double), torch.tensor([[tmp_output]], dtype=torch.double)
     monkeypatch.syspath_prepend("..")
     monkeypatch.setattr(
-        creative_project._max_response, "find_max_response_value", mock_find_max_response_value
+        #creative_project._best_response, "_find_max_response_value", mock_find_max_response_value
+        cls, "_find_max_response_value", mock_find_max_response_value
     )
 
     # initialize class and register required attributes
-    cls = Initializers()
+    #cls = Initializers()
     cls.train_X = train_X
     cls.train_Y = train_Y
 
