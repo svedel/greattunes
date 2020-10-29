@@ -1,5 +1,4 @@
 import torch
-import creative_project._best_response
 from creative_project._validators import Validators
 
 
@@ -59,7 +58,9 @@ class Initializers(Validators):
 
         if self.train_Y is not None:
             for it in range(1, self.train_Y.shape[0] + 1):
-                max_X, max_Y = self._find_max_response_value(self.train_X[:it, :], self.train_Y[:it])
+                max_X, max_Y = self._find_max_response_value(
+                    self.train_X[:it, :], self.train_Y[:it]
+                )
 
                 if first:
                     self.covars_best_response_value = max_X

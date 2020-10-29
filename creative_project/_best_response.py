@@ -1,5 +1,6 @@
 import torch
 
+
 @staticmethod
 def _find_max_response_value(train_X, train_Y):
     """
@@ -33,13 +34,20 @@ def _update_max_response_value(self):
 
     try:
         max_X, max_Y = self._find_max_response_value(self.train_X, self.train_Y)
-    except:
-        raise Exception("creative_project._best_response._update_max_response_value.py: Missing or unable to process "
-                        "one of following attributes: self.train_X, self.train_Y")
+    except Exception:
+        raise Exception(
+            "creative_project._best_response._update_max_response_value.py: Missing or unable to process "
+            "one of following attributes: self.train_X, self.train_Y"
+        )
 
     # the general case: append to existing data structures
-    if self.covars_best_response_value is not None and self.best_response_value is not None:
-        self.covars_best_response_value = torch.cat((self.covars_best_response_value, max_X), dim=0)
+    if (
+        self.covars_best_response_value is not None
+        and self.best_response_value is not None
+    ):
+        self.covars_best_response_value = torch.cat(
+            (self.covars_best_response_value, max_X), dim=0
+        )
         self.best_response_value = torch.cat((self.best_response_value, max_Y), dim=0)
 
     # initializing: set the first elements
