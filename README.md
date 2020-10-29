@@ -17,12 +17,28 @@ pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.
 ```
 
 ## Testing 
-The `pytest` framework is used for this library, with all tests residing in `creative-brain\tests`. To execute all tests, 
-run the following from the terminal from the project root folder (`creative-brain`)
+The `pytest` framework is used for this library, with all tests residing in `creative-brain\tests`. Tests consist of 
+unit tests, integration tests and sample problems, where the latter is a series of pre-defined applications of the 
+framework with known results.
+
+To execute all tests, run the following from the terminal from the project root folder (`creative-brain`)
 ```python
-python -m pytest tests/
+~/creative-brain$ python -m pytest tests/
 ```
 
+### Tests during CI
+All tests are run by CI pipeline when committing to any branch. 
+
+### Tests during development
+During development, unit and integration tests are typically sufficient to check ongoing developments. These tests can
+be executed by the command
+```python
+~/creative-brain$ python -m pytest tests/unit tests/integration
+```
+Before committing it is good practise to also run sample problems, which can be done by either `python -m pytest tests/`
+(running all tests including sample problems), or `python -m pytest tests/sample_problems`.
+
+### Additional code-level checks 
 In addition, linting, code style checking and sorting of imports is also covered. The following commands, executed in
 the terminal from the project root folder (`creative-brain`), will run the checks and perform style corrections if 
 needed
