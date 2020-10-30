@@ -97,4 +97,4 @@ class CreativeProject(Initializers, AcqFunction):
         _read_response_manual_input,
     )
     from ._modeling import _set_GP_model
-    from ._best_response import _find_max_response_value, _update_max_response_value
+    from ._best_response import _find_max_response_value, _update_max_response_value, current_best

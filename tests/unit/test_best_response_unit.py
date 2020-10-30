@@ -83,3 +83,35 @@ def test_update_max_response_value_unit(custom_models_simple_training_data_4elem
 
     assert cls.covars_best_response_value[0].item() == max_X
     assert cls.best_response_value[0].item() == max_Y
+
+
+@pytest.mark.parametrize(
+    "response_sampled_iter, covars_best, response_best",
+    [
+        [3, [1.1], [2.2]],
+        [10, [3.5, 12.2], [1.7]]
+    ]
+)
+def test_current_best_univariate_unit(tmp_best_response_class, response_sampled_iter, covars_best, response_best):
+    """
+    test that current_best works for univariate and multivariate covariate data
+    """
+
+    # class used for test
+    cls = tmp_best_response_class
+
+    # set attribute
+    cls.model = {"response_sampled_iter": response_sampled_iter}
+
+    # set best response variables
+    cls.covars_best_response_value = torch.tensor([covars_best], dtype=torch.double)
+    cls.best_response_value = torch.tensor([response_best], dtype=torch.double)
+
+    # run method
+    cls.current_best()
+
+    # assert
+    for it in range(len(covars_best)):
+        assert cls.best["covars"][it] == covars_best[it]
+    assert cls.best["response"] == response_best[0]
+    assert cls.best["iteration_when_recorded"] == response_sampled_iter
