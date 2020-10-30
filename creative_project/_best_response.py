@@ -39,8 +39,8 @@ def _update_max_response_value(self):
 
     # the general case: append to existing data structures
     if (
-            self.covars_best_response_value is not None
-            and self.best_response_value is not None
+        self.covars_best_response_value is not None
+        and self.best_response_value is not None
     ):
         self.covars_best_response_value = torch.cat(
             (self.covars_best_response_value, max_X), dim=0
@@ -51,6 +51,7 @@ def _update_max_response_value(self):
     else:
         self.covars_best_response_value = max_X
         self.best_response_value = max_Y
+
 
 def current_best(self):
     """
@@ -72,16 +73,31 @@ def current_best(self):
     max_X_list = self.covars_best_response_value[-1].tolist()
 
     # print to prompt
-    print("Maximum response value Y (iteration " + str(self.model["response_sampled_iter"]) + "): max_Y =" + str(
-        max_Y))
+    print(
+        "Maximum response value Y (iteration "
+        + str(self.model["response_sampled_iter"])
+        + "): max_Y ="
+        + str(max_Y)
+    )
     if isinstance(max_X_list, list):
         print(
-            "Corresponding covariate values resulting in max_Y: [" + ", ".join([str(x) for x in max_X_list]) + "]")
+            "Corresponding covariate values resulting in max_Y: ["
+            + ", ".join([str(x) for x in max_X_list])
+            + "]"
+        )
     else:
-        print("Corresponding covariate values resulting in max_Y: [" + str(max_X_list) + "]")
+        print(
+            "Corresponding covariate values resulting in max_Y: ["
+            + str(max_X_list)
+            + "]"
+        )
 
     # set attributes
-    self.best = {"covars": max_X_list,
-                 "response": max_Y,
-                 "iteration_when_recorded": self.model["response_sampled_iter"]}
+    self.best = {
+        "covars": max_X_list,
+        "response": max_Y,
+        "iteration_when_recorded": self.model["response_sampled_iter"],
+    }
+
+
 # NEED TO TEST THIS!!!
