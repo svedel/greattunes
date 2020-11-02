@@ -46,7 +46,6 @@ def test_sample_problems_1d_maximization(max_iter, max_response, error_lim, caps
     assert cc.best["iteration_when_recorded"] == max_iter
 
 
-
 # add new test with multivariate covariates
 @pytest.mark.parametrize(
     "max_iter, error_lim, x0_0, x1_0",
