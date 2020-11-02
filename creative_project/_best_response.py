@@ -77,12 +77,13 @@ def current_best(self):
         "Maximum response value Y (iteration "
         + str(self.model["response_sampled_iter"])
         + "): max_Y ="
-        + str(max_Y)
+        + "{:.5e}".format(max_Y)#str(max_Y)
     )
     if isinstance(max_X_list, list):
         print(
             "Corresponding covariate values resulting in max_Y: ["
-            + ", ".join([str(x) for x in max_X_list])
+            #+ ", ".join([str(x) for x in max_X_list])
+            + ", ".join(["{:.5e}".format(x) for x in max_X_list])
             + "]"
         )
     else:

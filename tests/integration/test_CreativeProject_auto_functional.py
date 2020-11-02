@@ -101,17 +101,15 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
 # test also printed stuff
 @pytest.mark.parametrize("max_iter, max_resp, covar_max_resp",
                          [
-                             [2, -0.9092974268256817, 0.5],
-                             [10, 4.818563709373879, 0.8024479419193281]
+                             #[2, -0.9092974268256817, 0.5],
+                             #[10, 4.818563709373879, 0.8024479419193281]
+                             [2, "-9.09297e-01", "5.00000e-01"],
+                             [10, "4.81856e+00", "8.02448e-01"]
                          ])
 def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_resp, capsys):
     """
     tests the stuff printed to the prompt, testing for univariate case
     """
-
-    #max_iter = 2
-    #max_resp = -0.9092974268256817
-    #covar_max_resp = 0.5
 
     # define data
     x_input = [(0.5, 0, 1)]
@@ -134,10 +132,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
     outtext = ""
     for it in range(1,max_iter+1):
         outtext += "ITERATION " + str(it) + ": Identify new covariate datapoint... Get response for new datapoint... ITERATION  " + str(it) + " - Successfully retrained GP model... Finish iteration...\n"
-    outtext += "Maximum response value Y (iteration " + str(it) + "): max_Y =" + str(max_resp) + "\n"
-    outtext += "Corresponding covariate values resulting in max_Y: [" + str(covar_max_resp) + "]\n"
-
-    print("captured.out length")
-    print(len(captured.out))
+    outtext += "Maximum response value Y (iteration " + str(it) + "): max_Y =" + max_resp + "\n"
+    outtext += "Corresponding covariate values resulting in max_Y: [" + covar_max_resp + "]\n"
 
     assert captured.out == outtext
