@@ -63,10 +63,6 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
     test that auto method works for a particular multivariate (bivariate) function
     """
 
-    #max_iter = 10
-    #max_response = 6.02073*6.02073
-    #error_lim = 1e-3
-
     # define data
     covars = [(0.5, 0, 1), (0.5, 0, 1)]  # covariates come as a list of tuples (one per covariate: (<initial_guess>, <min>, <max>))
 
@@ -103,3 +99,45 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
     assert abs(cc.best_response_value[-1].item() - max_response)/max_response < error_lim
 
 # test also printed stuff
+@pytest.mark.parametrize("max_iter, max_resp, covar_max_resp",
+                         [
+                             [2, -0.9092974268256817, 0.5],
+                             [10, 4.818563709373879, 0.8024479419193281]
+                         ])
+def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_resp, capsys):
+    """
+    tests the stuff printed to the prompt, testing for univariate case
+    """
+
+    #max_iter = 2
+    #max_resp = -0.9092974268256817
+    #covar_max_resp = 0.5
+
+    # define data
+    x_input = [(0.5, 0, 1)]
+
+    # define response function
+    def f(x):
+        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+
+    # initialize class instance
+    cc = CreativeProject(covars=x_input)
+
+    # run the auto-method
+    cc.auto(response_samp_func=f, max_iter=max_iter)
+
+    # run current_best method
+    cc.current_best()
+
+    captured = capsys.readouterr()
+
+    outtext = ""
+    for it in range(1,max_iter+1):
+        outtext += "ITERATION " + str(it) + ": Identify new covariate datapoint... Get response for new datapoint... ITERATION  " + str(it) + " - Successfully retrained GP model... Finish iteration...\n"
+    outtext += "Maximum response value Y (iteration " + str(it) + "): max_Y =" + str(max_resp) + "\n"
+    outtext += "Corresponding covariate values resulting in max_Y: [" + str(covar_max_resp) + "]\n"
+
+    print("captured.out length")
+    print(len(captured.out))
+
+    assert captured.out == outtext
