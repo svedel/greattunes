@@ -1,4 +1,5 @@
 import pytest
+import torch
 from matplotlib.testing.decorators import image_comparison
 
 
@@ -23,6 +24,43 @@ from matplotlib.testing.decorators import image_comparison
 #
 #     # create plot
 #     cls.plot_convergence()
+
+def test_plot_covars_ref_plot_1d(covars_for_custom_models_simple_training_data_4elements):
+    """
+    test that correct vector is returned
+    """
+
+    # covars
+    covars = covars_for_custom_models_simple_training_data_4elements
+
+    lower_bounds = [g[1] for g in covars]
+    upper_bounds = [g[2] for g in covars]
+    covar_bounds = torch.tensor([lower_bounds, upper_bounds],
+                                device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+                                dtype=torch.double)
+
+    # define test class
+    class TmpClass:
+        def __init__(self):
+            self.covar_bounds = covar_bounds
+
+        from creative_project._plot import _covars_ref_plot_1d
+
+    # initiate class
+    cls = TmpClass()
+
+    Xnew, x_min_plot, x_max_plot = cls._covars_ref_plot_1d()
+
+    assert x_max_plot == 2.2
+    assert x_min_plot == -2.2
+    assert Xnew.shape[0] == 100
+    assert round(Xnew[98].item(), 4) == 2.1556
+    assert round(Xnew[5].item(), 4) == -1.9778
+    assert round(Xnew[20].item(), 4) == -1.3111
+
+
+
+
 
 def test_plot_plot_convergence(custom_models_simple_training_data_4elements):
     """
