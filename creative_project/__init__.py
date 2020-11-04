@@ -102,4 +102,4 @@ class CreativeProject(Initializers, AcqFunction):
         _update_max_response_value,
         current_best,
     )
-    from ._plot import _covars_ref_plot_1d, plot_1d_latest, predictive_results
+    from ._plot import _covars_ref_plot_1d, plot_1d_latest, predictive_results, plot_convergence, plot_best_objective
