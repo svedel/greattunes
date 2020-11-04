@@ -164,3 +164,50 @@ def test_predictive_results_unit(ref_model_and_training_data):
     # test upper bound
     assert abs(round(upper_bound[17].item(), 6) - 3.215015) < error_lim
     assert abs(round(upper_bound[95].item(), 6) - 3.626709) < error_lim
+
+
+def test_plot_best_objective(custom_models_simple_training_data_4elements):
+    """
+    test that plot_best_objective works if self.train_Y contains 1d data in torch.double data type
+    """
+
+    # train Y data
+    train_Y = custom_models_simple_training_data_4elements[1]
+
+    # define test class
+    class TmpClass:
+        def __init__(self):
+            self.train_Y = train_Y
+
+        from creative_project._plot import plot_best_objective
+
+    # initiate class
+    cls = TmpClass()
+
+    # create plot
+    fx, ax = cls.plot_best_objective()
+
+    # test
+    for it in range(train_Y.shape[0]):
+        assert round(ax.lines[0].get_ydata()[it], 4) == round(train_Y[it].item(), 4)
+
+
+def test_plot_best_objective_fails():
+    """
+    test that plot_best_objective fails if self.train_Y is None
+    """
+
+    # define test class
+    class TmpClass:
+        def __init__(self):
+            self.train_Y = None
+
+        from creative_project._plot import plot_best_objective
+
+    # initiate class
+    cls = TmpClass()
+
+    # see that it fails
+    with pytest.raises(Exception) as e:
+        fx, ax = cls.plot_best_objective()
+    assert str(e.value) == "kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y is None"

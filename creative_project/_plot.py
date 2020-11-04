@@ -187,6 +187,27 @@ def plot_convergence(self):
     return fx, ax
 
 
+def plot_best_objective(self):
+    """
+    plots best objective value as a function of iteration number
+    :input:
+        - self.train_Y (torch.tensor of dtype=torch.double): observations (batch_shape X num_obs X num_output_models
+            [allows for batched models] OR num_obs X num_output_models)
+    :return: fx (figure)
+    :return: ax (figure axes)
+    """
+
+    if self.train_Y is None:
+        raise Exception("kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y is None")
+
+    # build the plot
+    fx, ax = plt.subplots(1, 1, figsize=(6, 4))
+    ax.plot(list(range(self.train_Y.shape[0])), self.train_Y.numpy(), "-b.")
+    ax.set_xlabel("Iteration $n$")
+    ax.set_ylabel("Best objective $y^{max}_n$ found up to iteration $n$")
+
+    return fx, ax
+
 # def plot_GP_samples(self, num_realizations=25):
 #     """
 #     plot sample traces of individual realizations of the underlying Gaussian Process model stored in
