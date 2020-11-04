@@ -10,6 +10,11 @@ def _covars_ref_plot_1d(self):
     defined when initiaizing class. Only 1D covars
     """
 
+    # check that only 1d data accepted
+    if self.covar_bounds.shape[1] > 1:
+        raise Exception("kre8_core.creative_project._plot._covars_ref_plot_1d: only valid for 1d data (single "
+                        "covariate), but provided data has " + str(self.covar_bounds.shape[1]) + " covariates.")
+
     # x-data for plotting covariates
     # find the natural scale of the problem as the max absolute number of values in the range. Coverts to float
     Xnew_scale = self.covar_bounds.abs().numpy().max()
