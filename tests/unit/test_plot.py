@@ -88,7 +88,7 @@ def test_plot_covars_ref_plot_1d_fails(covars_initialization_data):
     assert str(e.value) == "kre8_core.creative_project._plot._covars_ref_plot_1d: only valid for 1d data (single covariate), but provided data has 3 covariates."
 
 
-def test_plot_plot_convergence(custom_models_simple_training_data_4elements):
+def test_plot_convergence(custom_models_simple_training_data_4elements):
     """
     does test of convergence plot, leveraging test
     """
@@ -113,4 +113,6 @@ def test_plot_plot_convergence(custom_models_simple_training_data_4elements):
     y_axes_res = [-0.3333, 0.7000, 0.7500]
     for it in range(train_Y.shape[0]-1):
         assert ax.lines[0].get_xdata()[it] == it
-        assert round(ax.lines[0].get_ydata()[it],4) == round(y_axes_res[it],4)
+        assert round(ax.lines[0].get_ydata()[it],4) == round(y_axes_res[it], 4)
+
+
