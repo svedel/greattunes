@@ -182,7 +182,6 @@ def plot_convergence(self):
     return fx, ax
 
 
-
 # def plot_GP_samples(self, num_realizations=25):
 #     """
 #     plot sample traces of individual realizations of the underlying Gaussian Process model stored in
