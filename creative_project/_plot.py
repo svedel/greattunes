@@ -25,7 +25,6 @@ def predictive_results(self, pred_X):
     """
     provides predictive results (mean, std) for the stored, trained model at the covariate datapoints
     provided by pred_X
-    NOTE: AM INCLUDING self AS PARAM, SHOULD USE INSTANTIATED CLASS VIA self WHEN WRAPPING IN CLASS
     :param pred_X (torch.tensor type torch.double): input covariate datapoints (must have dtype=torch.double)
     :return mean_result (torch.tensor)
     :return lower_bound (torch.tensor)
@@ -155,6 +154,30 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
     ax2.legend()
     if with_ylabel:
         ax2.set_ylabel("Acquisition function (" + self.acq_func["type"] + ")")
+
+
+def plot_convergence(self):
+    """
+    plot relative improvement in response variable against iteration number.
+    TODO: add "rel_tol" relative tolerance to plot when that is defined
+    :input:
+        - self.train_Y (torch.tensor of dtype=torch.double): observations (batch_shape X num_obs X num_output_models
+            [allows for batched models] OR num_obs X num_output_models)
+    :return: a plot
+    """
+
+    # calculates the relative error
+    y = copy.deepcopy(self.train_Y)
+    y_diff = y[1:] - y[:-1]
+    y_rel = y_diff / y[1:]
+
+    # build the plot
+    fx, ax = plt.subplots(1, 1, figsize=(6, 4))
+    ax.plot(list(range(y_rel.shape[0])), y_rel.numpy(), "-b.")
+    ax.set_yscale("log")
+    ax.set_xlabel("Iteration $n$")
+    ax.set_ylabel("Relative improvement between iterations, $(y_n-y_{n-1})/y_n$")
+
 
 
 # def plot_GP_samples(self, num_realizations=25):
