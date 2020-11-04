@@ -1,6 +1,7 @@
 from botorch.models import SingleTaskGP
 import numpy as np
 import pytest
+import random
 import torch
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from creative_project._initializers import Initializers
@@ -10,6 +11,7 @@ from creative_project._initializers import Initializers
 def rng_state_tests():
     torch.manual_seed(0)
     np.random.seed(0)
+    random.seed(0)
 
 
 ### Simple training data

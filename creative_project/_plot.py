@@ -163,7 +163,8 @@ def plot_convergence(self):
     :input:
         - self.train_Y (torch.tensor of dtype=torch.double): observations (batch_shape X num_obs X num_output_models
             [allows for batched models] OR num_obs X num_output_models)
-    :return: a plot
+    :return: fx (figure)
+    :return: ax (figure axes)
     """
 
     # calculates the relative error
@@ -177,6 +178,8 @@ def plot_convergence(self):
     ax.set_yscale("log")
     ax.set_xlabel("Iteration $n$")
     ax.set_ylabel("Relative improvement between iterations, $(y_n-y_{n-1})/y_n$")
+
+    return fx, ax
 
 
 
