@@ -12,8 +12,12 @@ def _covars_ref_plot_1d(self):
 
     # check that only 1d data accepted
     if self.covar_bounds.shape[1] > 1:
-        raise Exception("kre8_core.creative_project._plot._covars_ref_plot_1d: only valid for 1d data (single "
-                        "covariate), but provided data has " + str(self.covar_bounds.shape[1]) + " covariates.")
+        raise Exception(
+            "kre8_core.creative_project._plot._covars_ref_plot_1d: only valid for 1d data (single "
+            "covariate), but provided data has "
+            + str(self.covar_bounds.shape[1])
+            + " covariates."
+        )
 
     # x-data for plotting covariates
     # find the natural scale of the problem as the max absolute number of values in the range. Coverts to float
@@ -202,7 +206,10 @@ def plot_best_objective(self):
     """
 
     if self.train_Y is None:
-        raise Exception("kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y is None")
+        raise Exception(
+            "kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y "
+            "is None"
+        )
 
     # build the plot
     fx, ax = plt.subplots(1, 1, figsize=(6, 4))
@@ -211,6 +218,7 @@ def plot_best_objective(self):
     ax.set_ylabel("Best objective $y^{max}_n$ found up to iteration $n$")
 
     return fx, ax
+
 
 # def plot_GP_samples(self, num_realizations=25):
 #     """
