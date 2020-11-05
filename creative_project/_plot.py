@@ -10,6 +10,15 @@ def _covars_ref_plot_1d(self):
     defined when initiaizing class. Only 1D covars
     """
 
+    # check that only 1d data accepted
+    if self.covar_bounds.shape[1] > 1:
+        raise Exception(
+            "kre8_core.creative_project._plot._covars_ref_plot_1d: only valid for 1d data (single "
+            "covariate), but provided data has "
+            + str(self.covar_bounds.shape[1])
+            + " covariates."
+        )
+
     # x-data for plotting covariates
     # find the natural scale of the problem as the max absolute number of values in the range. Coverts to float
     Xnew_scale = self.covar_bounds.abs().numpy().max()
@@ -25,7 +34,6 @@ def predictive_results(self, pred_X):
     """
     provides predictive results (mean, std) for the stored, trained model at the covariate datapoints
     provided by pred_X
-    NOTE: AM INCLUDING self AS PARAM, SHOULD USE INSTANTIATED CLASS VIA self WHEN WRAPPING IN CLASS
     :param pred_X (torch.tensor type torch.double): input covariate datapoints (must have dtype=torch.double)
     :return mean_result (torch.tensor)
     :return lower_bound (torch.tensor)
@@ -62,6 +70,8 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
         - gs: object of type matplotlib.gridspec.GridSpecFromSubplotSpec
         - iteration: last iteration number of stored data to plot (still using models from latest available
             iteration in self, which is stored in self.model["covars_sampled_iter"]). Must start at 1, not 0
+    :return ax1 (matplotlib axes): first plot of surrogate model and interrogation points (train_X points)
+    :return ax2 (matplotlib axes): acquisition function and latest point picked
     """
 
     # use plotting grid if provided as input
@@ -155,6 +165,59 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
     ax2.legend()
     if with_ylabel:
         ax2.set_ylabel("Acquisition function (" + self.acq_func["type"] + ")")
+
+    return ax1, ax2
+
+
+def plot_convergence(self):
+    """
+    plot relative improvement in response variable against iteration number.
+    TODO: add "rel_tol" relative tolerance to plot when that is defined
+    :input:
+        - self.train_Y (torch.tensor of dtype=torch.double): observations (batch_shape X num_obs X num_output_models
+            [allows for batched models] OR num_obs X num_output_models)
+    :return: fx (figure)
+    :return: ax (figure axes)
+    """
+
+    # calculates the relative error
+    y = copy.deepcopy(self.train_Y)
+    y_diff = y[1:] - y[:-1]
+    y_rel = y_diff / y[1:]
+
+    # build the plot
+    fx, ax = plt.subplots(1, 1, figsize=(6, 4))
+    ax.plot(list(range(y_rel.shape[0])), y_rel.numpy(), "-b.")
+    ax.set_yscale("log")
+    ax.set_xlabel("Iteration $n$")
+    ax.set_ylabel("Relative improvement between iterations, $(y_n-y_{n-1})/y_n$")
+
+    return fx, ax
+
+
+def plot_best_objective(self):
+    """
+    plots best objective value as a function of iteration number
+    :input:
+        - self.train_Y (torch.tensor of dtype=torch.double): observations (batch_shape X num_obs X num_output_models
+            [allows for batched models] OR num_obs X num_output_models)
+    :return: fx (figure)
+    :return: ax (figure axes)
+    """
+
+    if self.train_Y is None:
+        raise Exception(
+            "kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y "
+            "is None"
+        )
+
+    # build the plot
+    fx, ax = plt.subplots(1, 1, figsize=(6, 4))
+    ax.plot(list(range(self.train_Y.shape[0])), self.train_Y.numpy(), "-b.")
+    ax.set_xlabel("Iteration $n$")
+    ax.set_ylabel("Best objective $y^{max}_n$ found up to iteration $n$")
+
+    return fx, ax
 
 
 # def plot_GP_samples(self, num_realizations=25):
