@@ -2,6 +2,8 @@ import gpytorch
 import pytest
 import torch
 from botorch.acquisition import ExpectedImprovement
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
 from matplotlib.testing.decorators import image_comparison
 
 
@@ -334,6 +336,90 @@ def test_plot_1d_latest_one_window_works(ref_model_and_training_data, sample_met
 
 
 # test that plot windows works
+def test_plot_1d_latest_multiple_windows_works(ref_model_and_training_data, monkeypatch):
+    """
+    test that the axes contain multiple images
+    """
+
+    # input from fixture
+    train_X = ref_model_and_training_data[0]
+    train_Y = ref_model_and_training_data[1]
+    model_obj = ref_model_and_training_data[2]
+    lh = ref_model_and_training_data[3]
+    ll = ref_model_and_training_data[4]
+
+    # setting the grid of subfigs for plotting
+    n_x = train_X.shape[0]  # number of observations
+    n_y = 2  # number of subplots per observation
+    fig = plt.figure(figsize=(12, 30))
+    outer_gs = gridspec.GridSpec(n_x, n_y)
+
+    # define test class
+    class TmpClass:
+        def __init__(self):
+            self.train_X = train_X
+            self.proposed_X = train_X
+            self.train_Y = train_Y
+            self.model = {
+                "model_type": "SingleTaskGP",
+                "model": model_obj,
+                "likelihood": lh,
+                "loglikelihood": ll,
+                "covars_sampled_iter": train_X.shape[0],
+                "response_sampled_iter": train_Y.shape[0]
+            }
+            self.sampling = {
+                "method": "manual",  # "functions"
+                "response_func": None
+            }
+
+        from creative_project._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
+
+    # initialize class
+    cls = TmpClass()
+
+    # adding acquisition function to class
+    cls.acq_func = {
+        "type": "EI",  # define the type of acquisition function
+        "object": ExpectedImprovement(model=cls.model["model"], best_f=train_Y.max().item())
+    }
+
+    # monkeypatching
+    def mock_covars_ref_plot_1d():
+        x_min_plot = -1.21
+        x_max_plot = 1.1
+        Xnew = torch.linspace(x_min_plot, x_max_plot, dtype=torch.double)
+        return Xnew, x_min_plot, x_max_plot
+
+    monkeypatch.setattr(
+        cls, "_covars_ref_plot_1d", mock_covars_ref_plot_1d
+    )
+
+    def mock_predictive_results(pred_X):
+        # set to "eval" to get predictive mode
+        lh.eval()
+        model_obj.eval()
+        with torch.no_grad(), gpytorch.settings.fast_pred_var():
+            observed_pred = lh(model_obj(pred_X))
+
+        # Get upper and lower confidence bounds, mean
+        lower_bound, upper_bound = observed_pred.confidence_region()
+        mean_result = observed_pred.mean
+
+        return mean_result, lower_bound, upper_bound
+
+    monkeypatch.setattr(
+        cls, "predictive_results", mock_predictive_results
+    )
+
+    # loop through the steps already taken in optimization run
+    for it in range(cls.model['response_sampled_iter']):
+        gs = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=outer_gs[it])
+        _, _ = cls.plot_1d_latest(with_ylabel=False, gs=gs, iteration=it+1)
+
+    # size
+    assert len(fig.get_axes()) == n_x * n_y
+
 
 
 # remember to duplicate these at integration tests
