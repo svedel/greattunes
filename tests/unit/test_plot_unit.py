@@ -1,5 +1,7 @@
+import gpytorch
 import pytest
 import torch
+from botorch.acquisition import ExpectedImprovement
 from matplotlib.testing.decorators import image_comparison
 
 
@@ -211,3 +213,127 @@ def test_plot_best_objective_fails():
     with pytest.raises(Exception) as e:
         fx, ax = cls.plot_best_objective()
     assert str(e.value) == "kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y is None"
+
+
+# test that plot content (what's displayed) works
+@pytest.mark.parametrize("sample_method, use_resp_func, num_lines_ax1",
+                         [
+                             ["manual", False, 2],
+                             ["functions", True, 3]
+                         ]
+                         )
+def test_plot_1d_latest_one_window_works(ref_model_and_training_data, sample_method, use_resp_func, num_lines_ax1,
+                                         monkeypatch):
+    """
+    test that plot_1d_latest works and displays the right data on the axes. Test with and without response function
+    plotted. Monkeypatching embedded function calls in plot_1d_latest
+    """
+
+    # set response func
+    resp_func = None
+    if use_resp_func:
+        def resp_func(x):
+            return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+
+    # input from fixture
+    train_X = ref_model_and_training_data[0]
+    train_Y = ref_model_and_training_data[1]
+    model_obj = ref_model_and_training_data[2]
+    lh = ref_model_and_training_data[3]
+    ll = ref_model_and_training_data[4]
+
+    # define test class
+    class TmpClass:
+        def __init__(self):
+            self.train_X = train_X
+            self.proposed_X = train_X
+            self.train_Y = train_Y
+            self.model = {
+                "model_type": "SingleTaskGP",
+                "model": model_obj,
+                "likelihood": lh,
+                "loglikelihood": ll,
+                "covars_sampled_iter": train_X.shape[0]
+            }
+            self.sampling = {
+                "method": sample_method, # "functions"
+                "response_func": resp_func
+            }
+
+        from creative_project._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
+
+    # initialize class
+    cls = TmpClass()
+
+    # adding acquisition function to class
+    cls.acq_func = {
+        "type": "EI",  # define the type of acquisition function
+        "object": ExpectedImprovement(model=cls.model["model"], best_f=train_Y.max().item())
+    }
+
+    # monkeypatching
+    def mock_covars_ref_plot_1d():
+        x_min_plot = -1.21
+        x_max_plot = 1.1
+        Xnew = torch.linspace(x_min_plot, x_max_plot, dtype=torch.double)
+        return Xnew, x_min_plot, x_max_plot
+    monkeypatch.setattr(
+        cls, "_covars_ref_plot_1d", mock_covars_ref_plot_1d
+    )
+
+    def mock_predictive_results(pred_X):
+        # set to "eval" to get predictive mode
+        lh.eval()
+        model_obj.eval()
+        with torch.no_grad(), gpytorch.settings.fast_pred_var():
+            observed_pred = lh(model_obj(pred_X))
+
+        # Get upper and lower confidence bounds, mean
+        lower_bound, upper_bound = observed_pred.confidence_region()
+        mean_result = observed_pred.mean
+
+        return mean_result, lower_bound, upper_bound
+    monkeypatch.setattr(
+        cls, "predictive_results", mock_predictive_results
+    )
+
+    # run the test (test data in both plot axes; parametrize and also test WITH known sampling function)
+    ax1, ax2 = cls.plot_1d_latest()
+
+    error_lim = 1e-6
+
+    # ax1 (three lines: observations, mean model, response model; only 2 lines if response model not present)
+    # the observations (corresponding to train_X, train_Y)
+    assert abs(round(ax1.lines[0].get_xydata()[2, 1], 6) - train_Y[2].item()) < error_lim
+    assert abs(round(ax1.lines[0].get_xydata()[0, 0], 6) - train_X[0].item()) < error_lim
+
+    # mean model
+    assert ax1.lines[1].get_xydata().shape[0] == 100 # assert that torch.linspace returns a tensor of 100 elements
+    assert abs(round(ax1.lines[1].get_xydata()[5, 0], 6) - -1.093333) < error_lim
+    assert abs(round(ax1.lines[1].get_xydata()[97, 1], 6) - 0.520317) < error_lim
+
+    # test whether response function is available in plot
+    assert len(ax1.lines) == num_lines_ax1
+
+    # test response function values from plot (if available)
+    if resp_func is not None:
+        assert ax1.lines[2].get_xydata().shape[0] == 100 # assert that torch.linspace returns a tensor of 100 elements
+        assert abs(round(ax1.lines[2].get_xydata()[78, 0], 6) - 0.61) < error_lim
+        assert abs(round(ax1.lines[2].get_xydata()[10, 1], 6) - -0.743607) < error_lim
+
+    # ax2 (two lines: acquisition function and latest value)
+    assert len(ax2.lines) ==2
+    assert ax2.lines[0].get_xydata().shape[0] == 100 # assert that torch.linspace returns a tensor of 100 elements
+    assert ax2.lines[1].get_xydata().shape[0] == 1  # assert that only a single point is highlighted (the second "line")
+
+    assert abs(round(ax2.lines[0].get_xydata()[25,0], 6) - -0.626667) < error_lim
+    assert abs(round(ax2.lines[0].get_xydata()[60, 1], 6) - 0.003851) < error_lim
+
+    assert abs(round(ax2.lines[1].get_xydata()[0, 0], 6) - 1.0) < error_lim
+    assert abs(round(ax2.lines[1].get_xydata()[0, 1], 6) - 0.005185) < error_lim
+
+
+# test that plot windows works
+
+
+# remember to duplicate these at integration tests

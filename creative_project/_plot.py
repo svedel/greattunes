@@ -66,6 +66,8 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
         - gs: object of type matplotlib.gridspec.GridSpecFromSubplotSpec
         - iteration: last iteration number of stored data to plot (still using models from latest available
             iteration in self, which is stored in self.model["covars_sampled_iter"]). Must start at 1, not 0
+    :return ax1 (matplotlib axes): first plot of surrogate model and interrogation points (train_X points)
+    :return ax2 (matplotlib axes): acquisition function and latest point picked
     """
 
     # use plotting grid if provided as input
@@ -159,6 +161,8 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
     ax2.legend()
     if with_ylabel:
         ax2.set_ylabel("Acquisition function (" + self.acq_func["type"] + ")")
+
+    return ax1, ax2
 
 
 def plot_convergence(self):
