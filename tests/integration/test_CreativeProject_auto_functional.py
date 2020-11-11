@@ -53,13 +53,14 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
 
 
 @pytest.mark.parametrize(
-    "max_iter, max_response, error_lim",
+    "max_iter, max_response, error_lim, model_type",
     [
-        [10, 250, 1.1],
-        [30, 250, 5e-2],
+        [10, 250, 1.1, "SingleTaskGP"],
+        [30, 250, 5e-2, "SingleTaskGP"],
+        [10, 250, 96e-1, "Custom"],
     ]
 )
-def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, error_lim):
+def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, error_lim, model_type):
     """
     test that auto method works for a particular multivariate (bivariate) function
     """
@@ -72,7 +73,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
         return (-(6 * x[0] - 2) ** 2 * torch.sin(12 * x[0] - 4))*(-(6 * x[1] - 2) ** 2 * torch.sin(12 * x[1] - 4))
 
     # initialize class instance
-    cc = CreativeProject(covars=covars)
+    cc = CreativeProject(covars=covars, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -98,6 +99,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
         assert abs(cc.covars_best_response_value[-1, it].item() - THEORETICAL_MAX_COVAR)/THEORETICAL_MAX_COVAR \
                < error_lim
     assert abs(cc.best_response_value[-1].item() - max_response)/max_response < error_lim
+
 
 # test also printed stuff
 @pytest.mark.parametrize("max_iter, max_resp, covar_max_resp",
