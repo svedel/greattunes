@@ -4,13 +4,14 @@ from creative_project import CreativeProject
 
 
 @pytest.mark.parametrize(
-    "max_iter, max_response, error_lim",
+    "max_iter, max_response, error_lim, model_type",
     [
-        [10, 4.81856, 5e-2],
-        [50, 6.02073, 1e-3],
+        [10, 4.81856, 5e-2, "SingleTaskGP"],
+        [50, 6.02073, 1e-3, "SingleTaskGP"],
+        [50, 5.99716, 7e-3, "Custom"],
     ]
 )
-def test_sample_problems_1d_maximization(max_iter, max_response, error_lim, capsys):
+def test_sample_problems_1d_maximization(max_iter, max_response, error_lim, model_type, capsys):
     """
     solve a sample problem in two different conditions.
     test that auto method works for a particular single-covariate (univariate) function
@@ -25,7 +26,7 @@ def test_sample_problems_1d_maximization(max_iter, max_response, error_lim, caps
         return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input)
+    cc = CreativeProject(covars=x_input, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -34,14 +35,14 @@ def test_sample_problems_1d_maximization(max_iter, max_response, error_lim, caps
     assert cc.model["covars_sampled_iter"] == max_iter
 
     # assert that max value found
-    theoretical_max_covar = 0.75725
-    assert abs(cc.covars_best_response_value[-1].item() - theoretical_max_covar) < error_lim
+    THEORETICAL_MAX_COVAR = 0.75725
+    assert abs(cc.covars_best_response_value[-1].item() - THEORETICAL_MAX_COVAR) < error_lim
 
     # run current_best method
     cc.current_best()
     captured = capsys.readouterr()
 
-    assert abs(cc.best["covars"][0] - theoretical_max_covar) < error_lim
+    assert abs(cc.best["covars"][0] - THEORETICAL_MAX_COVAR) < error_lim
     assert abs(cc.best["response"] - max_response) < error_lim
     assert cc.best["iteration_when_recorded"] == max_iter
 
