@@ -4,13 +4,15 @@ from creative_project import CreativeProject
 
 
 @pytest.mark.parametrize(
-    "max_iter, max_response, error_lim",
+    "max_iter, max_response, error_lim, model_type",
     [
-        [10, 4.81856, 5e-2],
-        [30, 6.02073, 1e-3],
+        [10, 4.81856, 5e-2, "SingleTaskGP"],
+        [30, 6.02073, 1e-3, "SingleTaskGP"],
+        [10, 5.49629, 5e-2, "Custom"],
+        [50, 6.02073, 2.5e-2, "Custom"],
     ]
 )
-def test_CreativeProject_auto_univariate_functional(max_iter, max_response, error_lim):
+def test_CreativeProject_auto_univariate_functional(max_iter, max_response, error_lim, model_type):
     """
     test that auto method works for a particular single-covariate function
     """
@@ -24,10 +26,9 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
         return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input)
+    cc = CreativeProject(covars=x_input, model=model_type)
 
     # run the auto-method
-    #max_iter = 10
     cc.auto(response_samp_func=f, max_iter=max_iter)
 
     # assert that max_iter steps taken by optimizer
@@ -46,16 +47,16 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
     assert cc.best_response_value.shape[0] == max_iter
 
     # assert that the correct maximum and covariate values for that spot are identified
-    theoretical_max_covar = 0.75725
-    assert abs(cc.covars_best_response_value[-1].item() - theoretical_max_covar) < error_lim
+    THEORETICAL_MAX_COVAR = 0.75725
+    assert abs(cc.covars_best_response_value[-1].item() - THEORETICAL_MAX_COVAR) < error_lim
     assert abs(cc.best_response_value[-1].item() - max_response) < error_lim
 
 
 @pytest.mark.parametrize(
     "max_iter, max_response, error_lim",
     [
-        [10, 250, 25e-2],
-        [20, 250, 3e-3],
+        [10, 250, 1.1],
+        [30, 250, 5e-2],
     ]
 )
 def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, error_lim):
@@ -74,7 +75,6 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
     cc = CreativeProject(covars=covars)
 
     # run the auto-method
-    #max_iter = 10
     cc.auto(response_samp_func=f, max_iter=max_iter)
 
     # assert that max_iter steps taken by optimizer
@@ -93,18 +93,17 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
     assert cc.best_response_value.shape[0] == max_iter
 
     # assert that the correct maximum and covariate values for that spot are identified
-    theoretical_max_covar = 1.0
+    THEORETICAL_MAX_COVAR = 1.0
     for it in range(len(covars)):
-        assert abs(cc.covars_best_response_value[-1,it].item() - theoretical_max_covar)/theoretical_max_covar < error_lim
+        assert abs(cc.covars_best_response_value[-1, it].item() - THEORETICAL_MAX_COVAR)/THEORETICAL_MAX_COVAR \
+               < error_lim
     assert abs(cc.best_response_value[-1].item() - max_response)/max_response < error_lim
 
 # test also printed stuff
 @pytest.mark.parametrize("max_iter, max_resp, covar_max_resp",
                          [
-                             #[2, -0.9092974268256817, 0.5],
-                             #[10, 4.818563709373879, 0.8024479419193281]
                              [2, "-9.09297e-01", "5.00000e-01"],
-                             [10, "4.81856e+00", "8.02448e-01"]
+                             [10, "4.81834e+00", "8.02452e-01"]
                          ])
 def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_resp, capsys):
     """
