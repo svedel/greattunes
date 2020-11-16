@@ -51,7 +51,7 @@ def test_sample_problems_1d_maximization(max_iter, max_response, error_lim, mode
 @pytest.mark.parametrize(
     "max_iter, error_lim, x0_0, x1_0",
     [
-        [10, 5e-2, 1, -1],
+        [10, 1.2e-1, 1, -1],
         [50, 5e-3, 1, -1],
         [100, 3e-3, 4, -4],
     ]
