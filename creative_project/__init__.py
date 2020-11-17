@@ -46,6 +46,7 @@ class CreativeProject(Initializers, AcqFunction):
             self.initial_guess,
             self.covar_bounds,
         ) = self._Initializers__initialize_from_covars(covars)
+        self.__covars = covars  # store provided 'covars' as hidden attribute
 
         # define the model
         self.model = {
@@ -88,6 +89,29 @@ class CreativeProject(Initializers, AcqFunction):
         # best observed candidate (best response) [self.best_response_value 1 X num_obs tensor], together with
         # corresponding covariates [self.covariates_best_response_value num_covars X num_obs tensor]
         self._Initializers__initialize_best_response()
+
+    def __repr__(self):
+        """
+        define representation of the instantiated class (what's returned if instantiated class is executed [not any
+        methods, just the class])
+        :return: str
+        """
+        deep_str = f"covars={self.__covars!r}, model={self.model['model_type']!r}, acq_func={self.acq_func['type']!r}"
+        if self.nu is not None:
+            deep_str += f", nu={self.nu!r}"
+
+        return f"CreativeProject(" + deep_str + f")"
+
+    def __str__(self):
+        """
+        define str of the instantiated class (defines what's returned to command print(<instantiated_class>)
+        :return: str
+        """
+        deep_str = f"covars={self.__covars}, model={self.model['model_type']}, acq_func={self.acq_func['type']}"
+        if self.nu is not None:
+            deep_str += f", nu={self.nu}"
+
+        return f"CreativeProject(" + deep_str + f")"
 
     # import methods
     from ._campaign import auto
