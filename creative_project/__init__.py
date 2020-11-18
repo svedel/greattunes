@@ -97,6 +97,13 @@ class CreativeProject(Initializers, AcqFunction):
         :return: str
         """
         deep_str = f"covars={self.__covars!r}, model={self.model['model_type']!r}, acq_func={self.acq_func['type']!r}"
+
+        if self.train_X is not None:
+            deep_str += f", train_X={self.train_X!r}"
+
+        if self.train_Y is not None:
+            deep_str += f", train_Y={self.train_Y!r}"
+
         if self.nu is not None:
             deep_str += f", nu={self.nu!r}"
 
@@ -107,7 +114,14 @@ class CreativeProject(Initializers, AcqFunction):
         define str of the instantiated class (defines what's returned to command print(<instantiated_class>)
         :return: str
         """
-        deep_str = f"covars={self.__covars}, model={self.model['model_type']}, acq_func={self.acq_func['type']}"
+        deep_str = f"covars={self.__covars}, model={self.model['model_type']!r}, acq_func={self.acq_func['type']!r}"
+
+        if self.train_X is not None:
+            deep_str += f", train_X={self.train_X}"
+
+        if self.train_Y is not None:
+            deep_str += f", train_Y={self.train_Y}"
+
         if self.nu is not None:
             deep_str += f", nu={self.nu}"
 
