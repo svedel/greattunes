@@ -52,5 +52,14 @@ jobs:
           /bin/sh -c "isort creative_project/**/*.py"
       - name: run tests
         run: |
-          python -m pytest tests/
+          python -m pytest tests/unit tests/integration
+      - if: github.event_names == 'pull_request'
+        name: run sample problems
+        run: |
+          python -m pytest tests/sample_problems
+      - if: github.event_names != 'pull_request'
+        run: |
+          python -m pytest tests/unit tests/integration
+        continue-on-error: true
+
 
