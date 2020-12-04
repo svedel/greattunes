@@ -60,7 +60,7 @@ jobs:
       - if: github.event_names != 'pull_request'
         name: run sample problems
         run: |
-          python -m pytest tests/unit tests/integration
+          python -m pytest tests/sample_problems
         continue-on-error: true
 
 
