@@ -56,7 +56,7 @@ setuptools.setup(
     description="Toolset for easy execution of Bayesian optimization for either step-by-step or closed-loop needs.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(include=["creative_project", "creative_project.*"]),
     package_data={"kre8_core": ["requirements.txt"]},
     install_requires=requirements,
     classifiers=[
@@ -65,4 +65,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
+    #setup_requires=['pytest-runner'],
+    #tests_require=['pytest'],
 )
