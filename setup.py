@@ -1,5 +1,3 @@
-import subprocess
-
 import setuptools
 
 from creative_project._version import __version__
@@ -10,45 +8,6 @@ with open("README.md", "r") as fh:
 with open("requirements.txt") as req_file:
     requirements = [req.strip() for req in req_file.read().splitlines()]
 
-# print("Trying to install pytorch and torchvision!")
-# code = 1
-# try:
-#     code = subprocess.call(
-#         [
-#             "pip",
-#             "install",
-#             "torch==1.6.0+cpu",
-#             "torchvision==0.7.0+cpu",
-#             "-f",
-#             "https://download.pytorch.org/whl/torch_stable.html",
-#         ]
-#     )
-#     if code != 0:
-#         raise Exception("Torch and torchvision installation failed!")
-# except:
-#     try:
-#         code = subprocess.call(
-#             [
-#                 "pip3",
-#                 "install",
-#                 "torch==1.6.0+cpu",
-#                 "torchvision==0.7.0+cpu",
-#                 "-f",
-#                 "https://download.pytorch.org/whl/torch_stable.html",
-#             ]
-#         )
-#         if code != 0:
-#             raise Exception("Torch and torchvision installation failed!")
-#     except:
-#         print(
-#             "Failed to install pytorch, please install pytorch and torchvision manually by following the simple instructions over at: https://pytorch.org/get-started/locally/"
-#         )
-# if code == 0:
-#     print(
-#         "Successfully installed pytorch and torchvision CPU version! (If you need the GPU version, please install it manually, checkout the mindsdb docs and the pytroch docs if you need help)"
-#     )
-
-
 setuptools.setup(
     name="creative_project",
     version=__version__,
@@ -56,7 +15,7 @@ setuptools.setup(
     description="Toolset for easy execution of Bayesian optimization for either step-by-step or closed-loop needs.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(include=["creative_project", "creative_project.*"],exclude=["tests"]),
+    packages=setuptools.find_packages(include=["creative_project", "creative_project.*"], exclude=["tests"]),
     package_data={"kre8_core": ["requirements.txt"]},
     install_requires=requirements,
     classifiers=[
@@ -65,6 +24,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
-    setup_requires=['pytest-runner', 'black==19.10b0', 'flake8===3.7.9', 'isort==4.3.21'],
-    tests_require=['pytest==5.3.5', 'pytest-cov==2.8.1'],
+    #setup_requires=['pytest-runner', 'black==19.10b0', 'flake8===3.7.9', 'isort==4.3.21'],
+    #tests_require=['pytest==5.3.5', 'pytest-cov==2.8.1'],
 )
