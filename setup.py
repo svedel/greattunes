@@ -50,7 +50,7 @@ with open("requirements.txt") as req_file:
 
 
 setuptools.setup(
-    name="bayesian_core",
+    name="creative_project",
     version=__version__,
     author="Søren Vedel",
     description="Toolset for easy execution of Bayesian optimization for either step-by-step or closed-loop needs.",
