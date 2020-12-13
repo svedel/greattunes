@@ -10,14 +10,15 @@ https://pytorch.org/get-started/locally/
 """
 
 import setuptools
-from creative_project._version import __version__
 
+from creative_project._version import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 with open("requirements.txt") as req_file:
     requirements = [req.strip() for req in req_file.read().splitlines()]
+
 
 def req_remove(requirements, remove_str):
     """
@@ -31,6 +32,7 @@ def req_remove(requirements, remove_str):
         if remove_str not in req:
             new_req.append(req)
     return new_req
+
 
 def req_extend(requirements, target_str, extend_str):
     """
@@ -49,13 +51,15 @@ def req_extend(requirements, target_str, extend_str):
         counter += 1
     return new_req
 
-requirements = req_remove(requirements, '--find-link')
-requirements = req_remove(requirements, 'torch==1.6.0+cpu')
-requirements = req_remove(requirements, 'torchvision==0.7.0+cpu')
+
+requirements = req_remove(requirements, "--find-link")
+requirements = req_remove(requirements, "torch==1.6.0+cpu")
+requirements = req_remove(requirements, "torchvision==0.7.0+cpu")
 
 # proposed way of installing torch (which doesn't seem to work)
-#requirements = req_extend(requirements, 'torch==1.6.0+cpu', ' @ https://download.pytorch.org/whl/torch_stable.html ')
-#requirements = req_extend(requirements, 'torchvision==0.7.0+cpu', ' @ https://download.pytorch.org/whl/torch_stable.html ')
+# requirements = req_extend(requirements, 'torch==1.6.0+cpu', ' @ https://download.pytorch.org/whl/torch_stable.html ')
+# requirements = req_extend(requirements, 'torchvision==0.7.0+cpu',
+# ' @ https://download.pytorch.org/whl/torch_stable.html ')
 
 setuptools.setup(
     name="creative_project",
@@ -64,7 +68,7 @@ setuptools.setup(
     description="Toolset for easy execution of Bayesian optimization for either step-by-step or closed-loop needs.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    #dependency_links=["https://download.pytorch.org/whl/torch_stable.html"],
+    # dependency_links=["https://download.pytorch.org/whl/torch_stable.html"],
     install_requires=requirements,
     classifiers=[
         "Framework :: Torch",
@@ -76,7 +80,9 @@ setuptools.setup(
         "Intended Audience :: Science/Research",
         "Operating System :: OS Independent",
     ],
-    packages=setuptools.find_packages(include=["creative_project", "creative_project.*"]),
+    packages=setuptools.find_packages(
+        include=["creative_project", "creative_project.*"]
+    ),
     package_data={"kre8_core": ["requirements.txt"]},
     python_requires=">=3.7",
 )
