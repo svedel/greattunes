@@ -39,6 +39,10 @@ python -m pip install <path_to_repo>/kre8_core/dist/creative_project-<version>-p
 where `<version>` is the latest version in normal `python` format of `MAJOR.MINOR[.MICRO]` 
 (check `/dist`-folder to see which one to pick).
 
+### Uploading build to repo servers (e.g. `PyPI`)
+
+To be investigated. Here's [a link with help](https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python) on how to leverage `GitHub actions` for this purpose.
+
 ## Testing 
 The `pytest` framework is used for this library, with all tests residing in `creative-brain\tests`. Tests consist of 
 unit tests, integration tests and sample problems, where the latter is a series of pre-defined applications of the 
