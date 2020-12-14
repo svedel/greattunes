@@ -16,6 +16,33 @@ install command on my local system (an `Ubuntu`-based system with
 pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
+### Installation
+Currently the code is not available on any repo servers except the private GitHub account. The best way to install the
+code (after adding `torch` and `torchvision`) is follow this series of steps.
+
+1. Upgrade local versions of packaging libraries
+```python
+pip install --upgrade setuptools wheel
+```
+2. Clone this repo
+3. Do local installation
+```python
+python -m pip install <path_to_repo>/kre8_core/
+```
+
+Step 3 will install by running `kre8_core/setup.py` locally and installing. This step can also be broken into two, 
+which might improve debugging
+```python
+python3 <path_to_repo>/kre8_core/ setup.py bdist_wheel
+python -m pip install <path_to_repo>/kre8_core/dist/creative_project-<version>-py3-none-any.whl
+```
+where `<version>` is the latest version in normal `python` format of `MAJOR.MINOR[.MICRO]` 
+(check `/dist`-folder to see which one to pick).
+
+### Uploading build to repo servers (e.g. `PyPI`)
+
+To be investigated. Here's [a link with help](https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python) on how to leverage `GitHub actions` for this purpose.
+
 ## Testing 
 The `pytest` framework is used for this library, with all tests residing in `creative-brain\tests`. Tests consist of 
 unit tests, integration tests and sample problems, where the latter is a series of pre-defined applications of the 

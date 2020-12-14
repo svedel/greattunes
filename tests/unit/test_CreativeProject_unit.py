@@ -157,3 +157,67 @@ def test_CreativeProject__init__covars_trainingdata_none(covars_for_custom_model
     # assert best response initialized
     assert cls.covars_best_response_value is tmp_val
     assert cls.best_response_value is tmp_val
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y, nu",
+    [
+        [None, None, None],
+        [torch.tensor([[-1.0], [-1.1], [-0.5], [1.0]], dtype=torch.double),
+         torch.tensor([[0.2], [0.15], [0.5], [2.0]], dtype=torch.double), None],
+        [torch.tensor([[-1.0], [-1.1], [-0.5], [1.0]], dtype=torch.double),
+         torch.tensor([[0.2], [0.15], [0.5], [2.0]], dtype=torch.double), 1.5],
+    ]
+)
+def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_for_custom_models_simple_training_data_4elements, capsys):
+    """
+    test that "__str__" and "__repr__" work
+    """
+
+    # set parameters
+    covars = covars_for_custom_models_simple_training_data_4elements
+
+    # initiate class
+    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y, nu=nu)
+
+    # the expected output for __repr__
+    deep_str = f"covars={covars!r}, model='SingleTaskGP', acq_func='EI'"
+
+    if train_X is not None:
+        deep_str += f", train_X={train_X!r}"
+
+    if train_Y is not None:
+        deep_str += f", train_Y={train_Y!r}"
+
+    if nu is not None:
+        deep_str += f", nu={nu!r}"
+
+    str_repr =  f"CreativeProject(" + deep_str + f")\n"  # adding \n at end since this is part of string representation
+
+    # capture the output for __repr__
+    print(repr(cls))
+    captured = capsys.readouterr()
+
+    # assert for __repr__
+    assert captured.out == str_repr
+
+    # build output for __str__
+    deep_str = f"covars={covars}, model='SingleTaskGP', acq_func='EI'"
+
+    if train_X is not None:
+        deep_str += f", train_X={train_X}"
+
+    if train_Y is not None:
+        deep_str += f", train_Y={train_Y}"
+
+    if nu is not None:
+        deep_str += f", nu={nu}"
+
+    str_repr = f"CreativeProject(" + deep_str + f")\n"  # adding \n at end since this is part of string representation
+
+    # capture the output for __str__
+    print(cls)
+    captured = capsys.readouterr()
+
+    # assert for __str__
+    assert captured.out == str_repr

@@ -56,7 +56,7 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
     "max_iter, max_response, error_lim, model_type",
     [
         [10, 250, 1.1, "SingleTaskGP"],
-        [50, 250, 7e-2, "SingleTaskGP"],
+        [50, 250, 1, "SingleTaskGP"],
         [10, 250, 96e-1, "Custom"],
     ]
 )
