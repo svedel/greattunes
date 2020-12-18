@@ -183,7 +183,6 @@ def test_observe_print_candidate_to_prompt_fails_unit(tmp_observe_class, candida
     cls = tmp_observe_class
 
     # run _print_candidate_to_prompt method and ensure correct error returned
-
     with pytest.raises(Exception) as e:
         # run the method: generate the string to be printed
         input_request = cls._print_candidate_to_prompt(candidate=candidate)
