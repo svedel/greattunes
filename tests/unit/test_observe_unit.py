@@ -127,5 +127,64 @@ def test_observe_read_response_manual_input_unit(tmp_observe_class, additional_t
 
     # assert
     for it in range(len(input_data)):
-        assert output[0,it].item() == input_data[it]
+        assert output[0, it].item() == input_data[it]
 
+@pytest.mark.parametrize(
+    "candidate",
+    [
+        torch.tensor([[2.2]], dtype=torch.double),
+        torch.tensor([[2.2, 3.3, -1]], dtype=torch.double),
+    ]
+)
+def test_observe_print_candidate_to_prompt_works_unit(tmp_observe_class, candidate):
+    """
+    test that given a candidate, the right string is written by the method _print_candidate_to_prompt
+    :param candidate (torch tensor): one-row tensor of new datapoint to be investigated
+    """
+
+    # temporary class to run the test
+    cls = tmp_observe_class
+
+    # extend with required attributes
+    tmp_covars_proposed_iter = 2
+    cls.model = {"covars_proposed_iter": tmp_covars_proposed_iter}
+
+    # run the method: generate the string to be printed
+    input_request = cls._print_candidate_to_prompt(candidate=candidate)
+
+    # build expected output
+    first = True
+    outtext = "ITERATION " + str(tmp_covars_proposed_iter) + " - NEW datapoint to sample: "
+    for tmp in candidate[0]:
+        if first:
+            outtext += str(tmp.item())
+            first = False
+        else:
+            outtext += ", " + str(tmp.item())
+
+    # assert
+    assert input_request == outtext
+
+
+@pytest.mark.parametrize(
+    "candidate, error_msg",
+    [
+        [torch.tensor([], dtype=torch.double), "kre8_core.creative_project._observe._print_candidate_to_prompt: provided input 'candidate' is empty. Expecting torch tensor of size 1 X num_covariates"],
+        [None, "kre8_core.creative_project._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect datatype. Expecting to be of type torch.Tensor"]
+    ]
+)
+def test_observe_print_candidate_to_prompt_fails_unit(tmp_observe_class, candidate, error_msg):
+    """
+    test that _print_candidate_to_prompt throws the right error for the two cases
+    :param candidate: supposed to be one-row tensor of new datapoint to be investigated of type torch tensor, here hijacking
+    """
+
+    # temporary class to run the test
+    cls = tmp_observe_class
+
+    # run _print_candidate_to_prompt method and ensure correct error returned
+
+    with pytest.raises(Exception) as e:
+        # run the method: generate the string to be printed
+        input_request = cls._print_candidate_to_prompt(candidate=candidate)
+    assert str(e.value) == error_msg

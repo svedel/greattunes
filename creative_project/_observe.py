@@ -79,3 +79,29 @@ def _read_response_manual_input(self, additional_text):
     )
 
     return response_candidate_float_tensor
+
+
+def _print_candidate_to_prompt(self, candidate):
+    """
+    prints a candidate for new data point to prompt in user-friendly manner.
+    :param candidate (torch tensor): one-row tensor of new datapoint to be investigated
+    :return input_request (str)
+    """
+
+    # verify datatype of candidate
+    if not isinstance(candidate, torch.Tensor):
+        raise Exception(
+            "kre8_core.creative_project._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect datatype. Expecting to be of type torch.Tensor")
+
+    # verify that candidate not an empty list
+    if not candidate.size()[0] > 0:
+        raise Exception("kre8_core.creative_project._observe._print_candidate_to_prompt: provided input 'candidate' is empty. Expecting torch tensor of size 1 X num_covariates")
+
+    # convert 'candidate' to list from tensor (becomes list of lists), and pick the first of these nested lists
+    cand_list = candidate.tolist()[0]
+
+    # create string
+    input_request = "ITERATION " + str(self.model["covars_proposed_iter"]) + " - NEW datapoint to sample: " + ", ".join(
+        [str(x) for x in cand_list])
+
+    return input_request

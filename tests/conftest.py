@@ -78,6 +78,7 @@ def training_data_covar_complex(covars_initialization_data):
 
     return covars, train_X, train_Y
 
+
 ### Trained GP model
 @pytest.fixture(scope="class")
 def ref_model_and_training_data(custom_models_simple_training_data_4elements):
@@ -144,7 +145,7 @@ def tmp_observe_class():
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         from creative_project._observe import _get_and_verify_response_input, _get_response_function_input, \
-            _read_response_manual_input
+            _read_response_manual_input, _print_candidate_to_prompt
 
     cls = TmpClass()
 
