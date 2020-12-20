@@ -139,6 +139,7 @@ class CreativeProject(Initializers, AcqFunction):
         _find_max_response_value,
         _update_max_response_value,
         current_best,
+        _update_proposed_data,
     )
     from ._plot import (
         _covars_ref_plot_1d,

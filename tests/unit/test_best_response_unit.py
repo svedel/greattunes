@@ -115,3 +115,42 @@ def test_current_best_univariate_unit(tmp_best_response_class, response_sampled_
         assert cls.best["covars"][it] == covars_best[it]
     assert cls.best["response"] == response_best[0]
     assert cls.best["iteration_when_recorded"] == response_sampled_iter
+
+
+@pytest.mark.parametrize(
+    "candidate, proposed_X, covars_sampled_iter",
+    [
+        [torch.tensor([[1]], dtype=torch.double), torch.tensor([[0.9]], dtype=torch.double), 1],
+        [torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200]], dtype=torch.double), 1],
+        [torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200], [0, 1, 2]], dtype=torch.double), 2]
+    ]
+)
+def test_update_proposed_data_works(tmp_best_response_class, candidate, proposed_X, covars_sampled_iter):
+    """
+    positive tests for the cases where "_update_proposed_data" works
+    :param tmp_best_response_class:
+    :param candidate:
+    :param proposed_X:
+    :param covars_sampled_iter:
+    :return:
+    """
+
+    # initialize temp class for running test
+    cls = tmp_best_response_class
+
+    # update attributes to run test
+    cls.model = {
+        "covars_sampled_iter": covars_sampled_iter,
+        "covars_proposed_iter": 0,  # can initialize at any value, is updated relative to "covars_sampled_iter"
+    }
+    cls.proposed_X = proposed_X
+
+    # run the test
+    cls._update_proposed_data(candidate=candidate)
+
+    # assert that cls.proposed_X has grown by one row
+    assert cls.proposed_X.size()[0] == proposed_X.size()[0] + 1
+
+    # assert content of that last row of cls.proposed_X
+    for i in range(cls.proposed_X.size()[1]):
+        assert cls.proposed_X[-1, i].item() == candidate[0, i].item()

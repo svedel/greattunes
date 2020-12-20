@@ -195,7 +195,8 @@ def tmp_best_response_class():
             self.best_response_value = None
 
         # import methods
-        from creative_project._best_response import _find_max_response_value, _update_max_response_value, current_best
+        from creative_project._best_response import _find_max_response_value, _update_max_response_value, \
+            current_best, _update_proposed_data
 
     cls = TmpClass()
 
