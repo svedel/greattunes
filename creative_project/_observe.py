@@ -116,7 +116,7 @@ def _print_candidate_to_prompt(self, candidate):
     return input_request
 
 
-def _covars_datapoint_observation(self): # NOT TESTED!!!
+def _covars_datapoint_observation(self):  # NOT TESTED!!!
     """
     gets observation of actual covars x. Updates stored data, counters etc
     assumes:
@@ -169,15 +169,27 @@ def _get_and_verify_covars_input(self):
         if self._Validators__validate_num_covars(covars_candidate_float_tensor):
             accepted = True
         else:
-            additional_text = " (REPEAT, prior attempt had incorrect number of datapoints) "
+            additional_text = (
+                " (REPEAT, prior attempt had incorrect number of datapoints) "
+            )
 
     if accepted:
         return covars_candidate_float_tensor
     else:
         add_text = ""
         if self.proposed_X is not None:
-            add_text = " Was expecting something like " + str(self.proposed_X[-1]) + ", but got " + str(covars_candidate_float_tensor)
-        raise Exception("creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in " + str(MAX_ITER) + " iterations." + add_text)
+            add_text = (
+                " Was expecting something like "
+                + str(self.proposed_X[-1])
+                + ", but got "
+                + str(covars_candidate_float_tensor)
+            )
+        raise Exception(
+            "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in "
+            + str(MAX_ITER)
+            + " iterations."
+            + add_text
+        )
 
 
 def _read_covars_manual_input(self, additional_text):
@@ -192,13 +204,24 @@ def _read_covars_manual_input(self, additional_text):
             - will need to accept at the end
     """
 
-    assert isinstance(additional_text, str), "creative_project._observe._read_covars_manual_input: wrong datatype of parameter 'additional_text'. Was expecting 'str' but received " + str(type(additional_text))
+    assert isinstance(additional_text, str), (
+        "creative_project._observe._read_covars_manual_input: wrong datatype of parameter 'additional_text'. "
+        "Was expecting 'str' but received " + str(type(additional_text))
+    )
 
     # read candidate
-    covars_candidate_string = input("ITERATION " + str(self.model[
-                                                           "covars_proposed_iter"]) + additional_text + " - Please provide observed covariates separated by commas (" + str(
-        self.initial_guess.shape[0]) + " covariates): ")
-    covars_candidate_float_tensor = torch.tensor([[float(z) for z in covars_candidate_string.split(',')]],
-                                                 device=self.device, dtype=self.dtype)
+    covars_candidate_string = input(
+        "ITERATION "
+        + str(self.model["covars_proposed_iter"])
+        + additional_text
+        + " - Please provide observed covariates separated by commas ("
+        + str(self.initial_guess.shape[0])
+        + " covariates): "
+    )
+    covars_candidate_float_tensor = torch.tensor(
+        [[float(z) for z in covars_candidate_string.split(",")]],
+        device=self.device,
+        dtype=self.dtype,
+    )
 
     return covars_candidate_float_tensor
