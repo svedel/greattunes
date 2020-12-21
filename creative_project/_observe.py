@@ -116,12 +116,13 @@ def _print_candidate_to_prompt(self, candidate):
     return input_request
 
 
-def _covars_datapoint_observation(self):  # NOT TESTED!!!
+def _covars_datapoint_observation(self):
     """
     gets observation of actual covars x. Updates stored data, counters etc
     assumes:
         - covars x can only be one iteration ahead of observation y
-        - tracking of response observations is managed elsewhere, where it's also ensured that these are assigned to right counter
+        - tracking of response observations is managed elsewhere, where it's also ensured that these are assigned to
+        right counter
     """
 
     # iteration counter of proposed datapoint
@@ -182,7 +183,8 @@ def _get_and_verify_covars_input(self):
                 " Was expecting something like '"
                 + str(self.proposed_X[-1])
                 + "', but got '"
-                + str(covars_candidate_float_tensor) + "'"
+                + str(covars_candidate_float_tensor)
+                + "'"
             )
         raise Exception(
             "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in "
