@@ -187,3 +187,41 @@ def test_observe_print_candidate_to_prompt_fails_unit(tmp_observe_class, candida
         # run the method: generate the string to be printed
         input_request = cls._print_candidate_to_prompt(candidate=candidate)
     assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "additional_text", ["testing function", "12345_ygh", None, 22.0, [1.0, 4.4], torch.tensor([[2.2]], dtype=torch.double)]
+)
+def test_read_covars_manual_input(tmp_observe_class, additional_text, monkeypatch):
+    """
+    test reading of covars from manual input by user. Monkeypatches reliance on function 'input'
+    """
+
+    covariates = [1.1, 2.2, 200, -1.7]
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # add attribute 'initial_guess' required for '_read_covars_manual'
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    cls.initial_guess = torch.tensor([covariates], dtype=torch.double, device=device)
+
+    # monkeypatch
+    def mock_input(x):  # mock function to replace 'input' for unit testing purposes
+        return ", ".join([str(x) for x in covariates])
+    monkeypatch.setattr("builtins.input", mock_input)
+
+    # run the test
+    # different tests for cases where it's supposed to pass vs fail
+    if isinstance(additional_text, str):
+        covars_candidate_float_tensor = cls._read_covars_manual_input(additional_text)
+
+        # assert that the right elements are returned in 'covars_candidate_float_tensor'
+        for i in range(covars_candidate_float_tensor.size()[1]):
+            assert covars_candidate_float_tensor[0,i].item() == covariates[i]
+
+    # cases where type of additonal_text should make test fail
+    else:
+        with pytest.raises(AssertionError) as e:
+            covars_candidate_float_tensor = cls._read_covars_manual_input(additional_text)
+        assert str(e.value) == "creative_project._observe._read_covars_manual_input: wrong datatype of parameter 'additional_text'. Was expecting 'str' but received " + str(type(additional_text))

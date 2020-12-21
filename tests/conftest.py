@@ -145,7 +145,7 @@ def tmp_observe_class():
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         from creative_project._observe import _get_and_verify_response_input, _get_response_function_input, \
-            _read_response_manual_input, _print_candidate_to_prompt
+            _read_response_manual_input, _print_candidate_to_prompt, _read_covars_manual_input
 
     cls = TmpClass()
 
