@@ -125,7 +125,7 @@ def test_get_and_verify_covars_input_with_dependencies_fails(tmp_observe_class, 
     monkeypatch.setattr("builtins.input", mock_input)
 
     # expected error message
-    error_msg = "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like " + str(cls.proposed_X[-1]) + ", but got " + str(covars_tensor)
+    error_msg = "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like '" + str(cls.proposed_X[-1]) + "', but got '" + str(covars_tensor) + "'"
 
     # run the method, expect it to fail
     with pytest.raises(Exception) as e:
@@ -133,3 +133,99 @@ def test_get_and_verify_covars_input_with_dependencies_fails(tmp_observe_class, 
     assert str(e.value) == error_msg
 
 
+@pytest.mark.parametrize(
+    "train_X, covars_proposed_iter, covars_sampled_iter",
+    [
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 0, 0],
+        [None, 0, 0],
+    ]
+)
+def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, covars_proposed_iter, covars_sampled_iter, monkeypatch):
+    """
+    test that _covars_datapoint_observation works. Monkeypatching build-in method "input"
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # covariates to sample
+    covariates = [1.1, 2.2, 200, -1.7]
+    covars_tensor = torch.tensor([covariates], dtype=torch.double, device=device)
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # set proposed_X attribute (required for method to work)
+    cls.initial_guess = covars_tensor
+    cls.proposed_X = train_X
+    cls.train_X = train_X
+    cls.model = {"covars_proposed_iter": covars_proposed_iter,
+                 "covars_sampled_iter": covars_sampled_iter}
+
+    # monkeypatch
+    def mock_input(x):  # mock function to replace 'input' for unit testing purposes
+        return ", ".join([str(x) for x in covariates])
+    monkeypatch.setattr("builtins.input", mock_input)
+
+    # run the method
+    cls._covars_datapoint_observation()
+
+    # assert the right elements have been added
+    for i in range(cls.train_X.size()[1]):
+        assert cls.train_X[-1, i].item() == covariates[i]
+
+    # assert that counter has been updated
+    assert cls.model["covars_sampled_iter"] == cls.model["covars_proposed_iter"]
+
+    # only if covars_proposed_iter is ahead of sampled
+    if covars_proposed_iter > covars_sampled_iter:
+        # assert that new row has been added
+        assert cls.train_X.size()[0] == train_X.size()[0] + 1
+    elif train_X is None:
+        # assert that cls.train_X has been initiated
+        assert cls.train_X.size()[0] == 1
+    else:
+        # assert that no new row has been added
+        assert cls.train_X.size()[0] == train_X.size()[0]
+
+
+@pytest.mark.parametrize(
+    "covariate_str, error_msg",
+    [
+        ["", "could not convert string to float: ''"],
+        ["1, a, 2, 3", "could not convert string to float: ' a'"]
+    ]
+)
+def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str, error_msg, monkeypatch):
+    """
+    test that _covars_datapoint_observation fails. Monkeypatching build-in method "input"
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # covariates to sample
+    init_guess = [1.1, 2.2, 200, -1.7]
+    initial_guess = torch.tensor([init_guess], dtype=torch.double, device=device)
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # set proposed_X attribute (required for method to work)
+    cls.initial_guess = initial_guess
+    cls.proposed_X = initial_guess
+    cls.train_X = initial_guess
+    cls.model = {"covars_proposed_iter": 1,
+                 "covars_sampled_iter": 1}
+
+    # monkeypatch
+    def mock_input(x):  # mock function to replace 'input' for unit testing purposes
+        return covariate_str
+    monkeypatch.setattr("builtins.input", mock_input)
+
+    with pytest.raises(ValueError) as e:
+        # run the method
+        cls._covars_datapoint_observation()
+    assert str(e.value) == error_msg
