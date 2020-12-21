@@ -147,7 +147,7 @@ def tmp_observe_class():
 
         from creative_project._observe import _get_and_verify_response_input, _get_response_function_input, \
             _read_response_manual_input, _print_candidate_to_prompt, _read_covars_manual_input, \
-            _get_and_verify_covars_input
+            _get_and_verify_covars_input, _covars_datapoint_observation
 
     cls = TmpClass()
 
