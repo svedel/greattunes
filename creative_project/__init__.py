@@ -9,6 +9,8 @@ from ._version import __version__
 class CreativeProject(Initializers, AcqFunction):
     """
     user-facing functionality to balance exploration and exploitation for creative projects.
+    Note: Initializers is a child of Validators class (from ._validators.py) so all validator methods are available to
+    CreativeProject
     """
 
     # Initialize class instance
@@ -133,6 +135,9 @@ class CreativeProject(Initializers, AcqFunction):
         _get_and_verify_response_input,
         _get_response_function_input,
         _read_response_manual_input,
+        _covars_datapoint_observation,
+        _get_and_verify_covars_input,
+        _read_covars_manual_input
     )
     from ._modeling import _set_GP_model
     from ._best_response import (
