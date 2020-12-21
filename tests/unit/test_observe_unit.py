@@ -225,3 +225,84 @@ def test_read_covars_manual_input(tmp_observe_class, additional_text, monkeypatc
         with pytest.raises(AssertionError) as e:
             covars_candidate_float_tensor = cls._read_covars_manual_input(additional_text)
         assert str(e.value) == "creative_project._observe._read_covars_manual_input: wrong datatype of parameter 'additional_text'. Was expecting 'str' but received " + str(type(additional_text))
+
+
+
+def test_get_and_verify_covars_input_works(tmp_observe_class, monkeypatch):
+    """
+    test that _get_and_verify_covars_input works when providing the correct data. Monkeypatching methods
+    "_read_covars_manual_input" and "__validate_num_covars"
+    """
+
+    # covariates to sample
+    covariates = [1.1, 2.2, 200, -1.7]
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # monkeypatch "_read_covars_manual_input"
+    def mock_read_covars_manual_input(x):
+        return torch.tensor([covariates], dtype=torch.double, device=device)
+    monkeypatch.setattr(cls, "_read_covars_manual_input", mock_read_covars_manual_input)
+
+    # monkeypatch "_Validators__validate_num_covars"
+    def mock_Validators__validate_num_covars(x):
+        return True
+    monkeypatch.setattr(cls, "_Validators__validate_num_covars", mock_Validators__validate_num_covars)
+
+    # run method
+    covars_candidate_float_tensor = cls._get_and_verify_covars_input()
+
+    # assert the output
+    # assert that the right elements are returned in 'covars_candidate_float_tensor'
+    for i in range(covars_candidate_float_tensor.size()[1]):
+        assert covars_candidate_float_tensor[0, i].item() == covariates[i]
+
+
+@pytest.mark.parametrize(
+    "proposed_X",
+    [torch.tensor([[1.1, 2.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")),
+     None]
+)
+def test_get_and_verify_covars_input_fails(tmp_observe_class, proposed_X, monkeypatch):
+    """
+    test that _get_and_verify_covars_input fails for both providing incorrect data. Monkeypatching methods
+    "_read_covars_manual_input" and "__validate_num_covars"
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # covariates to sample
+    covariates = [1.1, 2.2, 200, -1.7]
+    covars_tensor = torch.tensor([covariates], dtype=torch.double, device=device)
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # set proposed_X attribute (required for method to work)
+    cls.proposed_X = proposed_X
+
+    # monkeypatch "_read_covars_manual_input"
+    def mock_read_covars_manual_input(x):
+        return covars_tensor
+    monkeypatch.setattr(cls, "_read_covars_manual_input", mock_read_covars_manual_input)
+
+    # monkeypatch "_Validators__validate_num_covars"
+    def mock_Validators__validate_num_covars(x):
+        return False
+    monkeypatch.setattr(cls, "_Validators__validate_num_covars", mock_Validators__validate_num_covars)
+
+    # expected error message returned
+    add_text = ""
+    if cls.proposed_X is not None:
+        add_text = " Was expecting something like " + str(cls.proposed_X[-1]) + ", but got " + str(covars_tensor)
+    error_msg = "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations." + add_text
+
+    # run method
+    with pytest.raises(Exception) as e:
+        covars_candidate_float_tensor = cls._get_and_verify_covars_input()
+    assert str(e.value) == error_msg

@@ -5,6 +5,7 @@ import random
 import torch
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from creative_project._initializers import Initializers
+from creative_project._validators import Validators
 
 ### Fixing state of random number generators for test reproducibility
 @pytest.fixture(autouse=True)
@@ -137,7 +138,7 @@ def tmp_observe_class():
     """
 
     # define class
-    class TmpClass:
+    class TmpClass(Validators):
         def __init__(self):
             self.sampling = {"method": None,
                              "response_func": None}
@@ -145,7 +146,8 @@ def tmp_observe_class():
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         from creative_project._observe import _get_and_verify_response_input, _get_response_function_input, \
-            _read_response_manual_input, _print_candidate_to_prompt, _read_covars_manual_input
+            _read_response_manual_input, _print_candidate_to_prompt, _read_covars_manual_input, \
+            _get_and_verify_covars_input
 
     cls = TmpClass()
 
