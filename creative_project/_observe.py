@@ -179,10 +179,10 @@ def _get_and_verify_covars_input(self):
         add_text = ""
         if self.proposed_X is not None:
             add_text = (
-                " Was expecting something like "
+                " Was expecting something like '"
                 + str(self.proposed_X[-1])
-                + ", but got "
-                + str(covars_candidate_float_tensor)
+                + "', but got '"
+                + str(covars_candidate_float_tensor) + "'"
             )
         raise Exception(
             "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in "
