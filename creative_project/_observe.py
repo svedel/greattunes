@@ -137,7 +137,7 @@ def _covars_datapoint_observation(self):  # NOT TESTED!!!
 
     # case where sampling this iteration for the second time, overwriting first sampled datapoint
     elif self.train_X.shape[0] >= obs_counter:
-        self.train_X[obs_counter-1, :] = covars_datapoint
+        self.train_X[obs_counter - 1, :] = covars_datapoint
     else:
         self.train_X = torch.cat((self.train_X, covars_datapoint), dim=0)
 
