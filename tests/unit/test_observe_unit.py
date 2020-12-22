@@ -299,7 +299,7 @@ def test_get_and_verify_covars_input_fails(tmp_observe_class, proposed_X, monkey
     # expected error message returned
     add_text = ""
     if cls.proposed_X is not None:
-        add_text = " Was expecting something like " + str(cls.proposed_X[-1]) + ", but got " + str(covars_tensor)
+        add_text = " Was expecting something like '" + str(cls.proposed_X[-1]) + "', but got '" + str(covars_tensor) + "'"
     error_msg = "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations." + add_text
 
     # run method
