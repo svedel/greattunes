@@ -31,7 +31,7 @@ def _response_datapoint_observation(self):
         self.train_Y = response_datapoint
     # case where sampling this iteration for the second time, overwriting first sampled datapoint
     elif self.train_Y.shape[0] >= obs_counter:
-        # self.train_Y[obs_counter - 1, :] = response_datapoint --- won't work because there is only one element in train_Y
+        # self.train_Y[obs_counter - 1, :] = response_datapoint --- won't work since train_Y has only one element
         self.train_Y[obs_counter - 1] = response_datapoint
     else:
         # self.train_Y.append(response_datapoint)
