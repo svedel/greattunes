@@ -204,7 +204,11 @@ def test_read_covars_manual_input(tmp_observe_class, additional_text, monkeypatc
 
     # add attribute 'initial_guess' required for '_read_covars_manual'
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    cls.initial_guess = torch.tensor([covariates], dtype=torch.double, device=device)
+    covar_tensor = torch.tensor([covariates], dtype=torch.double, device=device)
+    cls.initial_guess = covar_tensor
+
+    # add proposed_X attributed required for '_read_covars_manual'
+    cls.proposed_X = covar_tensor
 
     # monkeypatch
     def mock_input(x):  # mock function to replace 'input' for unit testing purposes
@@ -218,7 +222,7 @@ def test_read_covars_manual_input(tmp_observe_class, additional_text, monkeypatc
 
         # assert that the right elements are returned in 'covars_candidate_float_tensor'
         for i in range(covars_candidate_float_tensor.size()[1]):
-            assert covars_candidate_float_tensor[0,i].item() == covariates[i]
+            assert covars_candidate_float_tensor[0, i].item() == covariates[i]
 
     # cases where type of additonal_text should make test fail
     else:

@@ -216,8 +216,8 @@ def _read_covars_manual_input(self, additional_text):
         "ITERATION "
         + str(self.model["covars_proposed_iter"])
         + additional_text
-        + " - Please provide observed covariates separated by commas ("
-        + str(self.initial_guess.shape[0])
+        + " - Please provide observed covariates separated by commas (proposed datapoint: "
+        + ", ".join([str(tmp.item()) for tmp in self.proposed_X[-1]])
         + " covariates): "
     )
     covars_candidate_float_tensor = torch.tensor(

@@ -159,7 +159,7 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
 
     # set proposed_X attribute (required for method to work)
     cls.initial_guess = covars_tensor
-    cls.proposed_X = train_X
+    cls.proposed_X = covars_tensor
     cls.train_X = train_X
     cls.model = {"covars_proposed_iter": covars_proposed_iter,
                  "covars_sampled_iter": covars_sampled_iter}
