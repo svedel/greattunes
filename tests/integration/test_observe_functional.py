@@ -195,7 +195,8 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
     "covariate_str, error_msg",
     [
         ["", "could not convert string to float: ''"],
-        ["1, a, 2, 3", "could not convert string to float: ' a'"]
+        ["1, a, 2, 3", "could not convert string to float: ' a'"],
+        [" , a, 2, 3", "could not convert string to float: ''"]
     ]
 )
 def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str, error_msg, monkeypatch):
@@ -228,4 +229,103 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str
     with pytest.raises(ValueError) as e:
         # run the method
         cls._covars_datapoint_observation()
+    assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "train_Y, covars_proposed_iter, response_sampled_iter",
+    [
+        [torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1],
+        [torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1],
+        [torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 0, 0],
+        [None, 0, 0],
+    ]
+)
+def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars_proposed_iter, response_sampled_iter, monkeypatch):
+    """
+    test that _response_datapoint_observation works. Monkeypatching build-in method "input"
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # covariates to sample
+    resp = [2.2]
+    resp_tensor = torch.tensor([resp], dtype=torch.double, device=device)
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # set proposed_X attribute (required for method to work)
+    cls.initial_guess = torch.tensor([[1, 2, 3]], dtype=torch.double, device=device)#resp_tensor
+    cls.proposed_X = torch.tensor([[1, 2, 3]], dtype=torch.double, device=device)#resp_tensor
+    cls.train_Y = train_Y
+    cls.model = {"covars_proposed_iter": covars_proposed_iter,
+                 "response_sampled_iter": response_sampled_iter}
+
+    # monkeypatch
+    def mock_input(x):  # mock function to replace 'input' for unit testing purposes
+        return ", ".join([str(x) for x in resp])
+    monkeypatch.setattr("builtins.input", mock_input)
+
+    # run the method being tested
+    cls._response_datapoint_observation()
+
+    # assert the right elements have been added
+    assert cls.train_Y[-1].item() == resp[0]
+
+    # assert that counter has been updated
+    assert cls.model["response_sampled_iter"] == cls.model["covars_proposed_iter"]
+
+    # only if covars_proposed_iter is ahead of sampled
+    if covars_proposed_iter > response_sampled_iter:
+        # assert that new row has been added
+        assert cls.train_Y.size()[0] == train_Y.size()[0] + 1
+    elif train_Y is None:
+        # assert that cls.train_X has been initiated
+        assert cls.train_Y.size()[0] == 1
+    else:
+        # assert that no new row has been added
+        assert cls.train_Y.size()[0] == train_Y.size()[0]
+
+
+@pytest.mark.parametrize(
+    "response_str, error_msg",
+    [
+        ["", "could not convert string to float: ''"],
+        ["a", "could not convert string to float: 'a'"],
+        [" , a", "could not convert string to float: ''"]
+    ]
+)
+def test_response_datapoint_observation_fails(tmp_observe_class, response_str, error_msg, monkeypatch):
+    """
+    test that _response_datapoint_observation fails under right conditions. Monkeypatching build-in method "input"
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # covariates to sample
+    resp = [2.2]
+    resp_tensor = torch.tensor([resp], dtype=torch.double, device=device)
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # set proposed_X attribute (required for method to work)
+    cls.sampling = {"method": "manual"}
+    cls.initial_guess = resp_tensor
+    cls.proposed_X = resp_tensor
+    cls.train_Y = resp_tensor
+    cls.model = {"covars_proposed_iter": 1,
+                 "response_sampled_iter": 1}
+
+    # monkeypatch
+    def mock_input(x):  # mock function to replace 'input' for unit testing purposes
+        return response_str
+    monkeypatch.setattr("builtins.input", mock_input)
+
+    with pytest.raises(ValueError) as e:
+        # run the method
+        cls._response_datapoint_observation()
     assert str(e.value) == error_msg
