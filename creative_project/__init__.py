@@ -132,6 +132,7 @@ class CreativeProject(Initializers, AcqFunction):
     # import methods
     from ._campaign import auto
     from ._observe import (
+        _response_datapoint_observation,
         _get_and_verify_response_input,
         _get_response_function_input,
         _read_response_manual_input,
