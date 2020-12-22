@@ -5,6 +5,16 @@
 Library with Bayesian Optimization made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
+## Using the framework
+
+### Closed-loop: the `.auto` method
+
+### Manual interaction: the `.ask` and `.tell` methods
+
+NOTE: the new response data counter ("how many responses do we have") is derived from the number of proposed 
+    covariates, not the number of sampled responses. This in order to allow for a covariate to be reported after the
+    response. However, only when .ask-method is rerun will can new covariates and responses be added.
+
 ## Start-up notes
 Need to install the `torch`-libraries outside normal bulk `pip install`.
 
