@@ -345,7 +345,7 @@ def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_pr
         return covars_tensor
     monkeypatch.setattr(cls, "_get_and_verify_covars_input", mock_get_and_verify_covars_input)
 
-    # run the method
+    # run the method being tested
     cls._covars_datapoint_observation()
 
     # assert the right elements have been added
@@ -367,3 +367,55 @@ def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_pr
         assert cls.train_X.size()[0] == train_X.size()[0]
 
 
+@pytest.mark.parametrize(
+    "train_Y, covars_proposed_iter, response_sampled_iter",
+    [
+        [torch.tensor([[0.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1],
+        [torch.tensor([[0.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1],
+        [None, 0, 0]
+    ]
+)
+def test_response_datapoint_observation_unit(tmp_observe_class, train_Y, covars_proposed_iter, response_sampled_iter, monkeypatch):
+    """
+    test that _response_datapoint_observation works. Monkeypatching method "_get_and_verify_response_input"
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # covariates to sample
+    resp = [1.1]
+    resp_tensor = torch.tensor([resp], dtype=torch.double, device=device)
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # adding attributes required for test to work
+    cls.train_Y = train_Y
+    cls.model = {"covars_proposed_iter": covars_proposed_iter,
+                 "response_sampled_iter": response_sampled_iter}
+
+    # monkeypatch "_get_and_verify_covars_input"
+    def mock_get_and_verify_response_input():
+        return resp_tensor
+    monkeypatch.setattr(cls, "_get_and_verify_response_input", mock_get_and_verify_response_input)
+
+    # run the method being tested
+    cls._response_datapoint_observation()
+
+    # assert the right element have been added
+    assert cls.train_Y[-1].item() == resp[0]
+
+    # assert that counter has been updated
+    assert cls.model["response_sampled_iter"] == cls.model["covars_proposed_iter"]
+
+    # only if covars_proposed_iter is ahead of sampled
+    if covars_proposed_iter > response_sampled_iter:
+        # assert that new row has been added
+        assert cls.train_Y.size()[0] == train_Y.size()[0] + 1
+    elif train_Y is None:
+        # assert that cls.train_X has been initiated
+        assert cls.train_Y.size()[0] == 1
+    else:
+        # assert that no new row has been added
+        assert cls.train_Y.size()[0] == train_Y.size()[0]

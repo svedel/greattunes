@@ -4,11 +4,49 @@ Methods for observing responses and the associated covariates
 import torch
 
 
+### Response methods ###
+def _response_datapoint_observation(self):
+    """
+    gets observation of actual response y. Updates stored data, counters etc.
+    NOTE: the new response data counter ("how many responses do we have") is derived from the number of proposed
+    covariates, not the number of sampled responses. This in order to allow for a covariate to be reported after the
+    response. However, only when .ask-method is rerun will can new covariates and responses be added.
+    :depends on:
+        - self.model["covars_proposed_iter"] (counter of number of covars proposed)
+        - self.train_Y
+    :updates:
+        - self.train_Y
+        - self.model["response_sampled_iter"] (counter of number of responses sampled)
+    """
+
+    # iteration counter of proposed datapoint
+    obs_counter = self.model["covars_proposed_iter"]
+
+    # get and verify response datapoint
+    response_datapoint = self._get_and_verify_response_input()
+
+    # store data
+    # first datapoint
+    if self.train_Y is None:
+        self.train_Y = response_datapoint
+    # case where sampling this iteration for the second time, overwriting first sampled datapoint
+    elif self.train_Y.shape[0] >= obs_counter:
+        # self.train_Y[obs_counter - 1, :] = response_datapoint --- won't work because there is only one element in train_Y
+        self.train_Y[obs_counter - 1] = response_datapoint
+    else:
+        # self.train_Y.append(response_datapoint)
+        self.train_Y = torch.cat((self.train_Y, response_datapoint), dim=0)
+
+    # update counter
+    self.model["response_sampled_iter"] = obs_counter
+
+
 def _get_and_verify_response_input(self):
     """
     read and verify response. Assumes only a single input, and does not do any verification.
     :input:
-        - self.sampling["method"]: determines how to get the response data (manual input or function evaluation)
+        - self.sampling["method"]: determines how to get the response data (manual input or function evaluation).
+        Default model self.sampling["method"] = 'manual' is set in creative_project.__init__.py
     :return response_datapoint (torch Tensor): a single-element tensor containing the returned response datapoint
     """
 
@@ -81,6 +119,7 @@ def _read_response_manual_input(self, additional_text):
     return response_candidate_float_tensor
 
 
+### Covariate methods ###
 def _print_candidate_to_prompt(self, candidate):
     """
     prints a candidate for new data point to prompt in user-friendly manner.
