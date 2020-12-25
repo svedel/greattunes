@@ -83,8 +83,4 @@ def _set_GP_model(self, **kwargs):
     self.model["likelihood"] = lh
     self.model["loglikelihood"] = ll
 
-    return (
-        "ITERATION  "
-        + str(self.model["response_sampled_iter"])
-        + " - Successfully retrained GP model"
-    )
+    return "Successfully trained GP model"
