@@ -23,7 +23,6 @@ def _set_GP_model(self, **kwargs):
     """
 
     # TODO: check that self.model['model_type'] value is allowed
-    # TODO: include model's state_dict (see details here: botorch_custom_closed_loop_bayesian_optimization.ipynb)
 
     # FixedNoiseGP is a BoTorch alternative that also includes a fixed noise estimate on the observations train_Y
     if self.model["model_type"] == "SingleTaskGP":
