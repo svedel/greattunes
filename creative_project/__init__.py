@@ -130,7 +130,7 @@ class CreativeProject(Initializers, AcqFunction):
         return f"CreativeProject(" + deep_str + f")"
 
     # import methods
-    from ._campaign import auto
+    from ._campaign import auto, ask, tell
     from ._observe import (
         _response_datapoint_observation,
         _get_and_verify_response_input,
@@ -139,6 +139,7 @@ class CreativeProject(Initializers, AcqFunction):
         _covars_datapoint_observation,
         _get_and_verify_covars_input,
         _read_covars_manual_input,
+        _print_candidate_to_prompt,
     )
     from ._modeling import _set_GP_model
     from ._best_response import (
