@@ -114,6 +114,9 @@ class Initializers(Validators):
                     self.start_from_guess = False
 
                     # update stored data
-                    self.proposed_X = train_X
                     self.train_X = train_X
                     self.train_Y = train_Y
+
+                    # initialize proposed_X with empty (i.e. 0 to machine precision) since we have no proposals for
+                    # train_X
+                    self.proposed_X = torch.empty(train_X.size())
