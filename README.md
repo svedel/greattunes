@@ -7,6 +7,49 @@ known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorc
 
 ## Using the framework
 
+NOTE: Framework is built around initial (historical) training data is added during class instantiation via arguments `train_X=<>` and `train_Y=<>` such as
+```python
+# import
+import torch
+import CreativeProject
+
+### ------ Case 1 - multiple observations (also multivariate) ------ ###
+
+# set range of data
+covars = [(1, 0, 4.4), (5.2, 1.5, 7.0), (4, 2.2, 5.1)]
+
+# define initial data
+X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
+Y = torch.tensor([[33],[37.8]], dtype=torch.double)
+
+# initialize class
+cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+
+### ------ Case 2 - single observation (also univariate) ------ ###
+
+# set range of data
+covars = [(1, 0, 4.4)]
+
+# define initial data
+X = torch.tensor([[1]], dtype=torch.double)
+Y = torch.tensor([[33]], dtype=torch.double)
+
+# initialize class
+cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+
+### ------ Case 3 - single observation (multivariate) ------ ###
+
+# set range of data
+covars = [(1, 0, 4.4), (5.2, 1.5, 7.0), (4, 2.2, 5.1)]
+
+# define initial data
+X = torch.tensor([[1, 2, 3]], dtype=torch.double)
+Y = torch.tensor([[33]], dtype=torch.double)
+
+# initialize class
+cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+```
+
 ### Closed-loop: the `.auto` method
 
 ### Manual interaction: the `.ask` and `.tell` methods
