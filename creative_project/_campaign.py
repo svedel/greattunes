@@ -105,28 +105,6 @@ def ask(self):
     # special case of first iteration.
     candidate = self.identify_new_candidate()  # defined in _acq_func.AcqFunc
 
-    """
-    # if no training data provided, will start from initial guess provided as part of "covars" in 
-    # class instance initialization
-    if self.start_from_guess & self.model["covars_sampled_iter"] == 0:
-
-        candidate = self.initial_guess
-
-    else:
-
-        # optimize acquisition function
-        BATCH_SIZE = 1
-
-        candidate, _ = optimize_acqf(
-            acq_function=self.acq_func["object"],
-            bounds = self.covar_bounds,
-            q=BATCH_SIZE,
-            num_restarts=10,
-            raw_samples=512,  # used for intialization heuristic
-            options={"maxiter": 200},
-        )
-    """
-
     # remember to print new candidate to prompt in easy-to-read format
     candidate_text_for_display_in_prompt = self._print_candidate_to_prompt(candidate)
     print(candidate_text_for_display_in_prompt)
