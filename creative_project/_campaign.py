@@ -67,3 +67,86 @@ def auto(self, response_samp_func, max_iter=100):
 
         # update best response value and associated covariates
         self._update_max_response_value()
+
+
+def ask(self):
+    """
+    proposes the next covariate datapoint to sample based on data sampled so far, trained surrogate model
+    on that data of user-specified type and the chosen acquisition function. Special treatment when starting
+    from no knowledge (will start from user-provided guesses in "covars" in class instance initialization).
+
+    Batching is not supported, so proposed datapoint can at most be one iteration ahead of observed data. If
+    multiple proposals are attempted, prior un-investigated candidate datapoints (those where proposal is not
+    matched with an actual record of observed covariates and response) will be overridden by next request for
+    a candidate.
+
+    assumes (general run mode):
+        - model, likelihood exists
+        - acquisition function exists
+    does:
+        - retrains acquisition function
+        - generate new estimate for x*
+        - append x* to record
+
+    special case:
+        - handle case of first iteration where no data exists
+    """
+
+    # special case where historical data has been added: add a model the first time we iterate through
+    if (
+        self.train_X is not None
+        and self.train_Y is not None
+        and self.model["model"] is None
+    ):
+        # train model
+        model_retrain_succes_str = self._set_GP_model(nu=self.nu)
+        print(model_retrain_succes_str)
+
+    # initialize acquisition function (if first time data present, otherwise don't do anything)
+    self._AcqFunction__initialize_acq_func()
+
+    # generate new candidate covars datapoint
+    # special case of first iteration.
+    candidate = self.identify_new_candidate()  # defined in _acq_func.AcqFunc
+
+    # remember to print new candidate to prompt in easy-to-read format
+    candidate_text_for_display_in_prompt = self._print_candidate_to_prompt(candidate)
+    print(candidate_text_for_display_in_prompt)
+
+    # update counters etc
+    self._update_proposed_data(candidate)
+
+
+def tell(self):
+    """
+    samples the covariates and response corresponding to the output made from the "ask"-method.
+    Assumes a request for new datapoint has been made.
+
+    assumes:
+        - model, likelihood exists
+        - next data point x* proposed
+    does:
+        - samples x*, y*
+        - append x* to collection of covariates, y* to observations made
+        - refit model
+    """
+
+    # sample covariates for the 'candidate' datapoint proposed by .ask-method
+    # using manual input, updates train_X and sampling counter (self.model["covars_sampled_iter"])
+    self._covars_datapoint_observation()
+
+    # get response for the datapoint added in line above
+    # using manual input, updates train_Y and sampling counter (self.model["response_sampled_iter"])
+    self._response_datapoint_observation()
+
+    # retrain the GP model
+    # updates the prior and likelihood models behind the scenes
+    # self.nu is None except for case where self.model["model_type"] = "Custom", however is not called for any other
+    # case
+    model_retrain_succes_str = self._set_GP_model(nu=self.nu)
+
+    # print to prompt
+    print(model_retrain_succes_str)
+
+    # update best response value and associated covariates
+    self._update_max_response_value()

@@ -115,3 +115,134 @@ def test_current_best_univariate_unit(tmp_best_response_class, response_sampled_
         assert cls.best["covars"][it] == covars_best[it]
     assert cls.best["response"] == response_best[0]
     assert cls.best["iteration_when_recorded"] == response_sampled_iter
+
+
+@pytest.mark.parametrize(
+    "candidate, proposed_X, covars_sampled_iter",
+    [
+        [torch.tensor([[1]], dtype=torch.double), torch.tensor([[0.9]], dtype=torch.double), 1],  # univariate
+        [torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200]], dtype=torch.double), 1],  # multivariate
+        [torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200], [0, 1, 2]], dtype=torch.double), 2]  # multivariate and several historical entries
+    ]
+)
+def test_update_proposed_data_works(tmp_best_response_class, candidate, proposed_X, covars_sampled_iter):
+    """
+    positive tests for the cases where "_update_proposed_data" works
+    :param: tmp_best_response_class (test class defined in conftest.py)
+    """
+
+    # initialize temp class for running test
+    cls = tmp_best_response_class
+
+    # update attributes to run test
+    cls.model = {
+        "covars_sampled_iter": covars_sampled_iter,
+        "covars_proposed_iter": 0,  # can initialize at any value, is updated relative to "covars_sampled_iter"
+    }
+    cls.proposed_X = proposed_X
+
+    # run the test
+    cls._update_proposed_data(candidate=candidate)
+
+    # assert that cls.proposed_X has grown by one row
+    assert cls.proposed_X.size()[0] == proposed_X.size()[0] + 1
+
+    # assert content of that last row of cls.proposed_X
+    for i in range(cls.proposed_X.size()[1]):
+        assert cls.proposed_X[-1, i].item() == candidate[0, i].item()
+
+
+@pytest.mark.parametrize(
+    "candidate, proposed_X, covars_sampled_iter",
+    [
+        [torch.tensor([[1]], dtype=torch.double), torch.tensor([[0.9], [1.1]], dtype=torch.double), 1],
+        [torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200], [1.1, 2.2, 4.3]], dtype=torch.double), 1],
+        [torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200], [1.1, 2.2, 4.3], [0, 1, 2]], dtype=torch.double), 2]
+    ]
+)
+def test_update_proposed_data_overwrite(tmp_best_response_class, candidate, proposed_X, covars_sampled_iter):
+    """
+    positive tests for the cases where "_update_proposed_data" overwrites last entry in self.proposed_X
+    :param: tmp_best_response_class (test class defined in conftest.py)
+    """
+
+    # initialize temp class for running test
+    cls = tmp_best_response_class
+
+    # update attributes to run test
+    cls.model = {
+        "covars_sampled_iter": covars_sampled_iter,
+        "covars_proposed_iter": 0,  # can initialize at any value, is updated relative to "covars_sampled_iter"
+    }
+    cls.proposed_X = proposed_X
+
+    # run the test
+    cls._update_proposed_data(candidate=candidate)
+
+    # assert that cls.proposed_X has NOT grown
+    assert cls.proposed_X.size()[0] == proposed_X.size()[0]
+
+    # assert content of that last row of cls.proposed_X
+    for i in range(cls.proposed_X.size()[1]):
+        assert cls.proposed_X[-1, i].item() == candidate[0, i].item()
+
+
+@pytest.mark.parametrize(
+    "candidate", [torch.tensor([[1]], dtype=torch.double), torch.tensor([[1, 2, 3]], dtype=torch.double)]
+)
+def test_update_proposed_data_works_firs_entry(tmp_best_response_class, candidate):
+    """
+    positive tests for the cases where "_update_proposed_data" stores first set of candidate datapoints
+    :param: tmp_best_response_class (test class defined in conftest.py)
+    """
+
+    # initialize temp class for running test
+    cls = tmp_best_response_class
+
+    # update attributes to run test. self.proposed_X is initialized as 'None' in conftest.py
+    cls.model = {
+        "covars_sampled_iter": 0,  # initialize at 0 for the test to work (no data points sampled yet)
+        "covars_proposed_iter": 1,  # initialize at 1 since one datapoint has been proposed (can actually initialize at any value for _update_proposed_data to work)
+    }
+
+    # run the test
+    cls._update_proposed_data(candidate=candidate)
+
+    # assert that only a single candidate datapoint has been added
+    assert cls.proposed_X.size()[0] == 1
+
+    # assert that it's the right datapoint by comparing to 'candidate'
+    for i in range(cls.proposed_X.size()[1]):
+        assert cls.proposed_X[-1, i].item() == candidate[0, i].item()
+
+
+@pytest.mark.parametrize(
+    "candidate, proposed_X, error_msg",
+    [
+        [None, torch.tensor([[0.9], [1.1]], dtype=torch.double), "creative_project._best_response._update_proposed_data: provided variable is not 'candidate' of type torch.DoubleTensor (type of 'candidate' is " + str(type(None)) + ")"],
+        [[1.1], torch.tensor([[0.9], [1.1]], dtype=torch.double), "creative_project._best_response._update_proposed_data: provided variable is not 'candidate' of type torch.DoubleTensor (type of 'candidate' is " + str(type([1.1])) + ")"],
+        [torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[0.9], [1.1]], dtype=torch.double), "creative_project._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected 1, but got 2"],
+        [torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200], [1.1, 2.2, 4.3], [0, 1, 2]], dtype=torch.double), "creative_project._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected 3, but got 2"]
+    ]
+)
+def test_update_proposed_data_fails(tmp_best_response_class, candidate, proposed_X, error_msg):
+    """
+    negative tests for "_update_proposed_data": wrong data types, wrong number of candidates
+    :param: tmp_best_response_class (test class defined in conftest.py)
+    """
+
+    # initialize temp class for running test
+    cls = tmp_best_response_class
+
+    # update attributes to run test. self.proposed_X is initialized as 'None' in conftest.py
+    cls.model = {
+        "covars_sampled_iter": 0,  # initialize at 0 for the test to work (no data points sampled yet)
+        "covars_proposed_iter": 1,
+        # initialize at 1 since one datapoint has been proposed (can actually initialize at any value for _update_proposed_data to work)
+    }
+    cls.proposed_X = proposed_X
+
+    # run the test
+    with pytest.raises(AssertionError) as e:
+        cls._update_proposed_data(candidate=candidate)
+    assert str(e.value) == error_msg

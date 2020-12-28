@@ -31,6 +31,6 @@ def test_modeling__set_GP_model_functional(training_data_covar_complex, tmp_mode
     # run the method
     output_text = cls._set_GP_model(nu=nu)
 
-    assert output_text == "ITERATION  " + str(cls.model["response_sampled_iter"]) + " - Successfully retrained GP model"
+    assert output_text == "Successfully trained GP model"
     assert cls.model["likelihood"] is not None
     assert cls.model["loglikelihood"] is not None

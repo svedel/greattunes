@@ -164,3 +164,55 @@ def test_acq_func_identify_new_candidate_nodatacount_unit(covars_for_custom_mode
     # assert
     for it in range(len(covars)):
         assert candidate[it].item() == covars[it][0]
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y",
+    [
+        [torch.tensor([[1.1]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double)],
+        [torch.tensor([[1.1, -4.234, 7.65]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double)],
+        [None, None]
+]
+)
+def test__initialize_acq_func(train_X, train_Y, monkeypatch):
+    """
+    test that "__initialize_acq_func" works by testing the two scenarios that influence the outcome: having train_Y
+    being None or not. Monkeypatching "set_acq_func" in "__initialize_acq_func".
+    """
+
+    ### First test: iterations have already started (no initialization accepted)
+    # initialize
+    cls = AcqFunction()
+    cls.train_X = train_X
+    cls.train_Y = train_Y
+
+    # set counters. In this test have made sure that train_X, train_Y are either None, None or not-None, not-None
+    if (train_X is not None) and (train_Y is not None):
+        cls.model = {
+            "covars_sampled_iter": 1,
+            "response_sampled_iter": 1
+        }
+    else:
+        cls.model = {
+            "covars_sampled_iter": 0,
+            "response_sampled_iter": 0
+        }
+
+    # attribute to store acq function
+    cls.acq_func = {"object": None}
+
+    # monkeypatch "set_acq_func"
+    set_string = "set"
+    def mock_set_acq_func():
+        cls.acq_func["object"] = set_string
+
+    monkeypatch.setattr(cls, "set_acq_func", mock_set_acq_func)
+
+    # run the method
+    cls._AcqFunction__initialize_acq_func()
+
+    # assert
+    if train_X is None:
+        assert cls.acq_func["object"] is None
+    else:
+        assert cls.acq_func["object"] == set_string

@@ -5,6 +5,16 @@ import random
 import torch
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from creative_project._initializers import Initializers
+from creative_project._validators import Validators
+
+### Parsing of keywords: allow for specialized tests for different python versions
+def pytest_addoption(parser):
+    parser.addoption("--pythontestvers", action="store", default="3.8")
+
+@pytest.fixture(autouse=True)
+def pythontestvers(request):
+    return request.config.option.pythontestvers
+
 
 ### Fixing state of random number generators for test reproducibility
 @pytest.fixture(autouse=True)
@@ -78,6 +88,7 @@ def training_data_covar_complex(covars_initialization_data):
 
     return covars, train_X, train_Y
 
+
 ### Trained GP model
 @pytest.fixture(scope="class")
 def ref_model_and_training_data(custom_models_simple_training_data_4elements):
@@ -136,7 +147,7 @@ def tmp_observe_class():
     """
 
     # define class
-    class TmpClass:
+    class TmpClass(Validators):
         def __init__(self):
             self.sampling = {"method": None,
                              "response_func": None}
@@ -144,7 +155,8 @@ def tmp_observe_class():
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         from creative_project._observe import _get_and_verify_response_input, _get_response_function_input, \
-            _read_response_manual_input
+            _read_response_manual_input, _print_candidate_to_prompt, _read_covars_manual_input, \
+            _get_and_verify_covars_input, _covars_datapoint_observation, _response_datapoint_observation
 
     cls = TmpClass()
 
@@ -194,7 +206,8 @@ def tmp_best_response_class():
             self.best_response_value = None
 
         # import methods
-        from creative_project._best_response import _find_max_response_value, _update_max_response_value, current_best
+        from creative_project._best_response import _find_max_response_value, _update_max_response_value, \
+            current_best, _update_proposed_data
 
     cls = TmpClass()
 

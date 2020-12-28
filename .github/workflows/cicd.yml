@@ -18,6 +18,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8]
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v2
@@ -53,7 +54,7 @@ jobs:
           /bin/sh -c "isort creative_project/**/*.py"
       - name: run tests
         run: |
-          python -m pytest tests/unit tests/integration
+          python -m pytest tests/unit tests/integration --pythontestvers ${{ matrix.python-version }}
       - if: github.event_names == 'pull_request'
         name: run sample problems
         run: |

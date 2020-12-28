@@ -132,7 +132,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
 
     outtext = ""
     for it in range(1,max_iter+1):
-        outtext += "ITERATION " + str(it) + ": Identify new covariate datapoint... Get response for new datapoint... ITERATION  " + str(it) + " - Successfully retrained GP model... Finish iteration...\n"
+        outtext += "ITERATION " + str(it) + ": Identify new covariate datapoint... Get response for new datapoint... Successfully trained GP model... Finish iteration...\n"
     outtext += "Maximum response value Y (iteration " + str(it) + "): max_Y =" + max_resp + "\n"
     outtext += "Corresponding covariate values resulting in max_Y: [" + covar_max_resp + "]\n"
 

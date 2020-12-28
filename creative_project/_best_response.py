@@ -99,4 +99,47 @@ def current_best(self):
     }
 
 
-# NEED TO TEST THIS!!!
+def _update_proposed_data(self, candidate):
+    """
+    update the record of proposed covariates for next observation ("proposed_X") and associated counter
+    "model["covars_proposed_iter"]".
+    :param candidate (1 X num_covars torch tensor)
+    :return
+        - updates
+            - self.model["covars_proposed_iter"]
+            - self.proposed_X
+
+    assumes:
+        - proposed covariates ("proposed_X"), actually recorded covariates ("train_X") and observations
+        ("train_Y") must follow each other (i.e. "proposed_X" can only be ahead by one iteration relative to
+        "train_X" and "train_Y")
+    """
+
+    # data type validation on "candidate"
+    assert isinstance(candidate, torch.DoubleTensor), (
+        "creative_project._best_response._update_proposed_data: provided variable is not 'candidate' of type "
+        "torch.DoubleTensor (type of 'candidate' is " + str(type(candidate)) + ")"
+    )
+
+    # check number of covariates in "candidate" (only if previous records exist)
+    if self.proposed_X is not None:
+        assert candidate.size()[1] == self.proposed_X.size()[1], (
+            "creative_project._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected "
+            + str(self.proposed_X.size()[1])
+            + ", but got "
+            + str(candidate.size()[1])
+        )
+
+    # takes latest sampled covariates and store proposal as next
+    # update counter
+    self.model["covars_proposed_iter"] = self.model["covars_sampled_iter"] + 1
+
+    # add proposed candidate
+    # special case if no data stored previously (in which case self.proposed_X is None)
+    if self.proposed_X is None:
+        self.proposed_X = candidate
+    # special case where overwriting a previous proposal
+    elif self.proposed_X.shape[0] == self.model["covars_proposed_iter"]:
+        self.proposed_X[-1] = candidate
+    else:
+        self.proposed_X = torch.cat((self.proposed_X, candidate), dim=0)
