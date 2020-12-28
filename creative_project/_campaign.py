@@ -93,7 +93,11 @@ def ask(self):
     """
 
     # special case where historical data has been added: add a model the first time we iterate through
-    if (self.train_X is not None and self.train_Y is not None and self.model["model"] is None):
+    if (
+        self.train_X is not None
+        and self.train_Y is not None
+        and self.model["model"] is None
+    ):
         # train model
         model_retrain_succes_str = self._set_GP_model(nu=self.nu)
         print(model_retrain_succes_str)
@@ -137,7 +141,8 @@ def tell(self):
 
     # retrain the GP model
     # updates the prior and likelihood models behind the scenes
-    # self.nu is None except for case where self.model["model_type"] = "Custom", however is not called for any other case
+    # self.nu is None except for case where self.model["model_type"] = "Custom", however is not called for any other
+    # case
     model_retrain_succes_str = self._set_GP_model(nu=self.nu)
 
     # print to prompt
