@@ -218,6 +218,67 @@ def test_CreativeProject_tell_integration_test_works_overwrite(covars, model_typ
 
 
 # add a test that looks for failures in tell (e.g. incorrect added input: make sure nothing is updated)
+@pytest.mark.parametrize(
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, covars_cand, resp_cand, error_msg",
+    [
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[23]], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([0.8000], dtype=torch.float64)', but got 'tensor([[1., 2.]], dtype=torch.float64)'"],  # fail on train_X
+        [[(1, 0.5, 1.5)], "Custom", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[23]], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([0.8000], dtype=torch.float64)', but got 'tensor([[1., 2.]], dtype=torch.float64)'"],  # fail on train_X
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1]], dtype=torch.double), torch.tensor([[23, 11]], dtype=torch.double), "The expanded size of the tensor (1) must match the existing size (2) at non-singleton dimension 0.  Target sizes: [1].  Tensor sizes: [2]"],  # fail on train_Y
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[23]], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  0.8000,   0.2000, 102.0000], dtype=torch.float64)', but got 'tensor([[1., 2.]], dtype=torch.float64)'"],  # fail on train_X, too few entries
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([], dtype=torch.double), "The expanded size of the tensor (1) must match the existing size (0) at non-singleton dimension 0.  Target sizes: [1].  Tensor sizes: [0]"],  # fail on train_Y, too few entries
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  0.8000,   0.2000, 102.0000], dtype=torch.float64)', but got 'tensor([[1., 2.]], dtype=torch.float64)'"],  # too few in both train_X and train_Y, fail on train_X since this comes first
+    ]
+)
+def test_CreativeProject_tell_integration_test_fails(covars, model_type, train_X, train_Y, covars_proposed_iter,
+                                                     covars_sampled_iter, response_sampled_iter, covars_cand, resp_cand,
+                                                     error_msg, monkeypatch):
+    """
+    test that a failure in "tell" will cause an error and not update any counters. Monkeypatch
+    "_read_covars_manual_input" and "_read_response_manual_input" from ._observe.py to circumvent manual input via
+    builtins.input
+    """
+
+    # initialize the class
+    cc = CreativeProject(covars=covars, model=model_type)
+
+    # set attributes on class (to simulate previous iterations of ask/tell functionality)
+    cc.train_X = train_X
+    cc.proposed_X = train_X
+    cc.train_Y = train_Y
+    cc.model["covars_proposed_iter"] = covars_proposed_iter
+    cc.model["covars_sampled_iter"] = covars_sampled_iter
+    cc.model["response_sampled_iter"] = response_sampled_iter
+
+    # original model state
+    model_state = cc.model["model"]
+
+    # monkeypatch "_read_covars_manual_input"
+    candidate_tensor = covars_cand
+    def mock_read_covars_manual_input(additional_text):
+        return candidate_tensor
+    monkeypatch.setattr(cc, "_read_covars_manual_input", mock_read_covars_manual_input)
+
+    # monkeypatch "_read_response_manual_input"
+    resp_tensor = resp_cand
+    def mock_read_response_manual_input(additional_text):
+        return resp_tensor
+    monkeypatch.setattr(cc, "_read_response_manual_input", mock_read_response_manual_input)
+
+    with pytest.raises(Exception) as e:
+        # run the method
+        cc.tell()
+    assert str(e.value) == error_msg
+
+    # assert that stored train_X is not updated
+    assert cc.train_X.size()[0] == train_X.size()[0]
+    assert cc.train_X.size()[1] == train_X.size()[1]
+
+    # assert that stored train_Y is not updated
+    assert cc.train_Y.size()[0] == train_Y.size()[0]
+    assert cc.train_Y.size()[1] == train_Y.size()[1]
+
+    # assert that stored surrogate model is not updated
+    assert cc.model["model"] == model_state
 
 
 @pytest.mark.parametrize(
