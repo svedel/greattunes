@@ -7,6 +7,15 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 from creative_project._initializers import Initializers
 from creative_project._validators import Validators
 
+### Parsing of keywords: allow for specialized tests for different python versions
+def pytest_addoption(parser):
+    parser.addoption("--pythontestvers", action="store", default="3.8")
+
+@pytest.fixture(autouse=True)
+def pythontestvers(request):
+    return request.config.option.pythontestvers
+
+
 ### Fixing state of random number generators for test reproducibility
 @pytest.fixture(autouse=True)
 def rng_state_tests():
