@@ -205,7 +205,7 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
-    if pythontestvers == "3.7":
+    if pythontestvers == "3.7" and response_str != "a":
         # removes the '' from the error message
         error_msg = error_msg[:-2]
 
@@ -308,7 +308,7 @@ def test_response_datapoint_observation_fails(tmp_observe_class, response_str, e
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
-    if pythontestvers == "3.7":
+    if pythontestvers == "3.7" and response_str != "a":
         # removes the '' from the error message
         error_msg = error_msg[:-2]
 
