@@ -199,13 +199,13 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
         [" , a, 2, 3", "could not convert string to float: ''"]
     ]
 )
-def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str, error_msg, monkeypatch, pythonvers):
+def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str, error_msg, monkeypatch, pythontestvers):
     """
     test that _covars_datapoint_observation fails. Monkeypatching build-in method "input"
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
-    if pythonvers == "3.7":
+    if pythontestvers == "3.7":
         # removes the '' from the error message
         error_msg = error_msg[:-2]
 
@@ -302,13 +302,13 @@ def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars
         [" , a", "could not convert string to float: ''"]
     ]
 )
-def test_response_datapoint_observation_fails(tmp_observe_class, response_str, error_msg, monkeypatch, pythonvers):
+def test_response_datapoint_observation_fails(tmp_observe_class, response_str, error_msg, monkeypatch, pythontestvers):
     """
     test that _response_datapoint_observation fails under right conditions. Monkeypatching build-in method "input"
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
-    if pythonvers == "3.7":
+    if pythontestvers == "3.7":
         # removes the '' from the error message
         error_msg = error_msg[:-2]
 

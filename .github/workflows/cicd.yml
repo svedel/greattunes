@@ -54,7 +54,7 @@ jobs:
           /bin/sh -c "isort creative_project/**/*.py"
       - name: run tests
         run: |
-          python -m pytest tests/unit tests/integration
+          python -m pytest tests/unit tests/integration --pythontestvers ${{ matrix.python-version }}
       - if: github.event_names == 'pull_request'
         name: run sample problems
         run: |
@@ -62,7 +62,7 @@ jobs:
       - if: github.event_names != 'pull_request'
         name: run sample problems
         run: |
-          python -m pytest --pythonvers=${{ matrix.python-version }} tests/sample_problems
+          python -m pytest tests/sample_problems
         continue-on-error: true
       - name: build package
         run: python3 setup.py bdist_wheel
