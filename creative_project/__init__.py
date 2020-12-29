@@ -70,9 +70,9 @@ class CreativeProject(Initializers, AcqFunction):
             "object": None,
         }
 
-        # define sampling functions
-        # initialize as manual. Will be updated if method "auto" is used (use when sampling function known)
-        sampling_type = "manual"
+        # define sampling functions. initialize as iterative, which means using ask-tell (either manual or automatic).
+        # Will be updated if method "auto" is used (use when sampling function known)
+        sampling_type = "iterative"
         self.sampling = {"method": sampling_type, "response_func": None}
 
         # initialize data for training and storage:

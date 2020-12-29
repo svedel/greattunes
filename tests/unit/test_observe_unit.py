@@ -4,7 +4,7 @@ import torch
 @pytest.mark.parametrize("method, tmp_val",
                          [
                              ["functions", 1.0],
-                             ["manual", 2.0]
+                             ["iterative", 2.0]
                          ])
 def test_observe_get_and_verify_response_input_unit(tmp_observe_class, method, tmp_val, monkeypatch):
     """
@@ -39,14 +39,14 @@ def test_observe_get_and_verify_response_input_unit(tmp_observe_class, method, t
 
     if method == "functions":
         assert output[0].item() == tmp_val
-    elif method == "manual":
+    elif method == "iterative":
         assert output[0].item() == manual_tmp_val
 
 
 @pytest.mark.parametrize("method", ["WRONG", None])
 def test_observe_get_and_verify_response_input_fail_unit(tmp_observe_class, method):
     """
-    test that _get_and_verify_response_input fails for self.sampling["method"] not equal to "manual" or "functions".
+    test that _get_and_verify_response_input fails for self.sampling["method"] not equal to "iterative" or "functions".
     """
 
     # # define class
@@ -57,7 +57,7 @@ def test_observe_get_and_verify_response_input_fail_unit(tmp_observe_class, meth
         assert output == cls._get_and_verify_response_input()
     assert str(e.value) == "creative_project._observe._get_and_verify_response_input: class attribute " \
                            "self.sampling['method'] has non-permissable value " + str(method) + ", must be in " \
-                           "['manual', 'functions']."
+                           "['iterative', 'functions']."
 
 
 @pytest.mark.parametrize("FLAG_TRAINING_DATA", [True, False])

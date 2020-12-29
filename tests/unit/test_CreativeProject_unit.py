@@ -31,7 +31,7 @@ def test_CreativeProject__init__covars_notrainingdata_works(covars_for_custom_mo
     assert isinstance(cls.dtype, torch.dtype)
 
     # assert that attributes set/not set for initialization
-    assert cls.sampling["method"] == "manual"
+    assert cls.sampling["method"] == "iterative"
 
     # assert initialization
     assert cls.initial_guess[0].item() == covars[0][0]

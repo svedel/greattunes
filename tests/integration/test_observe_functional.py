@@ -16,7 +16,7 @@ def test_observe_get_and_verify_response_input_manual_functional(tmp_observe_cla
 
     # initialized temp class
     cls = tmp_observe_class
-    cls.sampling["method"] = "manual"
+    cls.sampling["method"] = "iterative"
 
     # set attribute
     cls.model = {"covars_proposed_iter": 0}
@@ -323,7 +323,7 @@ def test_response_datapoint_observation_fails(tmp_observe_class, response_str, e
     cls = tmp_observe_class
 
     # set proposed_X attribute (required for method to work)
-    cls.sampling = {"method": "manual"}
+    cls.sampling = {"method": "iterative"}
     cls.initial_guess = resp_tensor
     cls.proposed_X = resp_tensor
     cls.train_Y = resp_tensor

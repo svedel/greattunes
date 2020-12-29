@@ -45,13 +45,13 @@ def _get_and_verify_response_input(self):
     """
     read and verify response. Assumes only a single input, and does not do any verification.
     :input:
-        - self.sampling["method"]: determines how to get the response data (manual input or function evaluation).
-        Default model self.sampling["method"] = 'manual' is set in creative_project.__init__.py
+        - self.sampling["method"]: determines how to get the response data (iteratively via input or function evaluation).
+        Default model self.sampling["method"] = 'iterative' is set in creative_project.__init__.py
     :return response_datapoint (torch Tensor): a single-element tensor containing the returned response datapoint
     """
 
     # get candidate
-    if self.sampling["method"] == "manual":
+    if self.sampling["method"] == "iterative":
 
         additional_text = ""
 
@@ -67,7 +67,7 @@ def _get_and_verify_response_input(self):
             "self.sampling['method'] has non-permissable value "
             + str(self.sampling["method"])
             + ", must"
-            " be in ['manual', 'functions']."
+            " be in ['iterative', 'functions']."
         )
 
     return response_datapoint
