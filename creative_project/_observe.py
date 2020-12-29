@@ -2,6 +2,7 @@
 Methods for observing responses and the associated covariates
 """
 import torch
+from .utils import __get_covars_from_kwargs
 
 
 ### Response methods ###
@@ -155,20 +156,22 @@ def _print_candidate_to_prompt(self, candidate):
     return input_request
 
 
-def _get_covars_datapoint(self):
+def _get_covars_datapoint(self, covars):
     """
     gets observation of actual covars x. Updates stored data, counters etc
     assumes:
         - covars x can only be one iteration ahead of observation y
         - tracking of response observations is managed elsewhere, where it's also ensured that these are assigned to
         right counter
+    :param: covars (list or torch tensor or None): kwarg input in _campaign.tell (None if not present in tell). This
+    provides a programmatic way of providing the covars data
     """
 
     # iteration counter of proposed datapoint
     obs_counter = self.model["covars_proposed_iter"]
 
     # get and verify covars datapoint
-    covars_datapoint = self._get_and_verify_covars_input()
+    covars_datapoint = self._get_and_verify_covars_input(covars)
 
     # store data
     # first datapoint
@@ -185,11 +188,13 @@ def _get_covars_datapoint(self):
     self.model["covars_sampled_iter"] = obs_counter
 
 
-def _get_and_verify_covars_input(self):
+def _get_and_verify_covars_input(self, covars):
     """
     read and verify covars. Currently focused on manual input only, but to be expanded to allow multiple
     different mechanism (if needed). Allowing up to 'MAX_ITER' repeats of providing the data and updates text to
     prompt to indicate if candidates datapoint not accepted
+    :param: covars (list or torch tensor or None): kwarg input in _campaign.tell (None if not present in tell). This
+    provides a programmatic way of providing the covars data
     """
 
     MAX_ITER = 3
@@ -203,7 +208,10 @@ def _get_and_verify_covars_input(self):
         it += 1
 
         # read covars
-        covars_candidate_float_tensor = self._read_covars_manual_input(additional_text)
+        if covars is not None:
+            covars_candidate_float_tensor = __get_covars_from_kwargs(covars)
+        else:
+            covars_candidate_float_tensor = self._read_covars_manual_input(additional_text)
 
         # verify number of provided elements is correct
         if self._Validators__validate_num_covars(covars_candidate_float_tensor):

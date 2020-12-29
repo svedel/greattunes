@@ -62,17 +62,24 @@ def test_observe_get_and_verify_response_input_functions_functional(tmp_observe_
     assert output[0].item() == tmp_val
 
 
-def test_get_and_verify_covars_input_with_dependencies_works(tmp_observe_class, monkeypatch):
+@pytest.mark.parametrize(
+    "covariates, kwarg_covariates",
+    [
+        [[1.1, 2.2, 200, -1.7], None],
+        [[1.1, 2.2, 200, -1.7], [1.1, 2.2, 200, -1.7]],
+    ]
+)
+def test_get_and_verify_covars_input_with_dependencies_works(tmp_observe_class, covariates, kwarg_covariates, monkeypatch):
     """
     test _get_and_verify_covars_input which depends on _read_covars_manual_input and
-    _validators.Validators.__validate_num_covars. monkeypatch the user input
+    _validators.Validators.__validate_num_covars. monkeypatch the user input (when needed), also test the programmatic
+    option to provide input via kwargs
     """
 
     # device for torch tensor definitions
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # covariates to sample
-    covariates = [1.1, 2.2, 200, -1.7]
     covars_tensor = torch.tensor([covariates], dtype=torch.double, device=device)
 
     # temp class to execute the test
@@ -88,24 +95,31 @@ def test_get_and_verify_covars_input_with_dependencies_works(tmp_observe_class, 
     monkeypatch.setattr("builtins.input", mock_input)
 
     # run method
-    covars_candidate_float_tensor = cls._get_and_verify_covars_input()
+    covars_candidate_float_tensor = cls._get_and_verify_covars_input(covars=kwarg_covariates)
 
     # assert
     for i in range(covars_candidate_float_tensor.size()[1]):
         assert covars_candidate_float_tensor[0, i].item() == covariates[i]
 
 
-def test_get_and_verify_covars_input_with_dependencies_fails(tmp_observe_class, monkeypatch):
+@pytest.mark.parametrize(
+    "covariates, kwarg_covariates",
+    [
+        [[1.1, 2.2, 200, -1.7], None],
+        [[1.1, 2.2, 200, -1.7], [1.1, 2.2, 200, -1.7]],
+    ]
+)
+def test_get_and_verify_covars_input_with_dependencies_fails(tmp_observe_class, covariates, kwarg_covariates, monkeypatch):
     """
     test _get_and_verify_covars_input which depends on _read_covars_manual_input and
-    _validators.Validators.__validate_num_covars. monkeypatch the user input
+    _validators.Validators.__validate_num_covars. monkeypatch the user input (when needed), also test the programmatic
+    option to provide input via kwargs
     """
 
     # device for torch tensor definitions
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # covariates to sample
-    covariates = [1.1, 2.2, 200, -1.7]
     covars_tensor = torch.tensor([covariates], dtype=torch.double, device=device)
 
     # expected data (previously proposed and initial guess)
@@ -129,20 +143,22 @@ def test_get_and_verify_covars_input_with_dependencies_fails(tmp_observe_class, 
 
     # run the method, expect it to fail
     with pytest.raises(Exception) as e:
-        covars_candidate_float_tensor = cls._get_and_verify_covars_input()
+        covars_candidate_float_tensor = cls._get_and_verify_covars_input(covars=kwarg_covariates)
     assert str(e.value) == error_msg
 
 
 @pytest.mark.parametrize(
-    "train_X, covars_proposed_iter, covars_sampled_iter",
+    "train_X, covars_proposed_iter, covars_sampled_iter, covariates, kwarg_covariates",
     [
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1],
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1],
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 0, 0],
-        [None, 0, 0],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, [1.1, 2.2, 200, -1.7], [1.1, 2.2, 200, -1.7]],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, [1.1, 2.2, 200, -1.7], None],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, [1.1, 2.2, 200, -1.7], torch.tensor([[1.1, 2.2, 200, -1.7]], dtype=torch.double)],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1, [1.1, 2.2, 200, -1.7], None],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 0, 0, [1.1, 2.2, 200, -1.7], None],
+        [None, 0, 0, [1.1, 2.2, 200, -1.7], None],
     ]
 )
-def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, covars_proposed_iter, covars_sampled_iter, monkeypatch):
+def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, covars_proposed_iter, covars_sampled_iter, covariates, kwarg_covariates, monkeypatch):
     """
     test that _get_covars_datapoint works. Monkeypatching build-in method "input"
     """
@@ -151,7 +167,6 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # covariates to sample
-    covariates = [1.1, 2.2, 200, -1.7]
     covars_tensor = torch.tensor([covariates], dtype=torch.double, device=device)
 
     # temp class to execute the test
@@ -170,7 +185,7 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
     monkeypatch.setattr("builtins.input", mock_input)
 
     # run the method
-    cls._get_covars_datapoint()
+    cls._get_covars_datapoint(covars=kwarg_covariates)
 
     # assert the right elements have been added
     for i in range(cls.train_X.size()[1]):
@@ -231,9 +246,47 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str
         return covariate_str
     monkeypatch.setattr("builtins.input", mock_input)
 
+    # covariate kwargs is set to None so input-based method is used
+    kwarg_covariates = None
+
     with pytest.raises(ValueError) as e:
         # run the method
-        cls._get_covars_datapoint()
+        cls._get_covars_datapoint(covars=kwarg_covariates)
+    assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "kwarg_covariates, error_msg",
+    [
+        [[1.1, 2.2, -1.7], "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  1.1000,   2.2000, 200.0000,  -1.7000], dtype=torch.float64)', but got 'tensor([[ 1.1000,  2.2000, -1.7000]], dtype=torch.float64)'"],
+        [torch.tensor([1.1, 2.2, 200, -1.7], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size [4]"]
+    ]
+)
+def test_get_covars_datapoint_kwargs_data_int_fails(tmp_observe_class, kwarg_covariates, error_msg):
+    """
+    test that _get_covars_datapoint fails when providing incorrect kwargs
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # covariates to sample
+    init_guess = [1.1, 2.2, 200, -1.7]
+    initial_guess = torch.tensor([init_guess], dtype=torch.double, device=device)
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # set proposed_X attribute (required for method to work)
+    cls.initial_guess = initial_guess
+    cls.proposed_X = initial_guess
+    cls.train_X = initial_guess
+    cls.model = {"covars_proposed_iter": 1,
+                 "covars_sampled_iter": 1}
+
+    with pytest.raises(Exception) as e:
+        # run the method
+        cls._get_covars_datapoint(covars=kwarg_covariates)
     assert str(e.value) == error_msg
 
 
