@@ -321,7 +321,7 @@ def test_get_and_verify_covars_input_fails(tmp_observe_class, proposed_X, monkey
 )
 def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_proposed_iter, covars_sampled_iter, monkeypatch):
     """
-    test that _covars_datapoint_observation works. Monkeypatching method "_get_and_verify_covars_input"
+    test that _get_covars_datapoint works. Monkeypatching method "_get_and_verify_covars_input"
     """
 
     # device for torch tensor definitions
@@ -346,7 +346,7 @@ def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_pr
     monkeypatch.setattr(cls, "_get_and_verify_covars_input", mock_get_and_verify_covars_input)
 
     # run the method being tested
-    cls._covars_datapoint_observation()
+    cls._get_covars_datapoint()
 
     # assert the right elements have been added
     for i in range(cls.train_X.size()[1]):
@@ -377,7 +377,7 @@ def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_pr
 )
 def test_response_datapoint_observation_unit(tmp_observe_class, train_Y, covars_proposed_iter, response_sampled_iter, monkeypatch):
     """
-    test that _response_datapoint_observation works. Monkeypatching method "_get_and_verify_response_input"
+    test that _get_response_datapoint works. Monkeypatching method "_get_and_verify_response_input"
     """
 
     # device for torch tensor definitions
@@ -401,7 +401,7 @@ def test_response_datapoint_observation_unit(tmp_observe_class, train_Y, covars_
     monkeypatch.setattr(cls, "_get_and_verify_response_input", mock_get_and_verify_response_input)
 
     # run the method being tested
-    cls._response_datapoint_observation()
+    cls._get_response_datapoint()
 
     # assert the right element have been added
     assert cls.train_Y[-1].item() == resp[0]

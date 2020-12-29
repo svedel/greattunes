@@ -5,7 +5,7 @@ import torch
 
 
 ### Response methods ###
-def _response_datapoint_observation(self):
+def _get_response_datapoint(self):
     """
     gets observation of actual response y. Updates stored data, counters etc.
     NOTE: the new response data counter ("how many responses do we have") is derived from the number of proposed
@@ -155,7 +155,7 @@ def _print_candidate_to_prompt(self, candidate):
     return input_request
 
 
-def _covars_datapoint_observation(self):
+def _get_covars_datapoint(self):
     """
     gets observation of actual covars x. Updates stored data, counters etc
     assumes:

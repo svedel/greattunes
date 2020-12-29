@@ -144,7 +144,7 @@ def test_get_and_verify_covars_input_with_dependencies_fails(tmp_observe_class, 
 )
 def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, covars_proposed_iter, covars_sampled_iter, monkeypatch):
     """
-    test that _covars_datapoint_observation works. Monkeypatching build-in method "input"
+    test that _get_covars_datapoint works. Monkeypatching build-in method "input"
     """
 
     # device for torch tensor definitions
@@ -170,7 +170,7 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
     monkeypatch.setattr("builtins.input", mock_input)
 
     # run the method
-    cls._covars_datapoint_observation()
+    cls._get_covars_datapoint()
 
     # assert the right elements have been added
     for i in range(cls.train_X.size()[1]):
@@ -201,7 +201,7 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
 )
 def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str, error_msg, monkeypatch, pythontestvers):
     """
-    test that _covars_datapoint_observation fails. Monkeypatching build-in method "input"
+    test that _get_covars_datapoint fails. Monkeypatching build-in method "input"
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
@@ -233,7 +233,7 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str
 
     with pytest.raises(ValueError) as e:
         # run the method
-        cls._covars_datapoint_observation()
+        cls._get_covars_datapoint()
     assert str(e.value) == error_msg
 
 
@@ -248,7 +248,7 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str
 )
 def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars_proposed_iter, response_sampled_iter, monkeypatch):
     """
-    test that _response_datapoint_observation works. Monkeypatching build-in method "input"
+    test that _get_response_datapoint works. Monkeypatching build-in method "input"
     """
 
     # device for torch tensor definitions
@@ -274,7 +274,7 @@ def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars
     monkeypatch.setattr("builtins.input", mock_input)
 
     # run the method being tested
-    cls._response_datapoint_observation()
+    cls._get_response_datapoint()
 
     # assert the right elements have been added
     assert cls.train_Y[-1].item() == resp[0]
@@ -304,7 +304,7 @@ def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars
 )
 def test_response_datapoint_observation_fails(tmp_observe_class, response_str, error_msg, monkeypatch, pythontestvers):
     """
-    test that _response_datapoint_observation fails under right conditions. Monkeypatching build-in method "input"
+    test that _get_response_datapoint fails under right conditions. Monkeypatching build-in method "input"
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
@@ -337,5 +337,5 @@ def test_response_datapoint_observation_fails(tmp_observe_class, response_str, e
 
     with pytest.raises(ValueError) as e:
         # run the method
-        cls._response_datapoint_observation()
+        cls._get_response_datapoint()
     assert str(e.value) == error_msg

@@ -133,11 +133,11 @@ def tell(self):
 
     # sample covariates for the 'candidate' datapoint proposed by .ask-method
     # using manual input, updates train_X and sampling counter (self.model["covars_sampled_iter"])
-    self._covars_datapoint_observation()
+    self._get_covars_datapoint()
 
     # get response for the datapoint added in line above
     # using manual input, updates train_Y and sampling counter (self.model["response_sampled_iter"])
-    self._response_datapoint_observation()
+    self._get_response_datapoint()
 
     # retrain the GP model
     # updates the prior and likelihood models behind the scenes
