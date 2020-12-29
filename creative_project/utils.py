@@ -11,8 +11,11 @@ def __get_covars_from_kwargs(covars):
 
     # verify covars datatype
     if not isinstance(covars, (list, torch.DoubleTensor)):
-        raise Exception("creative_project.utils.__get_covars_from_kwargs: datatype of provided 'covars' is not allowed."
-                        "Only accept types 'list' and 'torch.DoubleTensor', got " + str(type(covars)))
+        raise Exception(
+            "creative_project.utils.__get_covars_from_kwargs: datatype of provided 'covars' is not allowed."
+            "Only accept types 'list' and 'torch.DoubleTensor', got "
+            + str(type(covars))
+        )
 
     # handle case when a list is provided
     if isinstance(covars, list):
@@ -29,18 +32,13 @@ def __get_covars_from_kwargs(covars):
 
         # first condition checks for only a single row in covars, second condition checks that there are columns in the
         # row (not just a single-element column vector)
-        if (covars_size_list[0] == 1 and len(covars_size_list) == 2):
+        if covars_size_list[0] == 1 and len(covars_size_list) == 2:
             covars_candidate_float_tensor = covars
         else:
-            raise Exception("creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'."
-                            " Was expecting torch tensor of size (1,<num_covariates>) but received one of size "
-                            + str(covars_size_list)
-                            )
+            raise Exception(
+                "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'."
+                " Was expecting torch tensor of size (1,<num_covariates>) but received one of size "
+                + str(covars_size_list)
+            )
 
     return covars_candidate_float_tensor
-
-
-
-
-
-

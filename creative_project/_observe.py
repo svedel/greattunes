@@ -211,7 +211,9 @@ def _get_and_verify_covars_input(self, covars):
         if covars is not None:
             covars_candidate_float_tensor = __get_covars_from_kwargs(covars)
         else:
-            covars_candidate_float_tensor = self._read_covars_manual_input(additional_text)
+            covars_candidate_float_tensor = self._read_covars_manual_input(
+                additional_text
+            )
 
         # verify number of provided elements is correct
         if self._Validators__validate_num_covars(covars_candidate_float_tensor):
