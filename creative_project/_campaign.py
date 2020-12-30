@@ -136,6 +136,7 @@ def tell(self, **kwargs):
 
     # get kwargs (these variables will be None if kwarg not present)
     covars = kwargs.get("covars")
+    response = kwargs.get("response")
 
     # sample covariates for the 'candidate' datapoint proposed by .ask-method
     # using manual input, updates train_X and sampling counter (self.model["covars_sampled_iter"])
@@ -143,7 +144,7 @@ def tell(self, **kwargs):
 
     # get response for the datapoint added in line above
     # using manual input, updates train_Y and sampling counter (self.model["response_sampled_iter"])
-    self._get_response_datapoint()
+    self._get_response_datapoint(response)
 
     # retrain the GP model
     # updates the prior and likelihood models behind the scenes

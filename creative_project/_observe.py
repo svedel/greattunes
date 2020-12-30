@@ -6,7 +6,7 @@ from .utils import __get_covars_from_kwargs
 
 
 ### Response methods ###
-def _get_response_datapoint(self):
+def _get_response_datapoint(self, response):
     """
     gets observation of actual response y. Updates stored data, counters etc.
     NOTE: the new response data counter ("how many responses do we have") is derived from the number of proposed
@@ -18,13 +18,15 @@ def _get_response_datapoint(self):
     :updates:
         - self.train_Y
         - self.model["response_sampled_iter"] (counter of number of responses sampled)
+    :param: response (list or torch tensor or None): kwarg input in _campaign.tell (None if not present in tell). This
+    provides a programmatic way of providing the response data
     """
 
     # iteration counter of proposed datapoint
     obs_counter = self.model["covars_proposed_iter"]
 
     # get and verify response datapoint
-    response_datapoint = self._get_and_verify_response_input()
+    response_datapoint = self._get_and_verify_response_input(response=response)
 
     # store data
     # first datapoint
@@ -42,21 +44,31 @@ def _get_response_datapoint(self):
     self.model["response_sampled_iter"] = obs_counter
 
 
-def _get_and_verify_response_input(self):
+def _get_and_verify_response_input(self, **kwargs):
     """
     read and verify response. Assumes only a single input, and does not do any verification.
     :input:
         - self.sampling["method"]: determines how to get the response data (iteratively via input or function evaluation).
         Default model self.sampling["method"] = 'iterative' is set in creative_project.__init__.py
+    :kwargs:
+        - response (list or torch tensor or None): kwarg input in _campaign.tell (None if not present in tell). This
+        provides a programmatic way of providing the response data
     :return response_datapoint (torch Tensor): a single-element tensor containing the returned response datapoint
     """
+
+    kwarg_response = kwargs.get("response")
 
     # get candidate
     if self.sampling["method"] == "iterative":
 
-        additional_text = ""
+        # get from programmatic input
+        if kwarg_response is not None:
+            response_datapoint = __get_covars_from_kwargs(kwarg_response)
 
-        response_datapoint = self._read_response_manual_input(additional_text)
+        # get from manual input from prompt
+        else:
+            additional_text = ""
+            response_datapoint = self._read_response_manual_input(additional_text)
 
     elif self.sampling["method"] == "functions":
 
@@ -71,7 +83,13 @@ def _get_and_verify_response_input(self):
             " be in ['iterative', 'functions']."
         )
 
-    return response_datapoint
+    if self._Validators__validate_num_response(response_datapoint):
+        return response_datapoint
+    else:
+        raise Exception(
+            "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was "
+            "expecting input of size (1,1) but received " + str(response_datapoint.size())
+        )
 
 
 def _get_response_function_input(self):

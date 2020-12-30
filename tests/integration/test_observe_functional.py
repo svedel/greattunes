@@ -2,12 +2,7 @@ import pytest
 import torch
 
 
-@pytest.mark.parametrize("input_data",
-                         [
-                             [3.1, -12.2],
-                             [4.5],
-                         ]
-                         )
+@pytest.mark.parametrize("input_data", [[4.5],])
 def test_observe_get_and_verify_response_input_manual_functional(tmp_observe_class, input_data, monkeypatch):
     """
     test _get_and_verify_response_input for manual method for getting response values. Monkeypatching the built-in
@@ -33,6 +28,35 @@ def test_observe_get_and_verify_response_input_manual_functional(tmp_observe_cla
         assert output[0, it].item() == input_data[it]
 
 
+@pytest.mark.parametrize(
+    "input_data, error_msg",
+    [
+        [[3.1, -12.2], "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        ]
+)
+def test_observe_get_and_verify_response_input_manual_functional_fails(tmp_observe_class, input_data, error_msg, monkeypatch):
+    """
+    test _get_and_verify_response_input for manual method for getting response values. Monkeypatching the built-in
+    "input" function
+    """
+
+    # initialized temp class
+    cls = tmp_observe_class
+    cls.sampling["method"] = "iterative"
+
+    # set attribute
+    cls.model = {"covars_proposed_iter": 0}
+
+    # monkeypatching "input"
+    monkeypatch_output = ", ".join([str(x) for x in input_data])  # match data from "input" function
+    monkeypatch.setattr("builtins.input", lambda _: monkeypatch_output)
+
+    # run function
+    with pytest.raises(Exception) as e:
+        output = cls._get_and_verify_response_input()
+    assert str(e.value) == error_msg
+
+
 def test_observe_get_and_verify_response_input_functions_functional(tmp_observe_class, training_data_covar_complex):
     """
     test _get_and_verify_response_input for manual method for getting response values
@@ -55,6 +79,9 @@ def test_observe_get_and_verify_response_input_functions_functional(tmp_observe_
         return tmp_val
 
     cls.sampling["response_func"] = mock_response_function
+
+    # set kwarg response to None (so manually provided input is used)
+    kwarg_response = None
 
     # run test
     output = cls._get_and_verify_response_input()
@@ -326,8 +353,11 @@ def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars
         return ", ".join([str(x) for x in resp])
     monkeypatch.setattr("builtins.input", mock_input)
 
+    # set kwarg response to None (so manually provided input is used)
+    kwarg_response = None
+
     # run the method being tested
-    cls._get_response_datapoint()
+    cls._get_response_datapoint(response=kwarg_response)
 
     # assert the right elements have been added
     assert cls.train_Y[-1].item() == resp[0]
@@ -348,16 +378,21 @@ def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars
 
 
 @pytest.mark.parametrize(
-    "response_str, error_msg",
+    "response_str, kwarg_response, error_msg",
     [
-        ["", "could not convert string to float: ''"],
-        ["a", "could not convert string to float: 'a'"],
-        [" , a", "could not convert string to float: ''"]
+        ["", None, "could not convert string to float: ''"],
+        ["a", None, "could not convert string to float: 'a'"],
+        [" , a", None, "could not convert string to float: ''"],
+        ["1", [1, 2], "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        ["1", ['a'], "too many dimensions 'str'"],
+        ["1", torch.tensor([[1, 2]], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"]
     ]
 )
-def test_response_datapoint_observation_fails(tmp_observe_class, response_str, error_msg, monkeypatch, pythontestvers):
+def test_response_datapoint_observation_fails(tmp_observe_class, response_str, kwarg_response, error_msg, monkeypatch, pythontestvers):
     """
-    test that _get_response_datapoint fails under right conditions. Monkeypatching build-in method "input"
+    test that _get_response_datapoint fails under right conditions. Monkeypatching build-in method "input" when testing
+    this method for providing response input, but also tests failure of programmatically providing input using the
+    kwarg "response" (default mode: if "response" is not None, it will be used and no manual data will be needed)
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
@@ -388,7 +423,7 @@ def test_response_datapoint_observation_fails(tmp_observe_class, response_str, e
         return response_str
     monkeypatch.setattr("builtins.input", mock_input)
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(Exception) as e:
         # run the method
-        cls._get_response_datapoint()
+        cls._get_response_datapoint(response=kwarg_response)
     assert str(e.value) == error_msg

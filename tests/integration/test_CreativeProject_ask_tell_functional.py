@@ -223,9 +223,9 @@ def test_CreativeProject_tell_integration_test_works_overwrite(covars, model_typ
     [
         [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[23]], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([0.8000], dtype=torch.float64)', but got 'tensor([[1., 2.]], dtype=torch.float64)'"],  # fail on train_X
         [[(1, 0.5, 1.5)], "Custom", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[23]], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([0.8000], dtype=torch.float64)', but got 'tensor([[1., 2.]], dtype=torch.float64)'"],  # fail on train_X
-        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1]], dtype=torch.double), torch.tensor([[23, 11]], dtype=torch.double), "The expanded size of the tensor (1) must match the existing size (2) at non-singleton dimension 0.  Target sizes: [1].  Tensor sizes: [2]"],  # fail on train_Y
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1]], dtype=torch.double), torch.tensor([[23, 11]], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],  # fail on train_Y
         [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[23]], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  0.8000,   0.2000, 102.0000], dtype=torch.float64)', but got 'tensor([[1., 2.]], dtype=torch.float64)'"],  # fail on train_X, too few entries
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([], dtype=torch.double), "The expanded size of the tensor (1) must match the existing size (0) at non-singleton dimension 0.  Target sizes: [1].  Tensor sizes: [0]"],  # fail on train_Y, too few entries
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2, 3]], dtype=torch.double), torch.tensor([], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([0])"],  # fail on train_Y, too few entries
         [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  0.8000,   0.2000, 102.0000], dtype=torch.float64)', but got 'tensor([[1., 2.]], dtype=torch.float64)'"],  # too few in both train_X and train_Y, fail on train_X since this comes first
     ]
 )
@@ -378,6 +378,10 @@ def test_CreativeProject_integration_ask_tell_one_loop_works(covars, model_type,
     if train_X is not None:
         assert cc.acq_func["object"] is not None
 
+# need:
+# - integration test for kwargs for response, nothing else (positive and negative)
+# - integration test for  kwargs for covars and response (positive and negative)
+
 
 @pytest.mark.parametrize(
     "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_covariates",
@@ -462,6 +466,155 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_works(covars
         assert cc.acq_func["object"] is not None
 
 
+@pytest.mark.parametrize(
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_response",
+    [
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8]], dtype=torch.double)],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[103]], dtype=torch.double)],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8]], dtype=torch.double)]
+    ]
+)
+def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_works(covars, model_type, train_X, train_Y,
+                                                                  covars_proposed_iter, covars_sampled_iter,
+                                                                  response_sampled_iter, kwarg_response, monkeypatch):
+    """
+    test that a single loop of ask/tell works when providing response as kwarg to tell: creates a candidate, creates a
+    model, stores covariates and response. Monkeypatch "_read_response_manual_input" from ._observe.py to circumvent
+    manual input via builtins.input and provides response via kwargs
+    """
+
+    # initialize the class
+    cc = CreativeProject(covars=covars, model=model_type)
+
+    # set attributes on class (to simulate previous iterations of ask/tell functionality)
+    cc.train_X = train_X
+    cc.proposed_X = train_X
+    cc.train_Y = train_Y
+    cc.model["covars_proposed_iter"] = covars_proposed_iter
+    cc.model["covars_sampled_iter"] = covars_sampled_iter
+    cc.model["response_sampled_iter"] = response_sampled_iter
+
+    # monkeypatch "_read_covars_manual_input"
+    candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
+    def mock_read_covars_manual_input(additional_text):
+        return candidate_tensor
+    monkeypatch.setattr(cc, "_read_covars_manual_input", mock_read_covars_manual_input)
+
+    # # monkeypatch "_read_response_manual_input"
+    # resp_tensor = torch.tensor([[12]], dtype=torch.double)
+    #
+    # def mock_read_response_manual_input(additional_text):
+    #     return resp_tensor
+    # monkeypatch.setattr(cc, "_read_response_manual_input", mock_read_response_manual_input)
+
+    # run the ask method
+    cc.ask()
+
+    # run the tell method
+    cc.tell(response=kwarg_response)
+
+
+    ### check for tell (no reason to assert for ask)###
+
+    # assert that a new observation has been added for covariates
+    if train_X is not None:
+        assert cc.train_X.size()[0] == train_X.size()[0] + 1
+    else:
+        assert cc.train_X.size()[0] == 1
+
+    # assert that the right elements have been added to the covariate observation
+    for i in range(cc.train_X.size()[1]):
+        assert cc.train_X[-1, i].item() == candidate_tensor[0, i].item()
+
+    # assert that a new observation has been added for the response
+    if train_Y is not None:
+        assert cc.train_Y.size()[0] == train_Y.size()[0] + 1
+    else:
+        assert cc.train_Y.size()[1] == 1
+
+    # assert that the right elements have been added to the response observation
+    assert cc.train_Y[-1, 0].item() == kwarg_response[0,0].item() #resp_tensor[0, 0].item()
+
+    ### check that acquisition function and model have been added
+
+    # check that a model function has been assigned (should happen in all cases as part of tell)
+    assert cc.model["model"] is not None
+
+    # check that an acquisition function has been added (only if some data present in train_X, train_Y at first step)
+    if train_X is not None:
+        assert cc.acq_func["object"] is not None
+
+
+@pytest.mark.parametrize(
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_covariates, kwarg_response",
+    [
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double)],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 1.2, 107]], dtype=torch.double), torch.tensor([[103]], dtype=torch.double)],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 1.2, 107]], dtype=torch.double), torch.tensor([[0.8]], dtype=torch.double)]
+    ]
+)
+def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_response_works(covars, model_type, train_X, train_Y,
+                                                                  covars_proposed_iter, covars_sampled_iter,
+                                                                  response_sampled_iter, kwarg_covariates,
+                                                                                   kwarg_response):
+    """
+    test that a single loop of ask/tell works when providing both covariates and response as kwarg to tell: creates a
+    candidate, creates a model, stores covariates and response.
+    """
+
+    # initialize the class
+    cc = CreativeProject(covars=covars, model=model_type)
+
+    # set attributes on class (to simulate previous iterations of ask/tell functionality)
+    cc.train_X = train_X
+    cc.proposed_X = train_X
+    cc.train_Y = train_Y
+    cc.model["covars_proposed_iter"] = covars_proposed_iter
+    cc.model["covars_sampled_iter"] = covars_sampled_iter
+    cc.model["response_sampled_iter"] = response_sampled_iter
+
+    # run the ask method
+    cc.ask()
+
+    # run the tell method
+    cc.tell(covars=kwarg_covariates, response=kwarg_response)
+
+
+    ### check for tell (no reason to assert for ask)###
+
+    # assert that a new observation has been added for covariates
+    if train_X is not None:
+        assert cc.train_X.size()[0] == train_X.size()[0] + 1
+    else:
+        assert cc.train_X.size()[0] == 1
+
+    # assert that the right elements have been added to the covariate observation
+    for i in range(cc.train_X.size()[1]):
+        assert cc.train_X[-1, i].item() == kwarg_covariates[0, i].item()
+
+    # assert that a new observation has been added for the response
+    if train_Y is not None:
+        assert cc.train_Y.size()[0] == train_Y.size()[0] + 1
+    else:
+        assert cc.train_Y.size()[1] == 1
+
+    # assert that the right elements have been added to the response observation
+    assert cc.train_Y[-1, 0].item() == kwarg_response[0,0].item()
+
+    ### check that acquisition function and model have been added
+
+    # check that a model function has been assigned (should happen in all cases as part of tell)
+    assert cc.model["model"] is not None
+
+    # check that an acquisition function has been added (only if some data present in train_X, train_Y at first step)
+    if train_X is not None:
+        assert cc.acq_func["object"] is not None
+
+
 # test in single ask-tell loop for failures
 @pytest.mark.parametrize(
     "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_covariates, error_msg",
@@ -496,14 +649,6 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_fails(covars
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
 
-    # # monkeypatch "_read_covars_manual_input"
-    # candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
-    #
-    # def mock_read_covars_manual_input(additional_text):
-    #     return candidate_tensor
-    #
-    # monkeypatch.setattr(cc, "_read_covars_manual_input", mock_read_covars_manual_input)
-
     # monkeypatch "_read_response_manual_input"
     resp_tensor = torch.tensor([[12]], dtype=torch.double)
 
@@ -518,6 +663,57 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_fails(covars
     with pytest.raises(Exception) as e:
         cc.tell(covars=kwarg_covariates)
     assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_response, error_msg",
+    [
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8, 2.2]], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, ['a'], "too many dimensions 'str'"],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, [12, 'a'], "must be real number, not str"],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 2.2]], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, ['b', 12.5], "too many dimensions 'str'"],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, [0.8, 'b'], "must be real number, not str"],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8], [103]], dtype=torch.double), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size [2, 1]"],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([0.8, 103], dtype=torch.double), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size [2]"],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, [1, 'a'], "must be real number, not str"]
+    ]
+)
+def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_fails(covars, model_type, train_X, train_Y,
+                                                                  covars_proposed_iter, covars_sampled_iter,
+                                                                  response_sampled_iter, kwarg_response, error_msg,
+                                                                          monkeypatch):
+    """
+    test that a single loop of ask/tell fails when providing covars as kwarg to tell. Monkeypatch
+    "_read_response_manual_input" from ._observe.py to circumvent manual input via builtins.input and provides
+    covariates via kwargs
+    """
+
+    # initialize the class
+    cc = CreativeProject(covars=covars, model=model_type)
+
+    # set attributes on class (to simulate previous iterations of ask/tell functionality)
+    cc.train_X = train_X
+    cc.proposed_X = train_X
+    cc.train_Y = train_Y
+    cc.model["covars_proposed_iter"] = covars_proposed_iter
+    cc.model["covars_sampled_iter"] = covars_sampled_iter
+    cc.model["response_sampled_iter"] = response_sampled_iter
+
+    # monkeypatch "_read_covars_manual_input"
+    candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
+    def mock_read_covars_manual_input(additional_text):
+        return candidate_tensor
+    monkeypatch.setattr(cc, "_read_covars_manual_input", mock_read_covars_manual_input)
+
+    # run the ask method
+    cc.ask()
+
+    # run the tell method
+    with pytest.raises(Exception) as e:
+        cc.tell(response=kwarg_response)
+    assert str(e.value) == error_msg
+
 
 @pytest.mark.parametrize(
     "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter",
