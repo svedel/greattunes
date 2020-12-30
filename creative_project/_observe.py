@@ -88,7 +88,8 @@ def _get_and_verify_response_input(self, **kwargs):
     else:
         raise Exception(
             "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was "
-            "expecting input of size (1,1) but received " + str(response_datapoint.size())
+            "expecting input of size (1,1) but received "
+            + str(response_datapoint.size())
         )
 
 

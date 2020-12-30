@@ -105,7 +105,6 @@ class Validators:
 
         return valid
 
-
     def __validate_num_response(self, response_array):
         """
         validate that there is only one response per timepoint in "response_array"
