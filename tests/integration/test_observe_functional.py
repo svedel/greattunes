@@ -396,7 +396,7 @@ def test_response_datapoint_observation_fails(tmp_observe_class, response_str, k
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
-    if pythontestvers == "3.7" and response_str != "a":
+    if pythontestvers == "3.7" and (response_str == "" or response_str == " , a"):
         # removes the '' from the error message
         error_msg = error_msg[:-2]
 
