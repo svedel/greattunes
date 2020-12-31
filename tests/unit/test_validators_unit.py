@@ -102,3 +102,39 @@ def test_Validators__validate_covars_passes(covars_for_custom_models_simple_trai
     cls = Validators()
 
     assert cls._Validators__validate_covars(covars=covars)
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        np.array([[1]]),
+        torch.tensor([[2]], dtype=torch.double)
+     ]
+)
+def test_Validators__validate_num_response_works(response):
+    """
+    validate that __validate_num_response works for numpy and torch tensor input
+    """
+
+    cls = Validators()
+
+    assert cls._Validators__validate_num_response(response)
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        np.array([[1, 2]]),
+        torch.tensor([[2, 3]], dtype=torch.double),
+        torch.tensor([2], dtype=torch.double),
+        None
+    ]
+)
+def test_Validators__validate_num_response_wont_validate(response):
+    """
+    validate that __validate_num_response works but doesnt validate
+    """
+
+    cls = Validators()
+
+    assert not cls._Validators__validate_num_response(response)

@@ -70,9 +70,9 @@ class CreativeProject(Initializers, AcqFunction):
             "object": None,
         }
 
-        # define sampling functions
-        # initialize as manual. Will be updated if method "auto" is used (use when sampling function known)
-        sampling_type = "manual"
+        # define sampling functions. initialize as iterative, which means using ask-tell (either manual or automatic).
+        # Will be updated if method "auto" is used (use when sampling function known)
+        sampling_type = "iterative"
         self.sampling = {"method": sampling_type, "response_func": None}
 
         # initialize data for training and storage:
@@ -132,11 +132,11 @@ class CreativeProject(Initializers, AcqFunction):
     # import methods
     from ._campaign import auto, ask, tell
     from ._observe import (
-        _response_datapoint_observation,
+        _get_response_datapoint,
         _get_and_verify_response_input,
         _get_response_function_input,
         _read_response_manual_input,
-        _covars_datapoint_observation,
+        _get_covars_datapoint,
         _get_and_verify_covars_input,
         _read_covars_manual_input,
         _print_candidate_to_prompt,

@@ -1,16 +1,17 @@
 import pytest
 import torch
+import creative_project.utils
 
 @pytest.mark.parametrize("method, tmp_val",
                          [
                              ["functions", 1.0],
-                             ["manual", 2.0]
+                             ["iterative", 2.0]
                          ])
 def test_observe_get_and_verify_response_input_unit(tmp_observe_class, method, tmp_val, monkeypatch):
     """
-    test that _get_and_verify_response_input works for self.sampling["method"] = "manual" or "functions". Leverage
+    test that _get_and_verify_response_input works for self.sampling["method"] = "iteratuve" or "functions". Leverage
     monkeypatching and create false class to mock that creative_project._observe will be called inside
-    CreativeProject class in creative_project.__init__
+    CreativeProject class in creative_project.__init__. Rely on manual input for "iterative" option
     """
 
     # # define class
@@ -34,30 +35,75 @@ def test_observe_get_and_verify_response_input_unit(tmp_observe_class, method, t
         cls, "_read_response_manual_input", mock_read_response_manual_input
     )
 
+    # set kwarg response to None (so manually provided input is used)
+    kwarg_response = None
+
     # run test
-    output = cls._get_and_verify_response_input()
+    output = cls._get_and_verify_response_input(response=kwarg_response)
 
     if method == "functions":
         assert output[0].item() == tmp_val
-    elif method == "manual":
+    elif method == "iterative":
         assert output[0].item() == manual_tmp_val
 
 
 @pytest.mark.parametrize("method", ["WRONG", None])
 def test_observe_get_and_verify_response_input_fail_unit(tmp_observe_class, method):
     """
-    test that _get_and_verify_response_input fails for self.sampling["method"] not equal to "manual" or "functions".
+    test that _get_and_verify_response_input fails for self.sampling["method"] not equal to "iterative" or "functions".
     """
 
     # # define class
     cls = tmp_observe_class
     cls.sampling["method"] = method
 
+    # set kwarg response to None (so manually provided input is used)
+    kwarg_response = None
+
     with pytest.raises(Exception) as e:
-        assert output == cls._get_and_verify_response_input()
+        assert output == cls._get_and_verify_response_input(response=kwarg_response)
     assert str(e.value) == "creative_project._observe._get_and_verify_response_input: class attribute " \
                            "self.sampling['method'] has non-permissable value " + str(method) + ", must be in " \
-                           "['manual', 'functions']."
+                           "['iterative', 'functions']."
+
+
+@pytest.mark.parametrize(
+    "kwarg_response",
+    [
+        [1.2],
+        torch.tensor([[1.2]], dtype=torch.double)
+    ]
+)
+def test_get_and_verify_response_input_kwarg_input_works(tmp_observe_class, kwarg_response, monkeypatch):
+    """
+    test that _get_and_verify_response_input works for self.sampling["method"] = "iterative" with programmatically
+    provided input. Leverage monkeypatching for utils.__get_covars_from_kwargs and create false class to mock that
+    creative_project._observe will be called inside CreativeProject class in creative_project.__init__
+    """
+
+    # set device for torch
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # # define class
+    cls = tmp_observe_class
+    cls.sampling["method"] = "iterative"
+
+    # monkeypatch "__get_covars_from_kwargs"
+    def mock__get_covars_from_kwargs(x):
+        if isinstance(kwarg_response, list):
+            return torch.tensor([kwarg_response], dtype=torch.double, device=device)
+        else:
+            return kwarg_response
+    monkeypatch.setattr(creative_project.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
+
+    # run test
+    output = cls._get_and_verify_response_input(response=kwarg_response)
+
+    # assert
+    if isinstance(kwarg_response, list):
+        assert output[0].item() == kwarg_response[0]
+    elif isinstance(kwarg_response, torch.DoubleTensor):
+        assert output[0].item() == kwarg_response[0].item()
 
 
 @pytest.mark.parametrize("FLAG_TRAINING_DATA", [True, False])
@@ -98,6 +144,51 @@ def test_observe_get_response_function_input_unit(tmp_observe_class, training_da
         with pytest.raises(Exception) as e:
             assert output == cls._get_response_function_input()
         assert str(e.value) == "'NoneType' object is not subscriptable"
+
+
+@pytest.mark.parametrize(
+    "response, kwarg_response, error_msg",
+    [
+        [torch.tensor([[2]], dtype=torch.double), ['a'], "too many dimensions 'str'"],
+        [torch.tensor([[2]], dtype=torch.double), [1, 2], "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        [torch.tensor([[2]], dtype=torch.double), [1, 'a'], "must be real number, not str"],
+        [torch.tensor([[2, 3]], dtype=torch.double), None, "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        [torch.tensor([[2]], dtype=torch.double), torch.tensor([[1, 2]], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+    ]
+)
+def test_get_and_verify_response_input_fails_wrong_input(tmp_observe_class, response, kwarg_response, error_msg,
+                                                         monkeypatch):
+    """
+    test that _get_and_verify_response_input fails for wrong inputs. Use only the "iterative" sampling option for this
+    test
+    """
+
+    # set device for torch
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # # define class
+    cls = tmp_observe_class
+    cls.sampling["method"] = "iterative"
+
+    # monkeypatch "__get_covars_from_kwargs"
+    def mock__get_covars_from_kwargs(x):
+        if isinstance(kwarg_response, list):
+            return torch.tensor([kwarg_response], dtype=torch.double, device=device)
+        else:
+            return kwarg_response
+    monkeypatch.setattr(creative_project.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
+
+    # monkeypatch _read_response_manual_input
+    def mock_read_response_manual_input(additional_text):
+        return response
+    monkeypatch.setattr(
+        cls, "_read_response_manual_input", mock_read_response_manual_input
+    )
+
+    # run test
+    with pytest.raises(Exception) as e:
+        output = cls._get_and_verify_response_input(response=kwarg_response)
+    assert str(e.value) == error_msg
 
 
 @pytest.mark.parametrize("additional_text, input_data",
@@ -257,13 +348,61 @@ def test_get_and_verify_covars_input_works(tmp_observe_class, monkeypatch):
         return True
     monkeypatch.setattr(cls, "_Validators__validate_num_covars", mock_Validators__validate_num_covars)
 
+    # covariate kwargs is set to None so input-based method is used
+    kwarg_covariates = None
+
     # run method
-    covars_candidate_float_tensor = cls._get_and_verify_covars_input()
+    covars_candidate_float_tensor = cls._get_and_verify_covars_input(covars=kwarg_covariates)
 
     # assert the output
     # assert that the right elements are returned in 'covars_candidate_float_tensor'
     for i in range(covars_candidate_float_tensor.size()[1]):
         assert covars_candidate_float_tensor[0, i].item() == covariates[i]
+
+
+@pytest.mark.parametrize(
+    "covars",
+    [
+        [1.1, 2.2, 200, -1.7],
+        torch.tensor([[1.1, 2.2, 200, -1.7]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")),
+    ]
+
+)
+def test_get_and_verify_covars_programmatic_works(tmp_observe_class, covars, monkeypatch):
+    """
+    test that _get_and_verify_covars_input works when providing the correct data programmatically. Monkeypatching
+    method "__validate_num_covars" and helper function "utils.__get_covars_from_kwargs"
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # monkeypatch "__get_covars_from_kwargs"
+    def mock__get_covars_from_kwargs(x):
+        if isinstance(covars, list):
+            return torch.tensor([covars], dtype=torch.double, device=device)
+        else:
+            return covars
+    monkeypatch.setattr(creative_project.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
+
+    # monkeypatch "_Validators__validate_num_covars"
+    def mock_Validators__validate_num_covars(x):
+        return True
+    monkeypatch.setattr(cls, "_Validators__validate_num_covars", mock_Validators__validate_num_covars)
+
+    # run method
+    covars_candidate_float_tensor = cls._get_and_verify_covars_input(covars=covars)
+
+    # assert the output
+    # assert that the right elements are returned in 'covars_candidate_float_tensor'
+    for i in range(covars_candidate_float_tensor.size()[1]):
+        if isinstance(covars, list):
+            assert covars_candidate_float_tensor[0, i].item() == covars[i]
+        else:
+            assert covars_candidate_float_tensor[0, i].item() == covars[0, i].item()
 
 
 @pytest.mark.parametrize(
@@ -306,22 +445,70 @@ def test_get_and_verify_covars_input_fails(tmp_observe_class, proposed_X, monkey
         add_text = " Was expecting something like '" + str(cls.proposed_X[-1]) + "', but got '" + str(covars_tensor) + "'"
     error_msg = "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations." + add_text
 
+    # covariate kwargs is set to None so input-based method is used
+    kwarg_covariates = None
+
     # run method
     with pytest.raises(Exception) as e:
-        covars_candidate_float_tensor = cls._get_and_verify_covars_input()
+        covars_candidate_float_tensor = cls._get_and_verify_covars_input(covars=kwarg_covariates)
     assert str(e.value) == error_msg
 
+
+# negative tests for _get_and_verify_covars for kwargs input
 @pytest.mark.parametrize(
-    "train_X, covars_proposed_iter, covars_sampled_iter",
+    "covars, error_msg",
     [
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1],
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1],
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 0, 0],
+        [[1.1, 2.2, 200, -1.7], "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations."],
+        [torch.tensor([[1.1, 2.2, 200, -1.7]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations."],
+        [torch.tensor([1.1, 2.2, 200, -1.7], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size [4]"],  # this one fails in utils.__get_covars_from_kwargs because of wrong size of input tensor
+    ]
+
+)
+def test_get_and_verify_covars_programmatic_fails(tmp_observe_class, covars, error_msg, monkeypatch):
+    """
+    test that _get_and_verify_covars_input fails when providing incorrect data programmatically. Monkeypatching
+    method "__validate_num_covars". Expected error is related to wrong number of elements returned
+    """
+
+    # device for torch tensor definitions
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # temp class to execute the test
+    cls = tmp_observe_class
+
+    # monkeypatch "__get_covars_from_kwargs"
+    def mock__get_covars_from_kwargs(x):
+        if isinstance(covars, list):
+            return torch.tensor([covars], dtype=torch.double, device=device)
+        else:
+            return covars
+    monkeypatch.setattr(creative_project.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
+
+    # monkeypatch "_Validators__validate_num_covars"
+    def mock_Validators__validate_num_covars(x):
+        return False
+    monkeypatch.setattr(cls, "_Validators__validate_num_covars", mock_Validators__validate_num_covars)
+
+    # run method
+    with pytest.raises(Exception) as e:
+        covars_candidate_float_tensor = cls._get_and_verify_covars_input(covars=covars)
+    assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "train_X, covars_proposed_iter, covars_sampled_iter, kwarg_covariates",
+    [
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, None],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1, None],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 0, 0, None],
     ]
 )
-def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_proposed_iter, covars_sampled_iter, monkeypatch):
+def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_proposed_iter, covars_sampled_iter, kwarg_covariates, monkeypatch):
     """
-    test that _covars_datapoint_observation works. Monkeypatching method "_get_and_verify_covars_input"
+    test that _get_covars_datapoint works. Monkeypatching method "_get_and_verify_covars_input". Also test that this
+    works both when covars is provided as kwargs or not (when covarites kwarg is set to None, different mehtod is used
+    in _get_and_verify_covars_input; since we're monkeypatching anyways it shouldn't change, but testing anyways).
     """
 
     # device for torch tensor definitions
@@ -341,12 +528,12 @@ def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_pr
                  "covars_sampled_iter": covars_sampled_iter}
 
     # monkeypatch "_get_and_verify_covars_input"
-    def mock_get_and_verify_covars_input():
+    def mock_get_and_verify_covars_input(covars):
         return covars_tensor
     monkeypatch.setattr(cls, "_get_and_verify_covars_input", mock_get_and_verify_covars_input)
 
     # run the method being tested
-    cls._covars_datapoint_observation()
+    cls._get_covars_datapoint(covars=kwarg_covariates)
 
     # assert the right elements have been added
     for i in range(cls.train_X.size()[1]):
@@ -368,16 +555,19 @@ def test_covars_datapoint_observation_unit(tmp_observe_class, train_X, covars_pr
 
 
 @pytest.mark.parametrize(
-    "train_Y, covars_proposed_iter, response_sampled_iter",
+    "train_Y, covars_proposed_iter, response_sampled_iter, kwarg_response",
     [
-        [torch.tensor([[0.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1],
-        [torch.tensor([[0.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1],
-        [None, 0, 0]
+        [torch.tensor([[0.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, None],
+        [torch.tensor([[0.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, [0.2]],
+        [torch.tensor([[0.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, torch.tensor([[0.2]], dtype=torch.double)],
+        [torch.tensor([[0.2]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1, None],
+        [None, 0, 0, None]
     ]
 )
-def test_response_datapoint_observation_unit(tmp_observe_class, train_Y, covars_proposed_iter, response_sampled_iter, monkeypatch):
+def test_response_datapoint_observation_unit(tmp_observe_class, train_Y, covars_proposed_iter, response_sampled_iter, kwarg_response, monkeypatch):
     """
-    test that _response_datapoint_observation works. Monkeypatching method "_get_and_verify_response_input"
+    test that _get_response_datapoint works. Monkeypatching method "_get_and_verify_response_input". For iterative
+    sampling,tests that it works both when response is provided as kwargs and not
     """
 
     # device for torch tensor definitions
@@ -396,12 +586,12 @@ def test_response_datapoint_observation_unit(tmp_observe_class, train_Y, covars_
                  "response_sampled_iter": response_sampled_iter}
 
     # monkeypatch "_get_and_verify_covars_input"
-    def mock_get_and_verify_response_input():
+    def mock_get_and_verify_response_input(response):
         return resp_tensor
     monkeypatch.setattr(cls, "_get_and_verify_response_input", mock_get_and_verify_response_input)
 
     # run the method being tested
-    cls._response_datapoint_observation()
+    cls._get_response_datapoint(response=kwarg_response)
 
     # assert the right element have been added
     assert cls.train_Y[-1].item() == resp[0]

@@ -58,8 +58,10 @@ class Validators:
 
         # with one column per covariate in covars_array, and one column per covariate in initial_guess, makes sure that
         # same amount of covariates present in both
-        if covars_array.shape[1] == self.initial_guess.shape[1]:
-            valid = True
+        if covars_array is not None:
+            if len(covars_array.shape) > 1:
+                if covars_array.shape[1] == self.initial_guess.shape[1]:
+                    valid = True
 
         return valid
 
@@ -100,5 +102,23 @@ class Validators:
                     )
 
         valid = True
+
+        return valid
+
+    def __validate_num_response(self, response_array):
+        """
+        validate that there is only one response per timepoint in "response_array"
+        :param covars_array (torch.tensor, pandas dataframe, numpy array; shape needs to be
+        num_observations X num_covariates)
+        :return valid (bool)
+        """
+
+        valid = False
+
+        # make sure single column
+        if response_array is not None:
+            if len(response_array.shape) > 1:
+                if response_array.shape[1] == 1:
+                    valid = True
 
         return valid
