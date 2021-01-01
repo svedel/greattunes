@@ -52,11 +52,16 @@ cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
 
 ### Closed-loop: the `.auto` method
 
-### Manual interaction: the `.ask` and `.tell` methods
+### Iterative: the `.ask` and `.tell` methods
 
 NOTE: the new response data counter ("how many responses do we have") is derived from the number of proposed 
     covariates, not the number of sampled responses. This in order to allow for a covariate to be reported after the
     response. However, only when .ask-method is rerun will can new covariates and responses be added.
+
+### Examples 
+
+A number of examples showing how to use the framework in `jupyter` notebooks is available in the [examples](examples) 
+folder. This includes both closed-loop and iterative usages, as well as a few real-world examples (latter to come!)
 
 ## Start-up notes
 Need to install the `torch`-libraries outside normal bulk `pip install`.
