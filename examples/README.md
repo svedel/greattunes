@@ -6,11 +6,15 @@ end-to-end frameworks, including ``all the glue stuff´´.
 
 Basic examples
 1. [Closed-loop optimization of _known_ function](#Example-1:-Closed-loop-optimization-of-_known_-function)
+2. [Iterative optimization of a function, which can be sampled](#Example-2:-Iterative-optimization-of-a-function,-which-can-be-sampled)
 
 ## Details
 
 ### Example 1: Closed-loop optimization of _known_ function
 In this example, we use the `.auto`-method to perform closed-loop maximization of a known function.
+
+### Example 2: Iterative optimization of a function, which can be sampled
+Here, the iterative solution approach accessible via the `.ask` and `.tell` methods is used to find the maximum of a function, which can be sampled. The example makes use of a well-defined function, but any samplable function could be used (also e.g. the readout from a physical system).
 
 File: xyc
 
