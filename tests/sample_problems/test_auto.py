@@ -11,7 +11,7 @@ from creative_project import CreativeProject
         [50, 5.99716, 7e-3, "Custom"],
     ]
 )
-def test_sample_problems_1d_maximization(max_iter, max_response, error_lim, model_type, capsys):
+def test_sample_problems_auto_1d_maximization(max_iter, max_response, error_lim, model_type, capsys):
     """
     solve a sample problem in two different conditions.
     test that auto method works for a particular single-covariate (univariate) function
@@ -56,7 +56,7 @@ def test_sample_problems_1d_maximization(max_iter, max_response, error_lim, mode
         [100, 3e-3, 4, -4],
     ]
 )
-def test_sample_problems_2d_maximization(max_iter, error_lim, x0_0, x1_0):
+def test_sample_problems_auto_2d_maximization(max_iter, error_lim, x0_0, x1_0):
     """
     solves a 2D maximzation problem for the negative Easom standard function for optimization. This function has a
     narrow peak at (x_0,x_1) = (0,0), otherwise is flat 0 (see details here https://www.sfu.ca/~ssurjano/easom.html)
