@@ -34,5 +34,6 @@ File: `Example 3 - Maximum of a multivariate function.ipynb`
 
 ### Example 4: Optimize a noisy, multivariate system
 
-Fill me out!!!
+Here a noisy multivariate response function is optimized. This illustrates how to apply Bayesian optimization for noisy systems such as those found in many real-world applications. The noise could either be inherent in the system itself or be a measurement uncertainty.
 
+File: `Example 4 - Optimize a noisy multivariate system.ipynb`
