@@ -5,7 +5,15 @@
 Library with Bayesian Optimization made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
+## Introduction
+
+### Design decisions
+
 ## Using the framework
+
+### Getting started
+
+### Solving some problems
 
 NOTE: Framework is built around initial (historical) training data is added during class instantiation via arguments `train_X=<>` and `train_Y=<>` such as
 ```python
@@ -62,6 +70,16 @@ NOTE: the new response data counter ("how many responses do we have") is derived
 
 A number of examples showing how to use the framework in `jupyter` notebooks is available in the [examples](examples) 
 folder. This includes both closed-loop and iterative usages, as well as a few real-world examples (latter to come!)
+
+## Contributing
+
+### Tech stack
+
+### Access to backlog etc
+
+### Testing strategy
+
+# OLD BELOW HERE
 
 ## Start-up notes
 Need to install the `torch`-libraries outside normal bulk `pip install`.
