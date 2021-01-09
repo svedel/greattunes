@@ -4,13 +4,16 @@ Methods for running campaigns. These are the key user-facing methods
 import torch
 
 
-def auto(self, response_samp_func, max_iter=100):
+def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=None):
     """
     this method executes black-box optimization for cases where sampling function response ("response_samp_func")
     is known. in this case no user interaction is needed during each iteration of the Bayesian optimization.
     :param response_samp_func (function): function generating the response
     (input: (1 x num_covars tensor) -> output: (1x1 tensor))
     :param max_iter (int): max number of iterations of the optimization
+    :param: rel_tol (float): limit on relative improvement between iterations sufficient to stop iteration
+    :param: rel_tol_steps (int): number of steps of no improvement in relative improvement. If this is set, the relative
+    tolerance must remain stable for at least rel_tol_steps number of iterations before considered a converged
     :TODO:
         - add stopping conditions on error improvement between iterations?
     """
@@ -19,9 +22,27 @@ def auto(self, response_samp_func, max_iter=100):
     self.sampling["method"] = "functions"
     self.sampling["response_func"] = response_samp_func
 
+    # relative tolerance - convert to float
+    if rel_tol is not None:
+        rel_tol = float(rel_tol)
+
+    # number of iterations with tolerance limit
+     if rel_tol_steps is not None:
+         if not rel_tol_steps > 0:
+             raise Exception("creative_project._campaign.auto: 'rel_tol_steps' must be greater than 0 but "
+                             "received " + str(rel_tol_steps))
+
+         # convert to int
+         rel_tol_steps = int(rel_tol_steps)
+
     # loop
     it = 0
     while it < max_iter:
+
+        # investigate if solution satisfies relative tolerance conditions (if these are added by the user) and stop
+        # iteration if the solution is considered converged by these conditions
+        if not self._Validators__continue_iterating_rel_tol_conditions(rel_tol=rel_tol, rel_tol_steps=rel_tol_steps):
+            break
 
         # update counter
         it += 1
@@ -157,3 +178,4 @@ def tell(self, **kwargs):
 
     # update best response value and associated covariates
     self._update_max_response_value()
+
