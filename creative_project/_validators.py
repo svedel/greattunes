@@ -152,10 +152,10 @@ class Validators:
             # leverage the functionality built for rel_tol_steps > 1
             rel_tol_steps = 1
 
-        if (rel_tol is not None) & (rel_tol_steps is not None):
+        if (rel_tol is not None) & (rel_tol_steps is not None) & (self.best_response_value is not None):
 
             # only proceed if at least 'rel_tol_steps' iterations have been completed
-            if self.best_response_value.size()[0] >= rel_tol_steps:
+            if self.best_response_value.size()[0] > rel_tol_steps:
 
                 # build list of relative differences
 
