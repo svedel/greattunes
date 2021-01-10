@@ -177,4 +177,3 @@ class Validators:
                     continue_iterating = False
 
         return continue_iterating
-
