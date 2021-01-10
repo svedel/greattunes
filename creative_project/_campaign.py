@@ -29,9 +29,9 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
         if not rel_tol_steps > 0:
             raise Exception("creative_project._campaign.auto: 'rel_tol_steps' must be greater than 0 but "
                             "received " + str(rel_tol_steps))
-
-    # convert to int
-    rel_tol_steps = int(rel_tol_steps)
+        else:
+            # convert to int
+            rel_tol_steps = int(rel_tol_steps)
 
     # loop
     it = 0
