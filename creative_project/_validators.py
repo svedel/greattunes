@@ -167,7 +167,7 @@ class Validators:
                 # rel_tol_steps+1 entries
                 tmp_array = torch.cat(
                     (
-                        self.best_response_value[-(rel_tol_steps + 1): -1],
+                        self.best_response_value[-(rel_tol_steps + 1) : -1],
                         self.best_response_value[-(rel_tol_steps):],
                     ),
                     dim=1,
