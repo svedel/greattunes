@@ -138,3 +138,48 @@ def test_Validators__validate_num_response_wont_validate(response):
     cls = Validators()
 
     assert not cls._Validators__validate_num_response(response)
+
+
+@pytest.mark.parametrize(
+    "best_response_value, rel_tol, rel_tol_steps, continue_iterating_bool",
+    [
+        [torch.tensor([[0.999], [1.0]], dtype=torch.double), 1e-2, None, False],  # case a) below
+        [torch.tensor([[0.999], [1.0]], dtype=torch.double), 1e-2, 1, False],  # case b) below
+        [torch.tensor([[0.998], [0.999], [1.0]], dtype=torch.double), 1e-2, 2, False], # case b) below
+        [torch.tensor([[0.998], [0.999], [1.0]], dtype=torch.double), None, None, True], # case c) below
+        [torch.tensor([[0.998], [0.999], [1.0]], dtype=torch.double), 1e-2, 4, True], # case d) below
+        [torch.tensor([[0.5], [0.75], [1.0]], dtype=torch.double), 1e-2, 2, True], # case e) below
+    ]
+)
+def test_Validators__continue_iterating_rel_tol_conditions_works(best_response_value, rel_tol, rel_tol_steps,
+                                                                 continue_iterating_bool):
+    """
+    test that __continue_iterating_rel_tol_conditions returns false when
+        a) when rel_tol_steps is set to None, rel_tol is not None and the relative improvement in the attribute
+        keeping best solution at each step (self.best_response_value) is less than the specified 'rel_tol'
+        b) when rel_tol and rel_tol_steps are both not None that it returns false only if the 'rel-tol'-condition has
+        been satisfied for the last 'rel_tol_steps' iterations.
+    and returns true when
+        c) rel_tol is None and rel_tol_steps is None
+        d) rel_tol is not None and rel_tol_steps is not None but the number of iterations is less than rel_tol_steps
+        e) rel_tol_steps is None and rel_tol is not None, but the relative improvement is larger than rel_tol
+        f) rel_tol_steps and rel_tol are both not None, but the relative improvement in one of the rel_tol_steps is
+        larger than rel_tol
+
+    The tests will be executed by creating an instance of class Validators and adding best_response_value as attribute
+    to this class. In actual application, Validators is a parent class to the main class CreativeProject, which itself
+    has best_response_value as an attribute.
+    """
+
+    # instantiate Validators
+    cls = Validators()
+
+    # add best_response_value as attribute
+    cls.best_response_value = best_response_value
+
+    # run __continue_iterating_rel_tol_conditions method
+    continue_iterating = cls._Validators__continue_iterating_rel_tol_conditions(rel_tol=rel_tol,
+                                                                                rel_tol_steps=rel_tol_steps)
+
+    # check whether the outcome is as expected
+    assert continue_iterating == continue_iterating_bool
