@@ -152,7 +152,11 @@ class Validators:
             # leverage the functionality built for rel_tol_steps > 1
             rel_tol_steps = 1
 
-        if (rel_tol is not None) & (rel_tol_steps is not None) & (self.best_response_value is not None):
+        if (
+            (rel_tol is not None)
+            & (rel_tol_steps is not None)
+            & (self.best_response_value is not None)
+        ):
 
             # only proceed if at least 'rel_tol_steps' iterations have been completed
             if self.best_response_value.size()[0] > rel_tol_steps:
@@ -162,14 +166,23 @@ class Validators:
                 # first build tensor with the last rel_tol_steps entries in self.best_response_value and the last
                 # rel_tol_steps+1 entries
                 tmp_array = torch.cat(
-                    (self.best_response_value[-(rel_tol_steps+1):-1], self.best_response_value[-(rel_tol_steps):]),
-                    dim=1).numpy()
+                    (
+                        self.best_response_value[-(rel_tol_steps + 1): -1],
+                        self.best_response_value[-(rel_tol_steps):],
+                    ),
+                    dim=1,
+                ).numpy()
 
                 # calculate the relative differences
-                tmp_rel_diff = np.diff(tmp_array, axis=1) / self.best_response_value[-(rel_tol_steps):].numpy()
+                tmp_rel_diff = (
+                    np.diff(tmp_array, axis=1)
+                    / self.best_response_value[-(rel_tol_steps):].numpy()
+                )
 
                 # determine if all below 'rel_tol'
-                below_rel_tol = [rel_dif[0] < rel_tol for rel_dif in tmp_rel_diff.tolist()]
+                below_rel_tol = [
+                    rel_dif[0] < rel_tol for rel_dif in tmp_rel_diff.tolist()
+                ]
 
                 # only accept if the relative difference is below 'rel_tol' for all steps
                 if sum(below_rel_tol) == rel_tol_steps:

@@ -124,7 +124,8 @@ def _update_proposed_data(self, candidate):
     # check number of covariates in "candidate" (only if previous records exist)
     if self.proposed_X is not None:
         assert candidate.size()[1] == self.proposed_X.size()[1], (
-            "creative_project._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected "
+            "creative_project._best_response._update_proposed_data: wrong number of covariates provided in "
+            "'candidate'. Expected "
             + str(self.proposed_X.size()[1])
             + ", but got "
             + str(candidate.size()[1])

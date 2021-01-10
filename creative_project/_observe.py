@@ -48,8 +48,8 @@ def _get_and_verify_response_input(self, **kwargs):
     """
     read and verify response. Assumes only a single input, and does not do any verification.
     :input:
-        - self.sampling["method"]: determines how to get the response data (iteratively via input or function evaluation).
-        Default model self.sampling["method"] = 'iterative' is set in creative_project.__init__.py
+        - self.sampling["method"]: determines how to get the response data (iteratively via input or function
+        evaluation). Default model self.sampling["method"] = 'iterative' is set in creative_project.__init__.py
     :kwargs:
         - response (list or torch tensor or None): kwarg input in _campaign.tell (None if not present in tell). This
         provides a programmatic way of providing the response data
