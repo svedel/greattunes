@@ -124,7 +124,6 @@ class Validators:
 
         return valid
 
-
     def __continue_iterating_rel_tol_conditions(self, rel_tol, rel_tol_steps):
         """
         determine whether 'rel_tol'-conditions are satisfied by comparing the best candidate (self.best_response_value)
