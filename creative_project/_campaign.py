@@ -14,8 +14,6 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
     :param: rel_tol (float): limit on relative improvement between iterations sufficient to stop iteration
     :param: rel_tol_steps (int): number of steps of no improvement in relative improvement. If this is set, the relative
     tolerance must remain stable for at least rel_tol_steps number of iterations before considered a converged
-    :TODO:
-        - add stopping conditions on error improvement between iterations?
     """
 
     # set sampling method
@@ -26,14 +24,14 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
     if rel_tol is not None:
         rel_tol = float(rel_tol)
 
-    # number of iterations with tolerance limit
-     if rel_tol_steps is not None:
-         if not rel_tol_steps > 0:
-             raise Exception("creative_project._campaign.auto: 'rel_tol_steps' must be greater than 0 but "
-                             "received " + str(rel_tol_steps))
+# number of iterations with tolerance limit
+    if rel_tol_steps is not None:
+        if not rel_tol_steps > 0:
+            raise Exception("creative_project._campaign.auto: 'rel_tol_steps' must be greater than 0 but "
+                            "received " + str(rel_tol_steps))
 
-         # convert to int
-         rel_tol_steps = int(rel_tol_steps)
+    # convert to int
+    rel_tol_steps = int(rel_tol_steps)
 
     # loop
     it = 0
