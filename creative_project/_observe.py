@@ -5,7 +5,7 @@ import torch
 from .utils import __get_covars_from_kwargs
 
 
-### Response methods ###
+# === Response methods ===
 def _get_response_datapoint(self, response):
     """
     gets observation of actual response y. Updates stored data, counters etc.
@@ -139,7 +139,7 @@ def _read_response_manual_input(self, additional_text):
     return response_candidate_float_tensor
 
 
-### Covariate methods ###
+# === Covariate methods ===
 def _print_candidate_to_prompt(self, candidate):
     """
     prints a candidate for new data point to prompt in user-friendly manner.

@@ -161,8 +161,7 @@ class Validators:
             # only proceed if at least 'rel_tol_steps' iterations have been completed
             if self.best_response_value.size()[0] > rel_tol_steps:
 
-                # build list of relative differences
-
+                # === Build list of relative differences ===
                 # first build tensor with the last rel_tol_steps entries in self.best_response_value and the last
                 # rel_tol_steps+1 entries
                 tmp_array = torch.cat(

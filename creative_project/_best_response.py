@@ -135,7 +135,7 @@ def _update_proposed_data(self, candidate):
     # update counter
     self.model["covars_proposed_iter"] = self.model["covars_sampled_iter"] + 1
 
-    # add proposed candidate
+    # === add proposed candidate ===
     # special case if no data stored previously (in which case self.proposed_X is None)
     if self.proposed_X is None:
         self.proposed_X = candidate
