@@ -105,11 +105,11 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
 @pytest.mark.parametrize(
     "max_iter, rel_tol, rel_tol_steps, num_iterations_exp",
     [
-        [50, 0.01, None, 2], # test that iteration stops if relative improvement in one step is below rel_tol
-        [50, 0.01, 2, 5], # test that iteration stops if relative improvement in two consecutive steps is below rel_tol
-        [50, 0.001, 2, 5], # test that iteration stops if relative improvement in two consecutive steps is below rel_tol
-        [50, 0.001, 4, 7], # test that iteration stops if relative improvement in three consecutive steps is below rel_tol
-        [50, 1e-8, 5, 8], # same as second case above but with realistic rel_tol
+        [50, 0.01, None, 2],  # test that iteration stops if relative improvement in one step is below rel_tol
+        [50, 0.01, 2, 5],  # test that iteration stops if relative improvement in two consecutive steps is below rel_tol
+        [50, 0.001, 2, 5],  # test that iteration stops if relative improvement in two consecutive steps is below rel_tol
+        [50, 0.001, 4, 7],  # test that iteration stops if relative improvement in three consecutive steps is below rel_tol
+        [50, 1e-8, 5, 8],  # same as second case above but with realistic rel_tol
     ]
 )
 def test_CreativeProject_auto_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num_iterations_exp):
