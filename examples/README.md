@@ -2,7 +2,7 @@
 
 ## Overview
 The examples in this folder all illustrate ways to leverage the framework in actual situations. Emphasis is on 
-end-to-end frameworks, including ``all the glue stuff´´. 
+end-to-end frameworks, including "all the glue stuff". 
 
 ### Basic examples
 * Univariate systems
@@ -11,6 +11,8 @@ end-to-end frameworks, including ``all the glue stuff´´.
 * Multivariate systems
   3. [Maximize a multivariate function using either closed-loop or iterative approach](#Example-3:-Maximize-a-multivariate-function-using-either-closed-loop-or-iterative-approach)
   4. [Optimize a noisy, multivariate system](#Example-4:-Optimize-a-noisy,-multivariate-system)
+* Advanced examples
+  5. [Stop optimization early when convergence seems to be reached based on relative improvement in best response](#Example-5:-Stop-optimization-early-when-convergence-seems-to-be-reached-based-on-relative-improvement-in-best-response)
   
 
 ## Details
@@ -37,3 +39,11 @@ File: `Example 3 - Maximum of a multivariate function.ipynb`
 Here a noisy multivariate response function is optimized. This illustrates how to apply Bayesian optimization for noisy systems such as those found in many real-world applications. The noise could either be inherent in the system itself or be a measurement uncertainty.
 
 File: `Example 4 - Optimize a noisy multivariate system.ipynb`
+
+### Example 5: Stop optimization early when convergence seems to be reached based on relative improvement in best response
+
+In this example illustrate how to use `rel_tol` and `rel_tol_steps`-parameters in `.auto`-method to stop iterations before the specified number of iterations if the solution is deemed converged. This is assessed by looking at the relative improvement in best response between consecutive iterations. `rel_tol` defines the relative improvement threshold required for convergence; also setting `rel_tol_steps` requires that this threshold is reached for `rel_tol_steps` consecutive iterations.
+
+The example discusses best practise for using these functionalities to obtain good convergence.
+
+File: `Example 5 - Optimization stopping criteria based on relative improvements.ipynb`
