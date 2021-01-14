@@ -11,6 +11,7 @@ known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorc
   without specifically requiring a model of the system be defined a priori.
 * Focus on ease of use: only few lines of code required for full Bayesian optimization.
 * Simple interface.
+* Erroneous observations of either covariates or response can be overridden during optimization. 
 * Well-documented code with detailed end-to-end examples of use, see [examples](#examples).
 * Optimization can start from scratch or repurpose existing data.
 
