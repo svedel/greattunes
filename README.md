@@ -1,17 +1,29 @@
-# Creative brain
+# Creative project: user-friendly Bayesian optimization library 
 
 ![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
 
 Library with Bayesian Optimization made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
-## Introduction
+## Features
+
+* Optimization of either *known* or *unknown* functions. The allows for optimization of e.g. real-world experiments 
+  without specifically requiring a model of the system be defined a priori.
+* Focus on ease of use: only few lines of code required for full Bayesian optimization.
+* Simple interface.
+* Well-documented code with detailed end-to-end examples of use, see [examples](#examples).
+* Optimization can start from scratch or repurpose existing data.
+
 
 ### Design decisions
 
-## Using the framework
+* 
+* 
 
-### Getting started
+
+## Installation
+
+## Basic use
 
 ### Solving some problems
 
