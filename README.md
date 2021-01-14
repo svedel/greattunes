@@ -2,7 +2,7 @@
 
 ![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
 
-Library with Bayesian Optimization made available for either closed-loop or user-driven (manual) optimization of either 
+Easy-to-use Bayesian Optimization library made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
 ## Features
@@ -17,15 +17,76 @@ known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorc
 
 ### Design decisions
 
-* 
-* 
+* **Multivariate covariates, univariate system response:** It is assumed that input covariates (the independent 
+  variables) can be either multivariate or univariate, while the system response (the dependent variable) is only 
+  univariate.
+* **System-generated or manual input:** Observations of covariates and responses during optimization can be provided 
+  both programmatically or manually via prompt input.
+* **Optimizes known and unknown response functions:** Both cases where the response function can be formulated 
+  mathematically and cases where the response can only be measured (e.g. a real-life experiment) can be 
+  optimized.  
+* **Observed covariates can vary from the proposed covariates:** The optimization routine at each iteration proposes 
+  new covariate data points to investigate, but there is no requirement that this is also the observed data point.
+  At each iteration step, proposed covariates, observed covariates and observed response are 3 separate entities.
+* **Data stored in class instance:** Data for *proposed covariate data points*, *observed covariates* and *observed 
+  responses* is stored in the instantiated class object.
+* **Data format and type validation:** Input data is validated at all iterations.
+* **Observations of covariates and response can be overridden during execution:** If an observation of either covariates 
+  or response seems incorrect, the framework allows overriding the previous observation.  
+* **Consistency in number of covariates and observations:** It is assumed that there is consistency in the number of 
+  observations of covariates and responses: at each step a new covariate data point is proposed, before observations
+  of covariates and response *for this iteration* are reported (specifically the number of proposed data points cannot 
+  exceed the number of observed covariates by more than 1, and the number of observed covariates also cannot exceed the
+  number of observed responses by more than 1). If additional data is provided for either observed covariates or 
+  observed response, this will override the last provided data. 
 
 
 ## Installation
 
+### First install `torch` dependencies
+
+**Installing `torch` dependencies is a requirement.** Unfortunately `torch`-libraries have to be installed outside 
+normal bulk `pip install -r requirements.txt`.
+
+To find the right installation command for `torch`, use [this link](https://pytorch.org/get-started/locally/)
+to determine the details and add as a separate command in the `github` actions yaml. As an example, the following is the 
+install command on my local system (an `Ubuntu`-based system with `pip` and without `CUDA` access)
+```python
+pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+```
+
+### Install library
+
+Currently the code is not available on any repo servers except the private GitHub account. The best way to install the
+code (after adding `torch` and `torchvision`) is follow this series of steps.
+
+1. Upgrade local versions of packaging libraries
+```python
+pip install --upgrade setuptools wheel
+```
+2. Clone this repo
+3. Do local installation
+```python
+python -m pip install <path_to_repo>/kre8_core/
+```
+
+Step 3 will install by running `kre8_core/setup.py` locally and installing. This step can also be broken into two, 
+which might improve debugging
+```python
+python3 <path_to_repo>/kre8_core/ setup.py bdist_wheel
+python -m pip install <path_to_repo>/kre8_core/dist/creative_project-<version>-py3-none-any.whl
+```
+where `<version>` is the latest version in normal `python` format of `MAJOR.MINOR[.MICRO]` 
+(check `/dist`-folder to see which one to pick).
+
+
 ## Basic use
 
-### Solving some problems
+### Solving a problem
+
+### Closed-loop: the `.auto` method
+
+### Iterative: the `.ask` and `.tell` methods
 
 NOTE: Framework is built around initial (historical) training data is added during class instantiation via arguments `train_X=<>` and `train_Y=<>` such as
 ```python
@@ -70,9 +131,7 @@ Y = torch.tensor([[33]], dtype=torch.double)
 cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
 ```
 
-### Closed-loop: the `.auto` method
 
-### Iterative: the `.ask` and `.tell` methods
 
 NOTE: the new response data counter ("how many responses do we have") is derived from the number of proposed 
     covariates, not the number of sampled responses. This in order to allow for a covariate to be reported after the
