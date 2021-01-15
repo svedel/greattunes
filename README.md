@@ -105,14 +105,13 @@ The critical things to define in this step are
 * The type of acquisitition function. This will also be fitted at each step of the optimization.
 
 ```python
-# import libraries
-import torch
+# import library
 from creative_project import CreativeProject
 
 # === Step 1: define the input ===
 
 # specify covariate. For each covariate of the model provide best guess of starting point together with upper and lower
-# limit
+# limit 
 x_start = 0.5  # initial guess
 x_min = 0  # lower limit
 x_max = 1  # upper limit
@@ -128,12 +127,16 @@ In order to optimize, we must first describe *which* function we want to do this
 function can be formulated mathematically and when it can only be sampled (e.g. through examples) but cannot be
 formulated. For an illustrate of the latter see Example 2 under [examples](#examples).
 
-Here we will work with a known function to optimize
+Here we will work with a known objective function to optimize
 ```python
 # univariate function to optimize
+import torch
+
 def f(x):
     return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
 ```
+Beware that the number of covariates (including their range) specified by `covars` under Step 1 must comply with the
+functional dependence of the objective function (`x` in the case above).
 
 We are now ready to solve the problem. We will run for `max_iter`=20 iterations.
 ```python
@@ -146,19 +149,27 @@ been to use the `.ask`-`.tell` methods instead of `.auto`.
 
 ### Initialization options
 
-### Closed-loop: the `.auto` method
+#### Multivariate covariates
 
-### Iterative: the `.ask` and `.tell` methods
+#### Starting with some historical data
 
+If historical data for pairs of covariates and response is available for your system, this can be added during
+initialization. In this case the optimization framework will have a better starting position and will likely converge
+more quickly.
 
+Historical data is added during class initialization. The number of observations (rows) of covariates and response must
+match. Historical training data is added during class instantiation via arguments `train_X=<>` and `train_Y=<>` as
+illustrated below for the following cases
+1. Multiple observations of multivariate system
+2. Single observation of univariate system
+3. Single observation of multivariate system
 
-NOTE: Framework is built around initial (historical) training data is added during class instantiation via arguments `train_X=<>` and `train_Y=<>` such as
 ```python
 # import
 import torch
-import CreativeProject
+from creative_project import CreativeProject
 
-### ------ Case 1 - multiple observations (also multivariate) ------ ###
+### ------ Case 1 - multiple observations (multivariate) ------ ###
 
 # set range of data
 covars = [(1, 0, 4.4), (5.2, 1.5, 7.0), (4, 2.2, 5.1)]
@@ -170,7 +181,7 @@ Y = torch.tensor([[33],[37.8]], dtype=torch.double)
 # initialize class
 cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
 
-### ------ Case 2 - single observation (also univariate) ------ ###
+### ------ Case 2 - single observation (univariate) ------ ###
 
 # set range of data
 covars = [(1, 0, 4.4)]
@@ -194,6 +205,18 @@ Y = torch.tensor([[33]], dtype=torch.double)
 # initialize class
 cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
 ```
+
+#### Surrogate model types
+
+#### Acquisition functions
+
+### Closed-loop: the `.auto` method
+
+### Iterative: the `.ask` and `.tell` methods
+
+
+
+
 
 
 
