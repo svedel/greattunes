@@ -80,6 +80,9 @@ python -m pip install <path_to_repo>/kre8_core/dist/creative_project-<version>-p
 where `<version>` is the latest version in normal `python` format of `MAJOR.MINOR[.MICRO]` 
 (check `/dist`-folder to see which one to pick).
 
+#### Uploading build to repo servers (e.g. `PyPI`)
+
+To be investigated. Here's [a link with help](https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python) on how to leverage `GitHub actions` for this purpose.
 
 ## Using the framework
 
@@ -319,100 +322,84 @@ NOTE: the new response data counter ("how many responses do we have") is derived
     covariates, not the number of sampled responses. This in order to allow for a covariate to be reported after the
     response. However, only when .ask-method is rerun will can new covariates and responses be added.
 
-## Advanced uses --- perhaps remove this? 
-
 ## Examples 
 
 A number of examples showing how to use the framework in `jupyter` notebooks is available in the [examples](examples) 
 folder. This includes both closed-loop and iterative usages, as well as a few real-world examples (latter to come!)
 
+
 ## Contributing
 
 ### Tech stack
 
+This library is built using the following
+* `torch`
+* `GPyTorch`
+* `BOTorch`
+* `numpy`
+
 ### Access to backlog etc
+
+To be detailed later
 
 ### Testing strategy
 
-# OLD BELOW HERE
+Regular unit and integration testing is performed during each run of the CI pipeline.
 
-## Start-up notes
-Need to install the `torch`-libraries outside normal bulk `pip install`.
+In addition, a set of sample problems are also executed. The purpose of these special integration tests is to verify
+that the optimization performance of the framework remains consistent. These sample problems is a series of pre-defined
+applications of the framework with known results.
 
-To find the right installation command for `torch`, use [this link](https://pytorch.org/get-started/locally/)
-to determine the details and add as a separate command in the `github` actions yaml. As an example, the following is the 
-install command on my local system (an `Ubuntu`-based system with 
-`pip` and without `CUDA` access)
+#### Test tooling
+
+The `pytest` framework is used for this library, with all tests residing in 
+[`creative_project\tests`](creative_project/tests). To execute all tests, run the following from the terminal from the 
+project root folder (`creative_project`)
 ```python
-pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+~/creative_project$ python -m pytest tests/
 ```
 
-### Installation
-Currently the code is not available on any repo servers except the private GitHub account. The best way to install the
-code (after adding `torch` and `torchvision`) is follow this series of steps.
+The tests are available in 
+* Unit tests: [`creative_project\tests\unit`](creative_project/tests/unit)
+* Integration tests: [`creative_project\tests\integration`](creative_project/tests/integration)
+* Sample problems: [`creative_project\tests\sample_problems`](creative_project/tests/sample_problems)
 
-1. Upgrade local versions of packaging libraries
-```python
-pip install --upgrade setuptools wheel
-```
-2. Clone this repo
-3. Do local installation
-```python
-python -m pip install <path_to_repo>/kre8_core/
-```
+All fixtures are collected in `tests\conftest.py` and config is specified in `tests\pytest.ini`.
 
-Step 3 will install by running `kre8_core/setup.py` locally and installing. This step can also be broken into two, 
-which might improve debugging
-```python
-python3 <path_to_repo>/kre8_core/ setup.py bdist_wheel
-python -m pip install <path_to_repo>/kre8_core/dist/creative_project-<version>-py3-none-any.whl
-```
-where `<version>` is the latest version in normal `python` format of `MAJOR.MINOR[.MICRO]` 
-(check `/dist`-folder to see which one to pick).
+#### Tests during CI
+All tests are run by CI pipeline when committing to any branch. In addition, linting, style format and library import
+style checks are also executed.
 
-### Uploading build to repo servers (e.g. `PyPI`)
+`sample_problems` tests are allowed to fail for regular commits but must pass for merge commits.
 
-To be investigated. Here's [a link with help](https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python) on how to leverage `GitHub actions` for this purpose.
-
-## Testing 
-The `pytest` framework is used for this library, with all tests residing in `creative-brain\tests`. Tests consist of 
-unit tests, integration tests and sample problems, where the latter is a series of pre-defined applications of the 
-framework with known results.
-
-To execute all tests, run the following from the terminal from the project root folder (`creative-brain`)
-```python
-~/creative-brain$ python -m pytest tests/
-```
-
-### Tests during CI
-All tests are run by CI pipeline when committing to any branch. 
-
-### Tests during development
+#### Tests during development
 During development, unit and integration tests are typically sufficient to check ongoing developments. These tests can
 be executed by the command
 ```python
-~/creative-brain$ python -m pytest tests/unit tests/integration
+~/creative_project$ python -m pytest tests/unit tests/integration
 ```
 Before committing it is good practise to also run sample problems, which can be done by either `python -m pytest tests/`
 (running all tests including sample problems), or `python -m pytest tests/sample_problems`.
 
-### Additional code-level checks 
-In addition, linting, code style checking and sorting of imports is also covered. The following commands, executed in
-the terminal from the project root folder (`creative-brain`), will run the checks and perform style corrections if 
-needed
+#### Additional code checks 
+In addition, linting, code style checking and sorting of imports is also executed by the CI pipeline. The library is
+currently using `flake8` for linting, `black` for code format checking and `isort` to manage library import style.
+
+The following commands, executed in the terminal from the project root folder (`creative_project`), will run the checks 
+and perform style corrections if needed
 ```python
-### linting
-~/creative-brain$ flake8 creative_project/
+# === linting ===
+~/creative_project$ flake8 creative_project/
 
-### code style
-~/creative-brain$ black creative_project --check # checks for fixes needed
-~/creative-brain$ black creative_project --diff # shows suggested edits
-~/creative-brain$ black creative_project # makes the edits (only command needed to update the code)
+# === code style ===
+~/creative_project$ black creative_project --check # checks for fixes needed
+~/creative_project$ black creative_project --diff # shows suggested edits
+~/creative_project$ black creative_project # makes the edits (only command needed to update the code)
 
-### sort imports
-~/creative-brain$ /bin/sh -c "isort creative_project/**/*.py --check-only" # checks for sorting opportunities
-~/creative-brain$ /bin/sh -c "isort creative_project/**/*.py --diff" # shows changes that could be done
-~/creative-brain$ /bin/sh -c "isort creative_project/**/*.py" # makes the changes (only command needed to update the code)
+# === sort imports ===
+~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --check-only" # checks for sorting opportunities
+~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --diff" # shows changes that could be done
+~/creative_project$ /bin/sh -c "isort creative_project/**/*.py" # makes the changes (only command needed to update the code)
 ```
 
 ## References
