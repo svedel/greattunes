@@ -81,13 +81,76 @@ where `<version>` is the latest version in normal `python` format of `MAJOR.MINO
 (check `/dist`-folder to see which one to pick).
 
 
-## Basic use
+## Using the framework
+
+All capabilities of the framework are described below.
+
+For those wanting to skip directly to working with the framework, a number of examples of how to use the framework end-to-end are included as Jupyter notebooks in [examples](#examples).  
 
 ### Solving a problem
+
+Solving an optimization problem consists of two steps in this framework:
+1. Define the input variables (covariates), the surrogate model type and the acquisition function. Also define the
+   response function if this is known
+2. Optimize based on closed-loop or iterative interface
+
+Here's a simple illustration of how to do this for a known function `f`.
+
+#### Step 1: Define the problem
+
+The critical things to define in this step are
+* The number of covariates. Upper and lower limits must be provided for each covariate to constraint the search space, 
+  and initial guess for each to be provided as well. Works for both univariate and multivariate covariate structures.
+* The type of surrogate model. The model will be fitted at each step of the optimization.
+* The type of acquisitition function. This will also be fitted at each step of the optimization.
+
+```python
+# import libraries
+import torch
+from creative_project import CreativeProject
+
+# === Step 1: define the input ===
+
+# specify covariate. For each covariate of the model provide best guess of starting point together with upper and lower
+# limit
+x_start = 0.5  # initial guess
+x_min = 0  # lower limit
+x_max = 1  # upper limit
+covars = [(x_start, x_min, x_max)]
+
+# initialize the class
+cls = CreativeProject(covars=covars, model="SingleTaskGP", acq_func="EI")
+```
+
+#### Step 2: Solve the problem
+
+In order to optimize, we must first describe *which* function we want to do this for. The framework works both when this
+function can be formulated mathematically and when it can only be sampled (e.g. through examples) but cannot be
+formulated. For an illustrate of the latter see Example 2 under [examples](#examples).
+
+Here we will work with a known function to optimize
+```python
+# univariate function to optimize
+def f(x):
+    return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+```
+
+We are now ready to solve the problem. We will run for `max_iter`=20 iterations.
+```python
+# run the auto-method
+    cc.auto(response_samp_func=f, max_iter=max_iter)
+```
+
+Had we worked with an objective function `f` which could not be formulated explicitly, the right entrypoint would have
+been to use the `.ask`-`.tell` methods instead of `.auto`.
+
+### Initialization options
 
 ### Closed-loop: the `.auto` method
 
 ### Iterative: the `.ask` and `.tell` methods
+
+
 
 NOTE: Framework is built around initial (historical) training data is added during class instantiation via arguments `train_X=<>` and `train_Y=<>` such as
 ```python
@@ -138,7 +201,9 @@ NOTE: the new response data counter ("how many responses do we have") is derived
     covariates, not the number of sampled responses. This in order to allow for a covariate to be reported after the
     response. However, only when .ask-method is rerun will can new covariates and responses be added.
 
-### Examples 
+## Advanced uses --- perhaps remove this? 
+
+## Examples 
 
 A number of examples showing how to use the framework in `jupyter` notebooks is available in the [examples](examples) 
 folder. This includes both closed-loop and iterative usages, as well as a few real-world examples (latter to come!)
