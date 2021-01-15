@@ -151,6 +151,25 @@ been to use the `.ask`-`.tell` methods instead of `.auto`.
 
 #### Multivariate covariates
 
+Multivariate covariates are set via the (mandatory) `covars` parameter during class initialization. Each covariate is 
+given as a 3-tuple of parameters (`<initial_guess>`,`<parameter_minimum>`, `<parameter_maximum>`) (the order matters!), with `covars` being a
+list of these tuples. As an example, for a cases with 3 covariates, the `covars` parameter would be
+
+```python
+covars = [(1, 0, 4.4), (5.2, 1.5, 7.0), (4, 2.2, 5.1)]
+```
+
+The order of the covariates matters since framework does not work with named covariates. Hence, the parameter defined 
+by the first tuple in `covars` will always have to be reported as the first covariate when iterating during 
+optimization, the second covariate will be initialized by the second tuple in `covars` etc.  
+
+Observations of multivariate covariates are specified as columns in the `train_X` attribute (format: `torch.tensor`), 
+with observations added as rows. As an example, the initial guess for the three covariates defined by `covars` above
+would be
+```python
+train_X = torch.tensor([[1, 5.2, 4]], dtype=torch.double)
+```
+
 #### Starting with some historical data
 
 If historical data for pairs of covariates and response is available for your system, this can be added during
@@ -206,7 +225,15 @@ Y = torch.tensor([[33]], dtype=torch.double)
 cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
 ```
 
-#### Surrogate model types
+#### Kernels for Gaussian process surrogate model
+
+The following kernels for Gaussian process surrogate model are implemented. Listed parameters are provided as input to 
+class initialization
+
+| Model name | Parameters | Comments |
+| ---------- | ---------- | -------- |
+| `"SingleTaskGP"` | N/A | A single-task exact kernel for Gaussian process regression. Follow this link for [more details](https://botorch.org/api/models.html#module-botorch.models.gp_regression). |
+| `"Custom"` | `nu` | A Matérn kernel with parameter `nu` (a float). For more details on Matérn kernels see [wiki page](https://en.wikipedia.org/wiki/Mat%C3%A9rn_covariance_function) |
 
 #### Acquisition functions
 
