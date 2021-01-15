@@ -362,7 +362,7 @@ project root folder (`creative_project`)
 ```
 
 The tests are available in 
-* Unit tests: [`creative_project\tests\unit`](unit)
+* Unit tests: [`creative_project\tests\unit`](tests/unit)
 * Integration tests: [`creative_project\tests\integration`](integration)
 * Sample problems: [`creative_project\tests\sample_problems`](sample_problems)
 
