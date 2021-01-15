@@ -132,6 +132,8 @@ formulated. For an illustrate of the latter see Example 2 under [examples](#exam
 
 Here we will work with a known objective function to optimize
 ```python
+# === Step 2: solve the problem ===
+
 # univariate function to optimize
 import torch
 
@@ -353,16 +355,16 @@ applications of the framework with known results.
 #### Test tooling
 
 The `pytest` framework is used for this library, with all tests residing in 
-[`creative_project\tests`](creative_project/tests). To execute all tests, run the following from the terminal from the 
+[`creative_project\tests`](tests). To execute all tests, run the following from the terminal from the 
 project root folder (`creative_project`)
 ```python
 ~/creative_project$ python -m pytest tests/
 ```
 
 The tests are available in 
-* Unit tests: [`creative_project\tests\unit`](creative_project/tests/unit)
-* Integration tests: [`creative_project\tests\integration`](creative_project/tests/integration)
-* Sample problems: [`creative_project\tests\sample_problems`](creative_project/tests/sample_problems)
+* Unit tests: [`creative_project\tests\unit`](unit)
+* Integration tests: [`creative_project\tests\integration`](integration)
+* Sample problems: [`creative_project\tests\sample_problems`](sample_problems)
 
 All fixtures are collected in `tests\conftest.py` and config is specified in `tests\pytest.ini`.
 
