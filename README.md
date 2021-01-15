@@ -268,9 +268,36 @@ The optimization can be stopped before `max_iter` steps have been taken by speci
 improvement in best observed response value (`best_response_value`). This is invoked by providing the parameter 
 `rel_tol` to the `.auto` method. 
 
+```python
+# some function to optimize
+def f(x):
+  ...
+
+# parameters
+max_iter = 100
+rel_tol = 1e-10
+
+# run the auto-method
+cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol)
+```
+
 In most cases the best results are found by requiring the `rel_tol` limit to be satisfied for multiple consecutive
 iterations. This can be achieved by also providing the number of consecutive steps required `rel_tol_steps`. If 
 `rel_tol_steps` is not provided, the limit on relative improvement only needs to be reached once for convergence.
+
+```python
+# some function to optimize
+def f(x):
+  ...
+
+# parameters
+max_iter = 100
+rel_tol = 1e-10
+rel_tol_steps = 5
+
+# run the auto-method
+cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
+```
 
 Best practises on using `rel_tol` and `rel_tol_steps` are provided in Example 5 in [examples](examples).
 
