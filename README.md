@@ -257,9 +257,15 @@ These acquisition functions are currently available
 
 ### Closed-loop: the `.auto` method
 
-#### Stopping based on relative improvement in best response
+#### Stopping based on relative improvement in best response: `rel_tol` and `rel_tol_steps`
 
 ### Iterative: the `.ask` and `.tell` methods
+
+Describe how to use + how with unknown function
+
+#### Providing input via prompt
+
+
 
 
 
