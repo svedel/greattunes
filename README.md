@@ -153,11 +153,11 @@ The following key attributes are stored for each optimization as part of the ins
 
 | Attribute | Comments |
 | --------- | -------- |
-| `train_X` | All *observed* covariates with dimensions $\mathrm{num_observations} \times \mathrm{num_covariates}$. |
-| `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions $\mathrm{num_observations} \times \mathrm{num_covariates}$. |
-| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions $\mathrm{num_observations} \times 1$. |
-| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions $\mathrm{num_observations} \times 1$. |
-| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions $\mathrm{num_observations} \times \mathrm{num_covariates}$. |    
+| `train_X` | All *observed* covariates with dimensions `num_observations` $\times$ `num_covariates`. |
+| `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions `num_observations` $\times$ `num_covariates`. |
+| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` $\times$ 1. |
+| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` $\times$ 1. |
+| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions $`num_observations` $\times$ `num_covariates`. |    
 
 ### Initialization options
 
@@ -257,7 +257,22 @@ These acquisition functions are currently available
 
 ### Closed-loop: the `.auto` method
 
-#### Stopping based on relative improvement in best response: `rel_tol` and `rel_tol_steps`
+Closed-loop optimization refers to situations where the function is known and therefore can iterate itself to 
+optimality. These are addressed via the `.auto` method, which takes a function handle `response_samp_func` as well as a 
+maximum number of iterations `max_iter` as input parameters. See the [example above](#Step-2:-Solve-the-problem) as 
+illustration of how to use the method.
+
+#### Stopping based on relative improvement in best observed response: `rel_tol` and `rel_tol_steps`
+
+The optimization can be stopped before `max_iter` steps have been taken by specifying the limit on the relative 
+improvement in best observed response value (`best_response_value`). This is invoked by providing the parameter 
+`rel_tol` to the `.auto` method. 
+
+In most cases the best results are found by requiring the `rel_tol` limit to be satisfied for multiple consecutive
+iterations. This can be achieved by also providing the number of consecutive steps required `rel_tol_steps`. If 
+`rel_tol_steps` is not provided, the limit on relative improvement only needs to be reached once for convergence.
+
+Best practises on using `rel_tol` and `rel_tol_steps` are provided in Example 5 in [examples](examples).
 
 ### Iterative: the `.ask` and `.tell` methods
 
