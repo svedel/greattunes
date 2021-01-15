@@ -85,7 +85,7 @@ where `<version>` is the latest version in normal `python` format of `MAJOR.MINO
 
 All capabilities of the framework are described below.
 
-For those wanting to skip directly to working with the framework, a number of examples of how to use the framework end-to-end are included as Jupyter notebooks in [examples](#examples).  
+For readers wanting to skip directly to working with the framework, a number of examples of how to use the framework end-to-end are included as Jupyter notebooks in [examples](#examples).  
 
 ### Solving a problem
 
@@ -146,6 +146,18 @@ We are now ready to solve the problem. We will run for `max_iter`=20 iterations.
 
 Had we worked with an objective function `f` which could not be formulated explicitly, the right entrypoint would have
 been to use the `.ask`-`.tell` methods instead of `.auto`.
+
+### Key attributes
+
+The following key attributes are stored for each optimization as part of the instantiated class 
+
+| Attribute | Comments |
+| --------- | -------- |
+| `train_X` | All *observed* covariates with dimensions $\mathrm{num_observations} \times \mathrm{num_covariates}$. |
+| `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions $\mathrm{num_observations} \times \mathrm{num_covariates}$. |
+| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions $\mathrm{num_observations} \times 1$. |
+| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions $\mathrm{num_observations} \times 1$. |
+| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions $\mathrm{num_observations} \times \mathrm{num_covariates}$. |    
 
 ### Initialization options
 
@@ -237,7 +249,15 @@ class initialization
 
 #### Acquisition functions
 
+These acquisition functions are currently available
+
+| Acquisition function name | Comments |
+| ------------------------- | -------- |
+| `"EI"` | Expected improvement acquisition function. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+
 ### Closed-loop: the `.auto` method
+
+#### Stopping based on relative improvement in best response
 
 ### Iterative: the `.ask` and `.tell` methods
 
