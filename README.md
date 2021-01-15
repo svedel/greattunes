@@ -153,11 +153,11 @@ The following key attributes are stored for each optimization as part of the ins
 
 | Attribute | Comments |
 | --------- | -------- |
-| `train_X` | All *observed* covariates with dimensions `num_observations` $\times$ `num_covariates`. |
-| `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions `num_observations` $\times$ `num_covariates`. |
-| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` $\times$ 1. |
-| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` $\times$ 1. |
-| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions $`num_observations` $\times$ `num_covariates`. |    
+| `train_X` | All *observed* covariates with dimensions `num_observations` X `num_covariates`. |
+| `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions `num_observations` X `num_covariates`. |
+| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` X 1. |
+| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. |
+| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. |    
 
 ### Initialization options
 
