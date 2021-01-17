@@ -2,8 +2,10 @@
 
 ![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
 
-Easy-to-use Bayesian Optimization library made available for either closed-loop or user-driven (manual) optimization of either 
+Easy-to-use Bayesian optimization library made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
+
+For a short primer on Bayesian optimization, see [this section](#a-primer-on-bayesian-optimization)  
 
 ## Features
 
@@ -373,21 +375,29 @@ from an instrument.
 Observed covariates and observed responses are sometimes off. To override the latest datapoint for either, simply 
 provide it again in the same iteration. This will automatically override the latest reported value 
 ```python
-
-PROVIDE EXAMPLE HERE
-
 # in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
-max_iter = 20
+# further assumes that at least on full iteration has been taken
 
-for i in range(max_iter):
-  
-    # generate candidate
-    cc.ask()  # new candidate is last row in cc.proposed_X
+# define a response
+def f(x):
+  ...
 
-    # report response
-    cc.tell()
+# generate candidate
+cc.ask()  # new candidate is last row in cc.proposed_X
+
+# first result
+observed_results = torch.tensor([[it.item() for it in cc.proposed_X[-1]]], dtype=torch.double)
+observed_response = torch.tensor([[f(cc.proposed_X[-1]).item()]], dtype=torch.double)
+
+# report first response
+cc.tell(covars=observed_results, response=observed_response)
+
+# second result
+observed_response_second = observed_response + 1
+
+# update response
+cc.tell(covars=observed_results, response=observed_response_second)
 ```
-
 
 
 ## Examples 
@@ -472,8 +482,48 @@ and perform style corrections if needed
 
 ## A primer on Bayesian optimization
 
+A number of good resources are available for Bayesian optimization, so below follows only a short primer. Interested
+readers are referred to the references listed below for more information.
+
+### Basics of Bayesian optimization
+
+Briefly and heuristically, Bayesian optimization works as follows. 
+1. Define a *objective function*. The goal of the optimization is to maximize this function.
+2. Define a *surrogate model*. This is an approximation of the actual functional dependencies underlying the objective
+function. Because Bayesian optimization builds its own model there is no requirement that the objective function can be
+   written as a mathematical expression.
+3. Define an *acquisition function*. This function is applied to the surrogate model to identify the next datapoint to
+sample (as such, the acquisition function is actually a functional)
+4. Iterate:
+    * Use the acquisition function to identify the next data point to sample.
+    * Observe the response of the objective function at the proposed point  
+    * Based on all observed covariates and responses of the objective function, update the surrogate model via Bayes 
+      theorem and repeat. 
+
+### Surrogate models
+
+A typical choice of surrogate model class is the [Gaussian process](https://en.wikipedia.org/wiki/Gaussian_process), 
+but this is not a strict requirement. Examples exist in which both random forest and various types of neural networks 
+have been used. 
+
+Formally, Bayesian optimization considers the function to be optimized as unknown and instead places a Bayesian prior
+distribution over it. This is the initial surrogate model. Upon observing the response, the prior model is updated to 
+obtain the posterior distribution of functions.
+
+The benefit of Gaussian process models is their explicit modeling of the uncertainty and ease of obtaining the posterior.
+
+### Acquisition functions
+
+Acquisition functions (functionals) propose the best point to sample for a particular problem, given the
+prior distribution of the surrogate model.
+
+A number of different functions exist, with some typical ones provided in Peter Frazier's 
+[Tutorial on Bayesian Optimization](https://arxiv.org/pdf/1807.02811.pdf). They typically balance exploration and 
+exploitation in different ways.
+
 ## References
 A list of Bayesian optimization references for later use
+* [Wikipedia entry on Bayesian optimization](https://en.wikipedia.org/wiki/Bayesian_optimization)
 * [borealis.ai](https://www.borealisai.com/en/blog/tutorial-8-bayesian-optimization/)
 * [bayesopt, SigOpt page](http://bayesopt.github.io/)
 * [Towards Data Science](https://towardsdatascience.com/quick-start-to-gaussian-process-regression-36d838810319)
