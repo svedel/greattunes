@@ -5,7 +5,7 @@
 Easy-to-use Bayesian optimization library made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
-For a short primer on Bayesian optimization, see [this section](#a-primer-on-bayesian-optimization)  
+A short primer on Bayesian optimization is provided in [this section](#a-primer-on-bayesian-optimization).  
 
 ## Features
 
