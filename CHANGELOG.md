@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Version number for this release: 0.0.2
+
+### Added
+* In `.tell`-method:
+    * Optional functionality to provide observations of covariates and response programmatically (provide as input
+      parameters `covars` and `response`)
+* In `.auto`-method: 
+    * Optional functionality to stop based on relative improvement of best response detected by the algorithm. Users can 
+      stop the algorithm as soon as the relative improvement of the best response drops below a user-specified limit in 
+      order to improve the speed of reaching an answer. See Example 5 in `examples` for illustration.
+* Examples of end-to-end workflows of using the library as Jupyter notebooks are added in `examples` folder with descriptions.
+
+
+### Changed
+* Extended the README.md of the repo to describe usage, design decisions, repo content and how to contribute
+
+### Deprecated
+None
+
+### Removed
+None
+
+### Fixed
+None
+
+## [0.0.1] - December 30, 2020
+
 Version number for first release: 0.0.1
 
 ### Added
@@ -20,7 +47,10 @@ developer and user experience.
 for code to be considered passing. 
 
 ### Deprecated
+None
 
 ### Removed
+None
 
 ### Fixed
+None
