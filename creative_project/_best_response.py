@@ -123,18 +123,19 @@ def _update_proposed_data(self, candidate):
 
     # check number of covariates in "candidate" (only if previous records exist)
     if self.proposed_X is not None:
-        assert candidate.size()[1] == self.proposed_X.size()[1], (
-            "creative_project._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected "
-            + str(self.proposed_X.size()[1])
-            + ", but got "
-            + str(candidate.size()[1])
+        assert (
+            candidate.size()[1] == self.proposed_X.size()[1]
+        ), "creative_project._best_response._update_proposed_data: wrong number of covariates provided in " "'candidate'. Expected " + str(
+            self.proposed_X.size()[1]
+        ) + ", but got " + str(
+            candidate.size()[1]
         )
 
     # takes latest sampled covariates and store proposal as next
     # update counter
     self.model["covars_proposed_iter"] = self.model["covars_sampled_iter"] + 1
 
-    # add proposed candidate
+    # === add proposed candidate ===
     # special case if no data stored previously (in which case self.proposed_X is None)
     if self.proposed_X is None:
         self.proposed_X = candidate

@@ -5,7 +5,7 @@ import torch
 from .utils import __get_covars_from_kwargs
 
 
-### Response methods ###
+# === Response methods ===
 def _get_response_datapoint(self, response):
     """
     gets observation of actual response y. Updates stored data, counters etc.
@@ -48,8 +48,8 @@ def _get_and_verify_response_input(self, **kwargs):
     """
     read and verify response. Assumes only a single input, and does not do any verification.
     :input:
-        - self.sampling["method"]: determines how to get the response data (iteratively via input or function evaluation).
-        Default model self.sampling["method"] = 'iterative' is set in creative_project.__init__.py
+        - self.sampling["method"]: determines how to get the response data (iteratively via input or function
+        evaluation). Default model self.sampling["method"] = 'iterative' is set in creative_project.__init__.py
     :kwargs:
         - response (list or torch tensor or None): kwarg input in _campaign.tell (None if not present in tell). This
         provides a programmatic way of providing the response data
@@ -139,7 +139,7 @@ def _read_response_manual_input(self, additional_text):
     return response_candidate_float_tensor
 
 
-### Covariate methods ###
+# === Covariate methods ===
 def _print_candidate_to_prompt(self, candidate):
     """
     prints a candidate for new data point to prompt in user-friendly manner.
