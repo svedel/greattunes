@@ -308,11 +308,63 @@ Best practises on using `rel_tol` and `rel_tol_steps` are provided in Example 5 
 
 ### Iterative: the `.ask` and `.tell` methods
 
-Describe how to use + how with unknown function
+The true value of Bayesian optimization is its ability to optimize problems which cannot be formulated mathematically.
+The mathematical method can work as long as a response can be generated, and in fact makes no assumptions on the 
+nature of the problem (except that a maximum is present). Thus, whether the response is generated as a measurement from
+an experiment, the feedback from users or the output of a defined mathematical function does not matter; all can be
+optimized via the framework.
+
+Optimization of unknown functions is handled by the methods `.ask` and `.tell`.
+* `.ask` provides a best guess of the next covariate data point to sample, given the history of previously sampled points for the 
+  problem (that is, `.ask` provides the output of the acquisition function)
+* `.tell` is the method to report the observed covariate data point and the associated response
+One call to `.ask` followed by a call to `.tell` performs one iteration of `.auto` from the point of view of the 
+Bayesian optimization; the difference is only in how to interface with it. Examples 2 and 3 in [examples](examples)
+shows how to use `.ask`-`.tell` to solve problems end-to-end.  
+
+To solve a problem, apply these problems iteratively: in each iteration start by calling `.ask`, then use the proposed 
+new data point to sample the system response and provide both this value and the actually sampled covariate values (can 
+be different from proposed values) back via `.tell`.
+
+```python
+# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+max_iter = 20
+
+for i in range(max_iter):
+  
+    # generate candidate
+    cc.ask()  # new candidate is last row in cc.proposed_X
+
+    # sample response (beware results must be formulated as torch tensors)
+    observed_covars = <from measurement or from cc.proposed_X>
+    observed_response = <from measurement or from specified objective function>
+
+    # report response
+    cc.tell(covars=observed_covars, response=observed_response)
+```
 
 #### Providing input via prompt
 
+Observations of covariates and response can be provided manually to `.tell`. To do so, simply call `.tell` without any 
+arguments at each iteration (all book keeping will be handled on backend)
+```python
+# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+max_iter = 20
 
+for i in range(max_iter):
+  
+    # generate candidate
+    cc.ask()  # new candidate is last row in cc.proposed_X
+
+    # report response
+    cc.tell()
+```
+
+In this case, the user will be prompted to provide input manually. There will be 3 attempts to provide covariates 
+(another 3 for response), and the method will stop if not successful within these attempts. Provided input data will be
+validated for number of variables and data type as part of these cycles.
+
+#### Overriding reported values of covariates or response 
 
 
 
@@ -403,6 +455,8 @@ and perform style corrections if needed
 ~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --diff" # shows changes that could be done
 ~/creative_project$ /bin/sh -c "isort creative_project/**/*.py" # makes the changes (only command needed to update the code)
 ```
+
+## A primer on Bayesian optimization
 
 ## References
 A list of Bayesian optimization references for later use
