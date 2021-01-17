@@ -364,17 +364,31 @@ In this case, the user will be prompted to provide input manually. There will be
 (another 3 for response), and the method will stop if not successful within these attempts. Provided input data will be
 validated for number of variables and data type as part of these cycles.
 
+Any of `covars` and `response` not provided as (named) parameter to `.tell` the user will be requested to provide via 
+manual input in prompt. It is thus possible to get e.g. covariates automatically but manually read off response values
+from an instrument.
+
 #### Overriding reported values of covariates or response 
 
+Observed covariates and observed responses are sometimes off. To override the latest datapoint for either, simply 
+provide it again in the same iteration. This will automatically override the latest reported value 
+```python
+
+PROVIDE EXAMPLE HERE
+
+# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+max_iter = 20
+
+for i in range(max_iter):
+  
+    # generate candidate
+    cc.ask()  # new candidate is last row in cc.proposed_X
+
+    # report response
+    cc.tell()
+```
 
 
-
-
-
-
-NOTE: the new response data counter ("how many responses do we have") is derived from the number of proposed 
-    covariates, not the number of sampled responses. This in order to allow for a covariate to be reported after the
-    response. However, only when .ask-method is rerun will can new covariates and responses be added.
 
 ## Examples 
 
