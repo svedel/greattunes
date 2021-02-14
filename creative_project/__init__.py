@@ -1,8 +1,6 @@
 import torch
 from ._initializers import Initializers
 from ._acq_func import AcqFunction
-
-# import version (perhaps move outside class?)
 from ._version import __version__
 
 
