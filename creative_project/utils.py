@@ -64,7 +64,9 @@ class DataSamplers:
         """
 
         # number of covariates
-        NUM_COVARS = initial_guess.shape[1]  # initial_guess has size 1 x <num covariates>
+        NUM_COVARS = initial_guess.shape[
+            1
+        ]  # initial_guess has size 1 x <num covariates>
 
         # initialize
         candidate = torch.empty((1, NUM_COVARS), dtype=dtype, device=device)
@@ -73,11 +75,11 @@ class DataSamplers:
         # iterate since each covariate has its own bounds on the covariate range.
         # attribute covar_bounds stores lower bounds in row 0, upper bounds in row 1, and torch.rand samples uniformly
         for i in range(NUM_COVARS):
-            candidate[0, i] = (covar_bounds[1, i] - covar_bounds[0, i]) * torch.rand(1) \
-                              + covar_bounds[0, i]
+            candidate[0, i] = (covar_bounds[1, i] - covar_bounds[0, i]) * torch.rand(
+                1
+            ) + covar_bounds[0, i]
 
         return candidate
-
 
     @staticmethod
     def latin_hcs(n_samp, initial_guess, covar_bounds, device):
@@ -101,7 +103,9 @@ class DataSamplers:
         """
 
         # number of covariates
-        NUM_COVARS = initial_guess.shape[1]  # initial_guess has size 1 x <num covariates>
+        NUM_COVARS = initial_guess.shape[
+            1
+        ]  # initial_guess has size 1 x <num covariates>
 
         # create array of bins. Each row corresponds to a unique point in the Latin hypercube
         bins = np.zeros((n_samp, NUM_COVARS))
@@ -114,11 +118,15 @@ class DataSamplers:
         for i in range(NUM_COVARS):
             # bin boundaries for this covariate
             # add a final datapoint to get the bin separations (n_samp + 1)
-            bin_boundaries_tmp = np.linspace(covar_bounds[0, i].item(), covar_bounds[1, i].item(), n_samp+1)
+            bin_boundaries_tmp = np.linspace(
+                covar_bounds[0, i].item(), covar_bounds[1, i].item(), n_samp + 1
+            )
 
             # random sampling with uniform distribution within bin
             # this has size 1 X n_samp
-            candidates_array[:, i] = np.random.uniform(low=bin_boundaries_tmp[:-1], high=bin_boundaries_tmp[1:])
+            candidates_array[:, i] = np.random.uniform(
+                low=bin_boundaries_tmp[:-1], high=bin_boundaries_tmp[1:]
+            )
 
         # convert to torch tensor. Each row in this tensor is a candidate
         # the chained .double() command converts to array of data type double
