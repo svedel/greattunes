@@ -33,14 +33,14 @@ class CreativeProject(Initializers, AcqFunction):
             - nu (float): kernel parameter for Matern kernel
         """
 
-        # Computational settings
+        # === Computational settings ===
         # determines computation device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # data type for tensors
         self.dtype = torch.double
 
-        # Data initialization
+        # === Data initialization ===
         # initialize the data (initial guess) and bounds on covars
         (
             self.initial_guess,
