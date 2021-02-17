@@ -52,34 +52,34 @@ class DataSamplers:
     """
 
     @staticmethod
-    def random(initial_guess, covar_bounds, device, dtype):
+    def random(n_samp, initial_guess, covar_bounds, device):
         """
         randomly samples each covariate within bounds to provice new candidate datapoint
+        :param n_samp (int): number of samples to be generated. Defines number of subsegments for each covariate, from
+        which each new candidate datapoint are obtained
         :param initial_guess (tensor, 1 X <num covariates>): contains all initial guesses for covariate values
             provided by user
         :param covar_bounds (tensor, 2 X <num covariates>): upper and lower bounds for covariates provided by user
         :param device (torch device): computational device used
-        :param dtype (torch dtype): tensor data type of output
-        :return: candidate (tensor, 1 X <num covariates>): new candidate
+        :return: candidates (tensor, n_samp X <num covariates>): tensor of new candidates
         """
 
         # number of covariates
-        NUM_COVARS = initial_guess.shape[
-            1
-        ]  # initial_guess has size 1 x <num covariates>
-
-        # initialize
-        candidate = torch.empty((1, NUM_COVARS), dtype=dtype, device=device)
+        # initial_guess has size 1 x <num covariates>
+        NUM_COVARS = initial_guess.shape[1]
 
         # randomly sample each covariate. Use uniform sampling probability within bounds provided (self.covar_bounds).
         # iterate since each covariate has its own bounds on the covariate range.
-        # attribute covar_bounds stores lower bounds in row 0, upper bounds in row 1, and torch.rand samples uniformly
-        for i in range(NUM_COVARS):
-            candidate[0, i] = (covar_bounds[1, i] - covar_bounds[0, i]) * torch.rand(
-                1
-            ) + covar_bounds[0, i]
+        # attribute covar_bounds stores lower bounds in row 0, upper bounds in row 1, and first tuple entry in 'size'
+        # argument determines number of repeat samples
+        candidates_array = np.random.uniform(low=covar_bounds[0,:].numpy(), high=covar_bounds[1,:].numpy(),
+                                             size=(n_samp, NUM_COVARS))
 
-        return candidate
+        # convert to torch tensor. Each row in this tensor is a candidate
+        # the chained .double() command converts to array of data type double
+        candidates = torch.from_numpy(candidates_array).double().to(device)
+
+        return candidates
 
     @staticmethod
     def latin_hcs(n_samp, initial_guess, covar_bounds, device):
