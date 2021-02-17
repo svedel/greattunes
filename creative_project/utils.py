@@ -72,8 +72,11 @@ class DataSamplers:
         # iterate since each covariate has its own bounds on the covariate range.
         # attribute covar_bounds stores lower bounds in row 0, upper bounds in row 1, and first tuple entry in 'size'
         # argument determines number of repeat samples
-        candidates_array = np.random.uniform(low=covar_bounds[0,:].numpy(), high=covar_bounds[1,:].numpy(),
-                                             size=(n_samp, NUM_COVARS))
+        candidates_array = np.random.uniform(
+            low=covar_bounds[0, :].numpy(),
+            high=covar_bounds[1, :].numpy(),
+            size=(n_samp, NUM_COVARS),
+        )
 
         # convert to torch tensor. Each row in this tensor is a candidate
         # the chained .double() command converts to array of data type double
