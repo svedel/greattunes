@@ -1,5 +1,8 @@
+import math
 import torch
+import warnings
 from creative_project._validators import Validators
+from creative_project.utils import DataSamplers
 
 
 class Initializers(Validators):
@@ -91,7 +94,7 @@ class Initializers(Validators):
         """
 
         # bool attribute used in 'ask'-method to determine whether training data has been provided
-        self.start_from_guess = True
+        #self.start_from_guess = True
 
         # initialize
         self.proposed_X = None
@@ -120,3 +123,87 @@ class Initializers(Validators):
                     # initialize proposed_X with empty (i.e. 0 to machine precision) since we have no proposals for
                     # train_X
                     self.proposed_X = torch.empty(train_X.size())
+
+    def __initialize_random_start(self, random_start, num_initial_random, random_sampling_method):
+        """
+        set details for how to randomize at start
+        :param random_start (bool): input from user (set during CreativeProject.__init__)
+        :param num_initial_random (int/None): provided as kwarg input from user (set during CreativeProject.__init__)
+        :param random_sampling_method (str/None): sampling method for random points. Options: "random" and "latin_hcs"
+        (latin hypercube sampling). Provided as kwarg input from user (set during CreativeProject.__init__)
+        :param (attributes)
+            - self.train_X (tensor/None): user-provided data for covariates. Only present if data passes validation
+            - self.train_Y (tensor/None): user-provided data for response. Only present if data passes validation
+        :return:
+            - self.num_initial_random_points (int): number of initial random datapoints. If set to 0, there's no
+            random start
+            - self.random_sampling_method (str): sampling method for random points. Options: "random" and "latin_hcs"
+        (latin hypercube sampling).
+        """
+
+        # control that 'random_sampling_method' is part of acceptable options
+        SAMPLING_METHODS_LIST = [func for func in dir(DataSamplers) if callable(getattr(DataSamplers, func)) and not func.startswith("__")]
+        if (random_sampling_method is not None)&(random_sampling_method not in SAMPLING_METHODS_LIST):
+            raise Exception("creative_project._initializers.Initializers.__initialize_random_start: The parameter "
+                            "'random_sampling_method' is not among allowed values ('" + "', '".join(SAMPLING_METHODS_LIST) + "').")
+
+        # set sampling method
+        if random_sampling_method is None:
+            self.random_sampling_method = "latin_hcs"  # default to latin hypercube sampling if not specified
+        else:
+            self.random_sampling_method = random_sampling_method
+
+        # split: train_X, train_Y present
+        if (self.train_X is not None)&(self.train_Y is not None):
+
+            # CASE 1: train_X, train_Y present; random_start = False
+            if not random_start:
+
+                # set 0 initial random sampling points
+                self.num_initial_random_points = 0
+                # in this special case, do not set any sampling method (since won't use)
+                self.random_sampling_method = None
+
+            # CASE 2: train_X, train_Y present; random_start = True
+            else:
+
+                # set number of initial points or make own guess
+                self.num_initial_random_points = self.determine_number_random_samples()
+                if num_initial_random is not None:
+                    self.num_initial_random_points = num_initial_random
+
+        # split: train_X, train_Y NOT present
+        else:
+
+            # CASE 3: train_X, train_Y NOT present; random_start = False
+            if not random_start:
+                self.num_initial_random_points = self.determine_number_random_samples()
+                # TODO: when adding logging, switch to setting this warning via logging message with level "warn", see
+                # here: "As an alternative, especially for standalone applications, consider the logging module. It can
+                # log messages having a level of debug, info, warning, error, etc. Log messages having a level of
+                # warning or higher are by default printed to stderr."
+                warnings.warn("Inconsistent settings for optimization initialization: No initial data provided via "
+                              "'train_X' and 'train_Y' but also 'random_start' is set to 'False'. Adjusting to start"
+                              " with " + str(self.num_initial_random_points) + " random datapoints")
+
+            # CASE 4: train_X, train_Y NOT present; random_start = True
+            else:
+
+                self.num_initial_random_points = self.determine_number_random_samples()
+                if num_initial_random is not None:
+                    self.num_initial_random_points = num_initial_random
+
+    def determine_number_random_samples(self):
+        """
+        estimates number of random samples to initiate an optimization run. Rule of thumb is to do sqrt(d) initial
+        random steps for a problem with d covariates
+        :param
+            - self.__covars (list of tuples): the user-provided details on covariates. Here using only the length of
+            the list, which gives the number of covariates
+        :return: num_random (int)
+        """
+
+        NUM_COVARS = len(self.__covars)
+        num_random = int(round(math.sqrt(NUM_COVARS), 0))
+
+        return num_random
