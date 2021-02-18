@@ -1,6 +1,8 @@
 import math
-import torch
 import warnings
+
+import torch
+
 from creative_project._validators import Validators
 from creative_project.utils import DataSamplers
 
@@ -94,7 +96,7 @@ class Initializers(Validators):
         """
 
         # bool attribute used in 'ask'-method to determine whether training data has been provided
-        #self.start_from_guess = True
+        # self.start_from_guess = True
 
         # initialize
         self.proposed_X = None
@@ -124,7 +126,9 @@ class Initializers(Validators):
                     # train_X
                     self.proposed_X = torch.empty(train_X.size())
 
-    def __initialize_random_start(self, random_start, num_initial_random, random_sampling_method):
+    def __initialize_random_start(
+        self, random_start, num_initial_random, random_sampling_method
+    ):
         """
         set details for how to randomize at start
         :param random_start (bool): input from user (set during CreativeProject.__init__)
@@ -142,19 +146,31 @@ class Initializers(Validators):
         """
 
         # control that 'random_sampling_method' is part of acceptable options
-        SAMPLING_METHODS_LIST = [func for func in dir(DataSamplers) if callable(getattr(DataSamplers, func)) and not func.startswith("__")]
-        if (random_sampling_method is not None)&(random_sampling_method not in SAMPLING_METHODS_LIST):
-            raise Exception("creative_project._initializers.Initializers.__initialize_random_start: The parameter "
-                            "'random_sampling_method' is not among allowed values ('" + "', '".join(SAMPLING_METHODS_LIST) + "').")
+        SAMPLING_METHODS_LIST = [
+            func
+            for func in dir(DataSamplers)
+            if callable(getattr(DataSamplers, func)) and not func.startswith("__")
+        ]
+        if (random_sampling_method is not None) & (
+            random_sampling_method not in SAMPLING_METHODS_LIST
+        ):
+            raise Exception(
+                "creative_project._initializers.Initializers.__initialize_random_start: The parameter "
+                "'random_sampling_method' is not among allowed values ('"
+                + "', '".join(SAMPLING_METHODS_LIST)
+                + "')."
+            )
 
         # set sampling method
         if random_sampling_method is None:
-            self.random_sampling_method = "latin_hcs"  # default to latin hypercube sampling if not specified
+            self.random_sampling_method = (
+                "latin_hcs"  # default to latin hypercube sampling if not specified
+            )
         else:
             self.random_sampling_method = random_sampling_method
 
         # split: train_X, train_Y present
-        if (self.train_X is not None)&(self.train_Y is not None):
+        if (self.train_X is not None) & (self.train_Y is not None):
 
             # CASE 1: train_X, train_Y present; random_start = False
             if not random_start:
@@ -182,9 +198,13 @@ class Initializers(Validators):
                 # here: "As an alternative, especially for standalone applications, consider the logging module. It can
                 # log messages having a level of debug, info, warning, error, etc. Log messages having a level of
                 # warning or higher are by default printed to stderr."
-                warnings.warn("Inconsistent settings for optimization initialization: No initial data provided via "
-                              "'train_X' and 'train_Y' but also 'random_start' is set to 'False'. Adjusting to start"
-                              " with " + str(self.num_initial_random_points) + " random datapoints")
+                warnings.warn(
+                    "Inconsistent settings for optimization initialization: No initial data provided via "
+                    "'train_X' and 'train_Y' but also 'random_start' is set to 'False'. Adjusting to start"
+                    " with "
+                    + str(self.num_initial_random_points)
+                    + " random datapoints"
+                )
 
             # CASE 4: train_X, train_Y NOT present; random_start = True
             else:
