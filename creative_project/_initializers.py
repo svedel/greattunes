@@ -82,21 +82,15 @@ class Initializers(Validators):
     def __initialize_training_data(self, train_X, train_Y):
         """
         determine whether training data and response data have been added as part of initialization of class instance.
-        Set attribute "start_from_guess"
         :param train_X (torch.tensor): design matrix of covariates (batch_shape X num_obs X num_training_features OR
         num_obs X num_training_features)
         :param train_Y (torch.tensor): observations (batch_shape X num_obs X num_output_models
         [allows for batched models] OR num_obs X num_output_models)
         :return (creates class attributes):
-            - start_from_guess (bool): determines whether can start from provided training data (False if
-            no/invalid/inconsistent data provided)
             - train_X (tensor): design matrix of covariates
             - train_Y (tensor): corresponding observations
             - proposed_X (tensor): the covariates proposed for analysis. Set to train_X
         """
-
-        # bool attribute used in 'ask'-method to determine whether training data has been provided
-        # self.start_from_guess = True
 
         # initialize
         self.proposed_X = None
@@ -116,7 +110,6 @@ class Initializers(Validators):
                 # instance initialization)
                 if self._Validators__validate_training_data(train_X, train_Y):
                     # set flag attribute indicating data is acceptable for hotstart
-                    self.start_from_guess = False
 
                     # update stored data
                     self.train_X = train_X
@@ -203,7 +196,7 @@ class Initializers(Validators):
                     "'train_X' and 'train_Y' but also 'random_start' is set to 'False'. Adjusting to start"
                     " with "
                     + str(self.num_initial_random_points)
-                    + " random datapoints"
+                    + " random datapoints."
                 )
 
             # CASE 4: train_X, train_Y NOT present; random_start = True
@@ -218,12 +211,12 @@ class Initializers(Validators):
         estimates number of random samples to initiate an optimization run. Rule of thumb is to do sqrt(d) initial
         random steps for a problem with d covariates
         :param
-            - self.__covars (list of tuples): the user-provided details on covariates. Here using only the length of
+            - self.covars (list of tuples): the user-provided details on covariates. Here using only the length of
             the list, which gives the number of covariates
         :return: num_random (int)
         """
 
-        NUM_COVARS = len(self.__covars)
+        NUM_COVARS = len(self.covars)
         num_random = int(round(math.sqrt(NUM_COVARS), 0))
 
         return num_random
