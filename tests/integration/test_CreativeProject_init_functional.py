@@ -118,3 +118,31 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_fails_functiona
 
     assert cls.train_X is None
     assert cls.train_Y is None
+
+
+@pytest.mark.parametrize(
+    "random_start, num_initial_random, random_sampling_method, train_X, train_Y, num_samples_res, method_sampling_res",
+    [
+        [True, None, "latin_hcs", None, None, 2, "latin_hcs"],  # because we have 3 covariates (see below), and no number of initial random samples have been provided, the method will default to round(sqrt(3)) = 2
+        [True, 3, "random", torch.tensor([[1, 2, 3], [2, 3, 4]], dtype=torch.double), torch.tensor([[43], [44]], dtype=torch.double), 3, "random"],  # here expect the number of initial points to be inherited from input
+    ]
+)
+def test_CreativeProject__init__initialize_random_start_works(random_start, num_initial_random, random_sampling_method,
+                                                              train_X, train_Y, num_samples_res, method_sampling_res):
+    """
+    test that initialization of random start parameters works. There are 4 different cases treated by
+    '__initialize_random_start', which are exhaustively tested by unit and integration tests for _initializers.py. Hence
+    purpose of present tests is only to ensure that the method also works when initalizing from CreativeProject, and
+    thus we are running with reduced test load
+    """
+
+    # data
+    covars = [(1, 0, 4), (3.4, -1.2, 6), (12, 11, 17.8)]
+
+    # initialize class
+    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y, random_start=random_start,
+                          num_initial_random=num_initial_random, random_sampling_method=random_sampling_method)
+
+    # assert
+    assert cls.random_sampling_method == method_sampling_res
+    assert cls.num_initial_random_points == num_samples_res
