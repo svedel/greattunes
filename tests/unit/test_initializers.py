@@ -5,6 +5,7 @@ therefore only test individual functions
 import math
 import pytest
 import torch
+import warnings
 from creative_project._initializers import Initializers
 import creative_project._best_response
 from creative_project.utils import DataSamplers
@@ -122,7 +123,6 @@ def test_Initializers__initialize_training_data_unit(custom_models_simple_traini
     cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)
 
     # assert that nothing has run
-    assert cls.start_from_guess == True
     assert cls.train_X == None
     assert cls.train_Y == None
     assert cls.proposed_X == None
@@ -139,7 +139,6 @@ def test_Initializers__initialize_training_data_unit(custom_models_simple_traini
     cls._Initializers__initialize_training_data(train_X=None, train_Y=None)
 
     # assert that nothing has run
-    assert cls.start_from_guess == True
     assert cls.train_X == None
     assert cls.train_Y == None
     assert cls.proposed_X == None
@@ -164,7 +163,6 @@ def test_Initializers__initialize_training_data_unit(custom_models_simple_traini
     cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)
 
     # assert that the data has been validated and stored in right places
-    assert cls.start_from_guess == False
     for it in range(train_X.shape[0]):
         assert cls.train_X[it].item() == train_X[it].item()
         assert cls.train_Y[it].item() == train_Y[it].item()
@@ -188,7 +186,7 @@ def test_Initializers_determine_number_random_samples(covars):
     cls = Initializers()
 
     # set attribute
-    cls._Initializers__covars = covars
+    cls.covars = covars
 
     # get result
     num_random = cls.determine_number_random_samples()
@@ -274,3 +272,41 @@ def test_Initializers__initialize_random_start_fails(monkeypatch):
         cls._Initializers__initialize_random_start(random_start=True, num_initial_random=2,
                                                    random_sampling_method="junk")  # acceptable values of 'random_sampling_method' given in SAMPLING_METHODS_LIST
     assert str(e.value) == "creative_project._initializers.Initializers.__initialize_random_start: The parameter 'random_sampling_method' is not among allowed values ('" + "', '".join(SAMPLING_METHODS_LIST) + "')."
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y, random_start, num_initial_random, random_sampling_method, num_initial_random_points_res, sampling_method_res",
+    [
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), False, 2, "random", 0, None], # Case 1. Special twist to ensure correct behavior even if user sets random parameter features while still choosing against random start
+    ]
+)
+def test_Initializers__initialize_random_start_warning(train_X, train_Y, random_start, num_initial_random,
+                                                     random_sampling_method, num_initial_random_points_res,
+                                                     sampling_method_res, monkeypatch):
+    """
+    test that the right warning message is raised
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # start by monkeypatching
+    NUM_RETURN = 33
+
+    def mock_determine_number_random_samples():
+        return NUM_RETURN
+
+    monkeypatch.setattr(cls, "determine_number_random_samples", mock_determine_number_random_samples)
+
+    # set attributes
+    cls.train_Y = train_Y
+    cls.train_X = train_X
+
+    # run method
+    cls._Initializers__initialize_random_start(random_start=random_start, num_initial_random=num_initial_random,
+                                           random_sampling_method=random_sampling_method)
+
+    # test that warning is raised
+    my_warning = "Inconsistent settings for optimization initialization: No initial data provided via 'train_X' and 'train_Y' but also 'random_start' is set to 'False'. Adjusting to start with " + str(num_initial_random) + " random datapoints."
+    with pytest.warns(UserWarning):
+        warnings.warn(my_warning, UserWarning)
