@@ -177,16 +177,10 @@ def test_AcqFunction_random_candidate_int_works(covars_sampled_iter, num_initial
     candidate = cls.random_candidate()
 
     # assert only one candidate
-    if cls.model["covars_sampled_iter"] == 0:
-        assert len(candidate.size()) == 1
-    else:
-        assert candidate.size()[0] == 1
+    assert candidate.size()[0] == 1
 
     # assert correct number of rows
-    if cls.model["covars_sampled_iter"] == 0:
-        assert candidate.size()[0] == cls.initial_guess.shape[1]
-    else:
-        assert candidate.size()[1] == cls.initial_guess.shape[1]
+    assert candidate.size()[1] == cls.initial_guess.shape[1]
 
     # assert that candidates torch tensor has been stored as attribute
     if cls.model["covars_sampled_iter"] == 0:
