@@ -80,7 +80,6 @@ def test_Initializers__initialize_training_data_functional(custom_models_simple_
     cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)
 
     # assert that the data has been validated and stored in right places
-    assert cls.start_from_guess == False
     for it in range(train_X.shape[0]):
         assert cls.train_X[it].item() == train_X[it].item()
         assert cls.train_Y[it].item() == train_Y[it].item()
@@ -98,7 +97,6 @@ def test_Initializers__initialize_training_data_functional(custom_models_simple_
     cls._Initializers__initialize_training_data(train_X=None, train_Y=None)
 
     # assert that nothing has run
-    assert cls.start_from_guess == True
     assert cls.train_X == None
     assert cls.train_Y == None
     assert cls.proposed_X == None
@@ -134,7 +132,7 @@ def test_Initializers__initialize_random_start_functional(train_X, train_Y, cova
     # set attributes
     cls.train_Y = train_Y
     cls.train_X = train_X
-    cls._Initializers__covars = covars
+    cls.covars = covars
 
     # run method
     cls._Initializers__initialize_random_start(random_start=random_start, num_initial_random=num_initial_random,
