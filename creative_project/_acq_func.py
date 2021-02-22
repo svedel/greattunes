@@ -186,7 +186,9 @@ class AcqFunction:
 
             # get the candidate datapoint as a single row in the set of candidates
             # reshape to convert row into a matrix (required through code base)
-            candidate = self.__initial_random_candidates[current_iteration - 1, :].reshape((1, NUM_COVARS))
+            candidate = self.__initial_random_candidates[
+                current_iteration - 1, :
+            ].reshape((1, NUM_COVARS))
 
         # CASE 2: create random datapoints from interdispersed random points
         else:
