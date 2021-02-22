@@ -1038,10 +1038,12 @@ def test_CreativeProject_integration_ask_tell_ask_works(covars, model_type, trai
     """
     test that both surrogate model and acquisition functions are added and updated following two rounds of ask-tell.
     Monkeypatch "_read_covars_manual_input" and "_read_response_manual_input" from ._observe.py to circumvent manual
-    input via builtins.input
+    input via builtins.input. This automatically tests the new functionality of random start by starting from no data
+    (train_X, train_Y)
     """
 
     # initialize the class
+    # random_start = True is default, so this tests random start
     cc = CreativeProject(covars=covars, model=model_type)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
