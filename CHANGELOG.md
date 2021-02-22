@@ -19,6 +19,10 @@ Version number for this release: 0.0.3
          
 
 ### Changed
+In `CreativeProject` class initialization:
+* If historical data is added via `train_X`, `train_Y`
+    * `proposed_X` has been changed to be a zero tensor of the same size as `train_X`. This replaces an empty tensor for `proposed_X`, which confusingly could take any values.
+    * optimization cycle counters (iteration counters) `model["covars_proposed_iter"]`, `model["covars_sampled_iter"]` and `model["response_sampled_iter"]` are set so the first iterations are taken as those from the historical data. That is, if `train_X`, `train_Y` is provided with two observations during initialization, then the counters are set as `model["covars_proposed_iter"]=2`, `model["covars_sampled_iter"]=2` and `model["response_sampled_iter"]=2`.  
 
 ### Deprecated
 
