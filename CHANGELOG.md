@@ -10,12 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Version number for this release: 0.0.3
 
 ### Added
+* Added new random sampling functionality with two purposes. Firstly, during initialization it is known to be good to start with random sampling if no data is available. Secondly, and also to ensure speedier optimization convergence, a single randomly sampled point every now and then in between Bayesian points is known to increase convergence. Random sampling is now available for both `auto` approach and `ask`-`tell` approach with the following features
+    * During class initialization, using random initialization or not is controlled by `random_start` (default: `True`)
+    * Additional parameters during initialization 
+        * `num_initial_random`: number of initial random; no default, if not specified will be set to $\sqrt{# dimensions}$
+        * `andom_sampling_method`: sampling method with options `random` (completely random) and `latin_hcs` (latin hypercube sampling); defaults to `latin_hcs` 
+        * `random_step_cadence`: the cadence of random sampling after initialization (default: 10)
+         
 
 ### Changed
 
 ### Deprecated
 
 ### Removed
+Removed the attribute `start_from_random`.
 
 ### Fixed
 
