@@ -117,7 +117,12 @@ class Initializers(Validators):
 
                     # initialize proposed_X with empty (i.e. 0 to machine precision) since we have no proposals for
                     # train_X
-                    self.proposed_X = torch.empty(train_X.size())
+                    self.proposed_X = torch.zeros(train_X.size())
+
+                    # update counters
+                    self.model["covars_proposed_iter"] = train_X.size()[0]
+                    self.model["covars_sampled_iter"] = train_X.size()[0]
+                    self.model["response_sampled_iter"] = train_Y.size()[0]
 
     def __initialize_random_start(
         self, random_start, num_initial_random, random_sampling_method
