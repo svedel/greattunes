@@ -1,4 +1,5 @@
 import torch
+import warnings
 from ._initializers import Initializers
 from ._acq_func import AcqFunction
 from ._version import __version__
@@ -12,18 +13,30 @@ class CreativeProject(Initializers, AcqFunction):
     """
 
     # Initialize class instance
-    def __init__(self, covars, model="SingleTaskGP", acq_func="EI", **kwargs):
+    def __init__(
+        self,
+        covars,
+        model="SingleTaskGP",
+        acq_func="EI",
+        random_start=True,
+        random_step_cadence=10,
+        **kwargs,
+    ):
         """
         defines the optimization model. Uses BoTorch underneath the hood, so any BoTorch model and aqcuisition function
         can be used. "model" and "aqc_func" must follow BoTorch nomeclature. A list of custom models is also
         available/under development to be included.
+
         :param covars (list of tuples): each entry (tuple) must contain (<initial_guess>, <min>, <max>) for each input
         variable. Currently only allows for continuous variables. Aspiration: Data type of input will be preserved and
         code be adapted to accommodate both integer and categorical variables.
         :param model str: sets surrogate model (currently allow "SingleTaskGP" and "Custom")
         :param acq_func (str): sets acquisition function (currently allows only "EI")
-        :param sampling_type (str): "manual"/"functions" determines whether to get data via manual input from prompt or
-        from functions
+        :param random_start (bool): determines whether to start from random. If set to True and previously obtained
+        data provided via train_X and train_Y, there will still be random samples at start
+        :param random_step_cadence (int/None): proposes a random datapoint (not determined by Bayesian optimization)
+        every 'random_step_cadence' iterations. Runs no random datapoints if set to None. This helps in finding the
+        global optimum.
         :kwargs
             - train_X (torch.tensor of dtype=torch.double): design matrix of covariates (batch_shape X num_obs X
             num_training_features OR num_obs X num_training_features)
@@ -31,6 +44,9 @@ class CreativeProject(Initializers, AcqFunction):
             [allows for batched models] OR num_obs X num_output_models)
             - kernel (str): kernel used to define custom GP models (not currently in use)
             - nu (float): kernel parameter for Matern kernel
+            - num_initial_random (int): number of initial random points. Only changes anything if 'random_start' is True
+            - random_sampling_method (str): sampling method for random points. Options: "random" and "latin_hcs" (latin
+            hypercube sampling)
         """
 
         # === Computational settings ===
@@ -46,7 +62,7 @@ class CreativeProject(Initializers, AcqFunction):
             self.initial_guess,
             self.covar_bounds,
         ) = self._Initializers__initialize_from_covars(covars)
-        self.__covars = covars  # store provided 'covars' as hidden attribute
+        self.covars = covars  # store provided 'covars' as hidden attribute
 
         # define the model
         self.model = {
@@ -80,11 +96,31 @@ class CreativeProject(Initializers, AcqFunction):
         #     iteration
         # grab training data if passed through kwargs. If any is not present 'train_X' and/or 'train_Y' will be set to
         # None
-        # !!! ADD STANDARDIZATION !!!
-        # !!! CONSIDER CREATING A DICT OF DATA INSTEAD OF THREE SEPARATE ATTRIBUTES !!!
         self._Initializers__initialize_training_data(
             train_X=kwargs.get("train_X"), train_Y=kwargs.get("train_Y")
         )
+
+        # set plan for initialization with random samples. In some cases (if train_X, train_Y is accepted) will not set
+        # any random initial points
+        self._Initializers__initialize_random_start(
+            random_start=random_start,
+            num_initial_random=kwargs.get("num_initial_random"),
+            random_sampling_method=kwargs.get("random_sampling_method"),
+        )
+
+        # set cadence for random iterations, i.e. iterations in which the candidate datapoint proposed is obtained
+        # from random sampling instead of from Bayesian optimization. A randomly generated datapoint is taken every
+        # 'random_step' iterations.
+        # Two special cases to consider
+        #   - If set to None, no iterations with randomly generated datapoints are used (after
+        #   any random initialization)
+        #   - If set to 1 there would be only randomly sampled points. A warning is issued
+        if random_step_cadence == 1:
+            warnings.warn(
+                "The choice of 'random_step_cadence' means that no proposed datapoints will be generated via"
+                "Bayesian optimization, i.e. that that there will be only random sampling and no optimization"
+            )
+        self.random_step_cadence = random_step_cadence
 
         # best observed candidate (best response) [self.best_response_value 1 X num_obs tensor], together with
         # corresponding covariates [self.covariates_best_response_value num_covars X num_obs tensor]
@@ -96,7 +132,7 @@ class CreativeProject(Initializers, AcqFunction):
         methods, just the class])
         :return: str
         """
-        deep_str = f"covars={self.__covars!r}, model={self.model['model_type']!r}, acq_func={self.acq_func['type']!r}"
+        deep_str = f"covars={self.covars!r}, model={self.model['model_type']!r}, acq_func={self.acq_func['type']!r}"
 
         if self.train_X is not None:
             deep_str += f", train_X={self.train_X!r}"
@@ -114,7 +150,7 @@ class CreativeProject(Initializers, AcqFunction):
         define str of the instantiated class (defines what's returned to command print(<instantiated_class>)
         :return: str
         """
-        deep_str = f"covars={self.__covars}, model={self.model['model_type']!r}, acq_func={self.acq_func['type']!r}"
+        deep_str = f"covars={self.covars}, model={self.model['model_type']!r}, acq_func={self.acq_func['type']!r}"
 
         if self.train_X is not None:
             deep_str += f", train_X={self.train_X}"
