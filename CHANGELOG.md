@@ -23,7 +23,7 @@ Version number for this release: 0.0.3
 ### Deprecated
 
 ### Removed
-Removed the attribute `start_from_random`.
+Removed the attribute `start_from_random` as part of adding more elaborate random sampling functionality.
 
 ### Fixed
 
