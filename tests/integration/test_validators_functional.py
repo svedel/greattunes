@@ -1,3 +1,4 @@
+import pytest
 import torch
 from creative_project._validators import Validators
 from creative_project._initializers import Initializers
@@ -36,6 +37,9 @@ def test_functional_Validators__validate_training_data(custom_models_simple_trai
     # change datatype to numpy for train_Y, will fail
     assert not cls._Validators__validate_training_data(train_X=train_X, train_Y=train_Y.numpy())
 
-    # change number of entries to train_Y, will fail
+    # change number of entries to train_Y, will throw exception
     new_train_Y = torch.cat((train_Y, torch.tensor([[22.0]], dtype=torch.double)))
-    assert not cls._Validators__validate_training_data(train_X=train_X, train_Y=new_train_Y)
+    with pytest.raises(Exception) as e:
+        #assert not cls._Validators__validate_training_data(train_X=train_X, train_Y=new_train_Y)
+        cls._Validators__validate_training_data(train_X=train_X, train_Y=new_train_Y)
+    assert str(e.value) == "creative_project._validators.Validators.__validate_training_data: The number of rows (observations) in provided 'train_X' (4) is not the same as for `train_Y` (5) as it should be."
