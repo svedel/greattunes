@@ -1120,3 +1120,92 @@ def test_CreativeProject_integration_ask_tell_ask_works(covars, model_type, trai
 
     # assert that acquisition function has updated
     assert acq_func1 != acq_func2
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y, random_sampling_method",
+    [
+        [None, None, "random"],
+        [None, None, "latin_hcs"],
+        [torch.tensor([[1.1, 2.1, 23.7]], dtype=torch.double), torch.tensor([[10.7]], dtype=torch.double), "random"],
+        [torch.tensor([[1.1, 2.1, 23.7],[1.9, 1.8, 18.2]], dtype=torch.double), torch.tensor([[10.7], [13.2]], dtype=torch.double), "random"],
+        [torch.tensor([[1.1, 2.1, 23.7],[1.9, 1.8, 18.2]], dtype=torch.double), torch.tensor([[10.7], [13.2]], dtype=torch.double), "latin_hcs"],
+    ]
+)
+def test_CreativeProject_integration_ask_tell_ask_tell_randon_start_works(train_X, train_Y, random_sampling_method,
+                                                                          monkeypatch):
+    """
+    test that ask-tell dynamics works with random start, with and without train_X, train_Y data being provided.
+    Monkeypatching user input
+    """
+
+    covars = [(1, 0, 2), (1.5, -1, 3), (22, 15, 27)]
+    num_initial_random = 1
+
+    # initialize the class
+    cc = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y, random_start=True,
+                         random_sampling_method=random_sampling_method, num_initial_random=num_initial_random)
+
+    # define decorator to add 1.0 to all entries in monkeypatched returned data. This to be able to tell that the last
+    # entry (from second "tell") is different than the first, and know that it has been overwritten
+    def add_one(func):
+        @functools.wraps(func)
+        def wrapper_add_one(*args, **kwargs):
+            wrapper_add_one.num_calls += 1
+            output = func(*args, **kwargs)
+            return output + wrapper_add_one.num_calls
+
+        wrapper_add_one.num_calls = 0
+        return wrapper_add_one
+
+    # monkeypatch "_read_covars_manual_input"
+    candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
+
+    @add_one
+    def mock_read_covars_manual_input(additional_text):
+        return candidate_tensor
+
+    monkeypatch.setattr(cc, "_read_covars_manual_input", mock_read_covars_manual_input)
+
+    # monkeypatch "_read_response_manual_input"
+    resp_tensor = torch.tensor([[12]], dtype=torch.double)
+
+    @add_one
+    def mock_read_response_manual_input(additional_text):
+        return resp_tensor
+
+    monkeypatch.setattr(cc, "_read_response_manual_input", mock_read_response_manual_input)
+
+    # check the number of iterations we're starting from
+    curr_iter = 0
+    if train_X is not None:  # enough to look at train_X since validator ensures train_X, train_Y have same number of rows
+        curr_iter = train_X.size()[0]
+
+    assert cc.model["covars_proposed_iter"] == curr_iter
+    assert cc.model["covars_sampled_iter"] == curr_iter
+    assert cc.model["response_sampled_iter"] == curr_iter
+
+    # run the ask method
+    cc.ask()
+
+    # run the tell method
+    cc.tell()
+
+    # assert that counters have increased by 1
+    curr_iter += 1
+    assert cc.model["covars_proposed_iter"] == curr_iter
+    assert cc.model["covars_sampled_iter"] == curr_iter
+    assert cc.model["response_sampled_iter"] == curr_iter
+
+    # run the ask method AGAIN
+    cc.ask()
+
+    # run the tell method AGAIN
+    cc.tell()
+
+    # assert that counters have increaed by 1 yet again (this time switching from random to bayesian)
+    curr_iter += 1
+    assert cc.model["covars_proposed_iter"] == curr_iter
+    assert cc.model["covars_sampled_iter"] == curr_iter
+    assert cc.model["response_sampled_iter"] == curr_iter
+
