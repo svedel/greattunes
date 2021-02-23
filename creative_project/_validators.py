@@ -41,6 +41,18 @@ class Validators:
 
                         valid = True
 
+                # the case where the number of rows (observations) are not the same for train_X and train_Y
+                else:
+                    raise Exception(
+                        "creative_project._validators.Validators.__validate_training_data: The number of"
+                        " rows (observations) in provided 'train_X' ("
+                        + str(train_X.size()[0])
+                        + ") is"
+                        " not the same as for `train_Y` ("
+                        + str(train_Y.size()[0])
+                        + ") as it should be."
+                    )
+
         return valid
 
     def __validate_num_covars(self, covars_array):
