@@ -68,7 +68,9 @@ def test_unit_Validators__validate_training_data(custom_models_simple_training_d
 
     # change number of entries to train_Y, will fail
     new_train_Y = torch.cat((train_Y, torch.tensor([[22.0]], dtype=torch.double)))
-    assert not cls._Validators__validate_training_data(train_X=train_X, train_Y=new_train_Y)
+    with pytest.raises(Exception) as e:
+        cls._Validators__validate_training_data(train_X=train_X, train_Y=new_train_Y)
+    assert str(e.value) == "creative_project._validators.Validators.__validate_training_data: The number of rows (observations) in provided 'train_X' (4) is not the same as for `train_Y` (5) as it should be."
 
 
 @pytest.mark.parametrize(

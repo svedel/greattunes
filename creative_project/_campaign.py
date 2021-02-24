@@ -6,8 +6,30 @@ import torch
 
 def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=None):
     """
-    this method executes black-box optimization for cases where sampling function response ("response_samp_func")
-    is known. in this case no user interaction is needed during each iteration of the Bayesian optimization.
+    This method executes black-box optimization for cases where sampling function response ("response_samp_func")
+    is known. In this case no user interaction is needed during each iteration of the Bayesian optimization.
+
+    Example of how to call:
+
+        # covariates of the model (2 parameters)
+        # covariates come as a list of tuples (one per covariate: (<initial_guess>, <min>, <max>))
+        covars = [(1, 0, 2), (12, 6, 14)]
+
+        # number of iterations
+        max_iter = 50
+
+        # initialize the class
+        cls = CreativeProject(covars=covars)
+
+        # define the response function
+        # x is a two-element vector, with one per covariate in 'covars'
+        def f(x):
+            return -(6 * x[0] - 2) ** 2 * torch.sin(12 * x[1] - 4)
+
+        # run the auto-method
+        cls.auto(response_samp_func=f, max_iter=max_iter)
+
+
     :param response_samp_func (function): function generating the response
     (input: (1 x num_covars tensor) -> output: (1x1 tensor))
     :param max_iter (int): max number of iterations of the optimization
@@ -95,7 +117,32 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
 
 def ask(self):
     """
-    proposes the next covariate datapoint to sample based on data sampled so far, trained surrogate model
+    This 'ask' method together with 'tell' method is how to invoke the framework for cases where the system response is
+    not available as a function. Examples of this include when the response is a result of a physical action (e.g. an
+    experiment), if a good model does not exist, or if model evaluation is time consuming.
+
+    Example of how to call:
+
+        # covariates of the model (2 parameters)
+        # covariates come as a list of tuples (one per covariate: (<initial_guess>, <min>, <max>))
+        covars = [(1, 0, 2), (12, 6, 14)]
+
+        # initialize the class
+        cls = CreativeProject(covars=covars)
+
+        # define the response function
+        # x is a two-element vector, with one per covariate in 'covars'
+        def f(x):
+            return -(6 * x[0] - 2) ** 2 * torch.sin(12 * x[1] - 4)
+
+        # === run one iteration ===
+        # propose datapoint to sample
+        cls.ask()
+
+        # record actually sampled datapoint and the response
+        cls.tell()
+
+    'ask' proposes the next covariate datapoint to sample based on data sampled so far, trained surrogate model
     on that data of user-specified type and the chosen acquisition function. Special treatment when starting
     from no knowledge (will start from user-provided guesses in "covars" in class instance initialization).
 
@@ -113,7 +160,7 @@ def ask(self):
         - append x* to record
 
     special case:
-        - handle case of first iteration where no data exists
+        - handle case of first iteration where no historical data exists.
     """
 
     # special case where historical data has been added: add a model the first time we iterate through
@@ -143,8 +190,35 @@ def ask(self):
 
 def tell(self, **kwargs):
     """
-    samples the covariates and response corresponding to the output made from the "ask"-method.
-    Assumes a request for new datapoint has been made.
+    This 'tell' method together with 'ask' method is how to invoke the framework for cases where the system response is
+    not available as a function. Examples of this include when the response is a result of a physical action (e.g. an
+    experiment), if a good model does not exist, or if model evaluation is time consuming.
+
+    Example of how to call:
+
+        # covariates of the model (2 parameters)
+        # covariates come as a list of tuples (one per covariate: (<initial_guess>, <min>, <max>))
+        covars = [(1, 0, 2), (12, 6, 14)]
+
+        # initialize the class
+        cls = CreativeProject(covars=covars)
+
+        # define the response function
+        # x is a two-element vector, with one per covariate in 'covars'
+        def f(x):
+            return -(6 * x[0] - 2) ** 2 * torch.sin(12 * x[1] - 4)
+
+        # === run one iteration ===
+        # propose datapoint to sample
+        cls.ask()
+
+        # record actually sampled datapoint and the response
+        cls.tell()
+
+    specifically this 'tell' method samples the covariates and response corresponding to the output made from the
+    "ask"-method, ensures that the provided data is valid, and then updates the surrogate model and stores the provided
+    data. It is assumed that 'ask' has been run (assumes a request for new datapoint has been made.).
+
     :input kwargs:
         - covars (torch tensor of size 1 X num_covars or list): provide observed covars data programmatically. If kwarg
         present, will use this approach over manual input

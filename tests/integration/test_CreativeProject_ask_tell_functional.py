@@ -5,23 +5,25 @@ from creative_project import CreativeProject
 
 
 @pytest.mark.parametrize(
-    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter",
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, random_start",
     [
-        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1]
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, True],  # case 1 with random start
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, True],  # case 2 with random start
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, False]
     ]
 )
 def test_CreativeProject_ask_integration_test_works(covars, model_type, train_X, train_Y, covars_proposed_iter,
-                                                    covars_sampled_iter, response_sampled_iter):
+                                                    covars_sampled_iter, response_sampled_iter, random_start):
     """
     test the positive cases for CreativeProject.ask method.
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=random_start)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
     cc.train_X = train_X
@@ -30,6 +32,9 @@ def test_CreativeProject_ask_integration_test_works(covars, model_type, train_X,
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    if covars_proposed_iter > 0:
+        cc.num_initial_random_points = 0
+        cc.random_sampling_method = None
 
         # run the method
     cc.ask()
@@ -282,18 +287,20 @@ def test_CreativeProject_tell_integration_test_fails(covars, model_type, train_X
 
 
 @pytest.mark.parametrize(
-    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter",
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, random_start",
     [
-        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1]
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, True],  # case 1 with random start
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, True],  # case 2 with random start
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, False]
     ]
 )
 def test_CreativeProject_integration_ask_tell_one_loop_works(covars, model_type, train_X, train_Y,
                                                                   covars_proposed_iter, covars_sampled_iter,
-                                                                  response_sampled_iter, monkeypatch):
+                                                                  response_sampled_iter, random_start, monkeypatch):
     """
     test that a single loop of ask/tell works: creates a candidate, creates a model, stores covariates and response.
     Monkeypatch "_read_covars_manual_input" and "_read_response_manual_input" from ._observe.py to circumvent manual
@@ -301,7 +308,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_works(covars, model_type,
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=random_start)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
     cc.train_X = train_X
@@ -310,6 +317,9 @@ def test_CreativeProject_integration_ask_tell_one_loop_works(covars, model_type,
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    if covars_proposed_iter > 0:
+        cc.num_initial_random_points = 0
+        cc.random_sampling_method = None
 
     # monkeypatch "_read_covars_manual_input"
     candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
@@ -384,18 +394,21 @@ def test_CreativeProject_integration_ask_tell_one_loop_works(covars, model_type,
 
 
 @pytest.mark.parametrize(
-    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_covariates",
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_covariates, random_start",
     [
-        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8]], dtype=torch.double)],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8, 0.2, 103]], dtype=torch.double)],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8, 0.2, 103]], dtype=torch.double)]
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double), False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double), False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double), True],  # case 1 with random start
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double), True],  # case 2 with random start
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8]], dtype=torch.double), False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8, 0.2, 103]], dtype=torch.double), False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8, 0.2, 103]], dtype=torch.double), False]
     ]
 )
 def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_works(covars, model_type, train_X, train_Y,
                                                                   covars_proposed_iter, covars_sampled_iter,
-                                                                  response_sampled_iter, kwarg_covariates, monkeypatch):
+                                                                  response_sampled_iter, kwarg_covariates, random_start,
+                                                                          monkeypatch):
     """
     test that a single loop of ask/tell works when providing covars as kwarg to tell: creates a candidate, creates a
     model, stores covariates and response. Monkeypatch "_read_response_manual_input" from ._observe.py to circumvent
@@ -403,7 +416,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_works(covars
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=random_start)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
     cc.train_X = train_X
@@ -412,6 +425,9 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_works(covars
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    if covars_proposed_iter > 0:
+        cc.num_initial_random_points = 0
+        cc.random_sampling_method = None
 
     # # monkeypatch "_read_covars_manual_input"
     # candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
@@ -467,18 +483,21 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_works(covars
 
 
 @pytest.mark.parametrize(
-    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_response",
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_response, random_start",
     [
-        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8]], dtype=torch.double)],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[103]], dtype=torch.double)],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8]], dtype=torch.double)]
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double), False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double), False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double), True],  # case 1 with random start
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[1.8]], dtype=torch.double), True],  # case 2 with random start
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8]], dtype=torch.double), False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[103]], dtype=torch.double), False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8]], dtype=torch.double), False]
     ]
 )
 def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_works(covars, model_type, train_X, train_Y,
                                                                   covars_proposed_iter, covars_sampled_iter,
-                                                                  response_sampled_iter, kwarg_response, monkeypatch):
+                                                                  response_sampled_iter, kwarg_response, random_start,
+                                                                            monkeypatch):
     """
     test that a single loop of ask/tell works when providing response as kwarg to tell: creates a candidate, creates a
     model, stores covariates and response. Monkeypatch "_read_response_manual_input" from ._observe.py to circumvent
@@ -486,7 +505,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_works(cova
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=random_start)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
     cc.train_X = train_X
@@ -495,6 +514,9 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_works(cova
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    if covars_proposed_iter > 0:
+        cc.num_initial_random_points = 0
+        cc.random_sampling_method = None
 
     # monkeypatch "_read_covars_manual_input"
     candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
@@ -548,26 +570,28 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_works(cova
 
 
 @pytest.mark.parametrize(
-    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_covariates, kwarg_response",
+    "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_covariates, kwarg_response, random_start",
     [
-        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double)],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double)],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 1.2, 107]], dtype=torch.double), torch.tensor([[103]], dtype=torch.double)],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 1.2, 107]], dtype=torch.double), torch.tensor([[0.8]], dtype=torch.double)]
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double), False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double), False],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double), True],  # case 1 with random start
+        [[(1, 0.5, 1.5)], "Custom", None, None, 0, 0, 0, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double), True],  # case 2 with random start
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.7]], dtype=torch.double), torch.tensor([[1.8]], dtype=torch.double), False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 1.2, 107]], dtype=torch.double), torch.tensor([[103]], dtype=torch.double), False],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 1.2, 107]], dtype=torch.double), torch.tensor([[0.8]], dtype=torch.double), False]
     ]
 )
 def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_response_works(covars, model_type, train_X, train_Y,
                                                                   covars_proposed_iter, covars_sampled_iter,
                                                                   response_sampled_iter, kwarg_covariates,
-                                                                                   kwarg_response):
+                                                                                   random_start, kwarg_response):
     """
     test that a single loop of ask/tell works when providing both covariates and response as kwarg to tell: creates a
     candidate, creates a model, stores covariates and response.
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=random_start)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
     cc.train_X = train_X
@@ -576,6 +600,9 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_response_wor
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    if covars_proposed_iter > 0:
+        cc.num_initial_random_points = 0
+        cc.random_sampling_method = None
 
     # run the ask method
     cc.ask()
@@ -639,7 +666,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_fails(covars
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=False)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
     cc.train_X = train_X
@@ -648,6 +675,9 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_fails(covars
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    if covars_proposed_iter > 0:
+        cc.num_initial_random_points = 0
+        cc.random_sampling_method = None
 
     # monkeypatch "_read_response_manual_input"
     resp_tensor = torch.tensor([[12]], dtype=torch.double)
@@ -690,7 +720,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_fails(cova
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=False)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
     cc.train_X = train_X
@@ -699,6 +729,9 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_fails(cova
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    if covars_proposed_iter > 0:
+        cc.num_initial_random_points = 0
+        cc.random_sampling_method = None
 
     # monkeypatch "_read_covars_manual_input"
     candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
@@ -732,7 +765,7 @@ def test_CreativeProject_integration_ask_tell_ask_works(covars, model_type, trai
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=False)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
     cc.train_X = train_X
@@ -819,15 +852,18 @@ def test_CreativeProject_integration_ask_ask_tell_overwrite_candidate_works(cova
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=False)
 
-    # set attributes on class (to simulate previous iterations of ask/tell functionality)
+    # set attributes on class (to simulate previous iterations of ask/tell functionality). That is, set attributes set
+    # both by _Initializers__initialize_training_data and by _Initializers__initialize_random_start
     cc.train_X = train_X
     cc.proposed_X = train_X
     cc.train_Y = train_Y
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    cc.num_initial_random_points = 0
+    cc.random_sampling_method = None
 
 
     # monkeypatch "_read_covars_manual_input"
@@ -903,15 +939,24 @@ def test_CreativeProject_integration_ask_tell_tell_overwrite_covar_resp_works(co
     """
 
     # initialize the class
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = CreativeProject(covars=covars, model=model_type, random_start=False)
 
-    # set attributes on class (to simulate previous iterations of ask/tell functionality)
+    # ISSUE IS THAT I AM CIRCUMVENTING THE INITIALIZATION OF RANDOM POINTS WHICH REQUIRES THAT TRAIN_X, TRAIN_Y
+    # INITIALIZATION HAS FINISHED. I NEED TO SET RANDOM INITIALIZATION PARAMTERES MANUALLY BELOW
+    #
+    # ALSO MAKE SURE I DO AT LEAST ONE TEST WHERE I DO THE FULL E2E TEST (ALLOWING FOR AUTOMATICALLY CREATING RANDOM
+    # INITIALIZATION)
+
+    # set attributes on class (to simulate previous iterations of ask/tell functionality). That is, set attributes set
+    # both by _Initializers__initialize_training_data and by _Initializers__initialize_random_start
     cc.train_X = train_X
     cc.proposed_X = train_X
     cc.train_Y = train_Y
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
+    cc.num_initial_random_points = 0
+    cc.random_sampling_method = None
 
     # define decorator to add 1.0 to all entries in monkeypatched returned data. This to be able to tell that the last
     # entry (from second "tell") is different than the first, and know that it has been overwritten
@@ -993,10 +1038,12 @@ def test_CreativeProject_integration_ask_tell_ask_works(covars, model_type, trai
     """
     test that both surrogate model and acquisition functions are added and updated following two rounds of ask-tell.
     Monkeypatch "_read_covars_manual_input" and "_read_response_manual_input" from ._observe.py to circumvent manual
-    input via builtins.input
+    input via builtins.input. This automatically tests the new functionality of random start by starting from no data
+    (train_X, train_Y)
     """
 
     # initialize the class
+    # random_start = True is default, so this tests random start
     cc = CreativeProject(covars=covars, model=model_type)
 
     # set attributes on class (to simulate previous iterations of ask/tell functionality)
@@ -1073,3 +1120,92 @@ def test_CreativeProject_integration_ask_tell_ask_works(covars, model_type, trai
 
     # assert that acquisition function has updated
     assert acq_func1 != acq_func2
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y, random_sampling_method",
+    [
+        [None, None, "random"],
+        [None, None, "latin_hcs"],
+        [torch.tensor([[1.1, 2.1, 23.7]], dtype=torch.double), torch.tensor([[10.7]], dtype=torch.double), "random"],
+        [torch.tensor([[1.1, 2.1, 23.7],[1.9, 1.8, 18.2]], dtype=torch.double), torch.tensor([[10.7], [13.2]], dtype=torch.double), "random"],
+        [torch.tensor([[1.1, 2.1, 23.7],[1.9, 1.8, 18.2]], dtype=torch.double), torch.tensor([[10.7], [13.2]], dtype=torch.double), "latin_hcs"],
+    ]
+)
+def test_CreativeProject_integration_ask_tell_ask_tell_randon_start_works(train_X, train_Y, random_sampling_method,
+                                                                          monkeypatch):
+    """
+    test that ask-tell dynamics works with random start, with and without train_X, train_Y data being provided.
+    Monkeypatching user input
+    """
+
+    covars = [(1, 0, 2), (1.5, -1, 3), (22, 15, 27)]
+    num_initial_random = 1
+
+    # initialize the class
+    cc = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y, random_start=True,
+                         random_sampling_method=random_sampling_method, num_initial_random=num_initial_random)
+
+    # define decorator to add 1.0 to all entries in monkeypatched returned data. This to be able to tell that the last
+    # entry (from second "tell") is different than the first, and know that it has been overwritten
+    def add_one(func):
+        @functools.wraps(func)
+        def wrapper_add_one(*args, **kwargs):
+            wrapper_add_one.num_calls += 1
+            output = func(*args, **kwargs)
+            return output + wrapper_add_one.num_calls
+
+        wrapper_add_one.num_calls = 0
+        return wrapper_add_one
+
+    # monkeypatch "_read_covars_manual_input"
+    candidate_tensor = torch.tensor([[tmp[0] for tmp in covars]], dtype=torch.double)
+
+    @add_one
+    def mock_read_covars_manual_input(additional_text):
+        return candidate_tensor
+
+    monkeypatch.setattr(cc, "_read_covars_manual_input", mock_read_covars_manual_input)
+
+    # monkeypatch "_read_response_manual_input"
+    resp_tensor = torch.tensor([[12]], dtype=torch.double)
+
+    @add_one
+    def mock_read_response_manual_input(additional_text):
+        return resp_tensor
+
+    monkeypatch.setattr(cc, "_read_response_manual_input", mock_read_response_manual_input)
+
+    # check the number of iterations we're starting from
+    curr_iter = 0
+    if train_X is not None:  # enough to look at train_X since validator ensures train_X, train_Y have same number of rows
+        curr_iter = train_X.size()[0]
+
+    assert cc.model["covars_proposed_iter"] == curr_iter
+    assert cc.model["covars_sampled_iter"] == curr_iter
+    assert cc.model["response_sampled_iter"] == curr_iter
+
+    # run the ask method
+    cc.ask()
+
+    # run the tell method
+    cc.tell()
+
+    # assert that counters have increased by 1
+    curr_iter += 1
+    assert cc.model["covars_proposed_iter"] == curr_iter
+    assert cc.model["covars_sampled_iter"] == curr_iter
+    assert cc.model["response_sampled_iter"] == curr_iter
+
+    # run the ask method AGAIN
+    cc.ask()
+
+    # run the tell method AGAIN
+    cc.tell()
+
+    # assert that counters have increaed by 1 yet again (this time switching from random to bayesian)
+    curr_iter += 1
+    assert cc.model["covars_proposed_iter"] == curr_iter
+    assert cc.model["covars_sampled_iter"] == curr_iter
+    assert cc.model["response_sampled_iter"] == curr_iter
+

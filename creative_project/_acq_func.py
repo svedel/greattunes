@@ -1,5 +1,8 @@
+import torch
 from botorch.acquisition import ExpectedImprovement
 from botorch.optim import optimize_acqf
+
+from creative_project.utils import DataSamplers
 
 
 class AcqFunction:
@@ -72,14 +75,14 @@ class AcqFunction:
         :return candidate (1 x num_covars tensor)
         """
 
-        # special case of first iteration.
-        # if no training data provided, will start from initial guess provided as part of "covars" in
-        # class instance initialization
-        if (self.start_from_guess) and (self.model["covars_sampled_iter"] == 0):
+        # determine whether to use random or bayesian sampling based on iteration number
+        sample_type = self.__random_or_bayesian()
 
-            candidate = self.initial_guess
+        # select random or bayesian candidate
+        if sample_type == "random":
+            candidate = self.random_candidate()
 
-        else:
+        elif sample_type == "bayesian":
 
             # optimize acquisition function
             BATCH_SIZE = 1
@@ -91,6 +94,111 @@ class AcqFunction:
                 num_restarts=10,
                 raw_samples=512,  # used for intialization heuristic
                 options={"maxiter": 200},
+            )
+
+        return candidate
+
+    def __random_or_bayesian(self):
+        """
+        determine whether next candidate datapoint should be determined by random sampling or Bayesian optimization
+        :param
+            - self.model["covars_sampled_iter"] (int): number of covariate datapoints sampled so far
+            - self.num_initial_random_points (int): number of initial random datapoints (data points obtained from
+            random sampling and not from the acquisition function). If set to 0, there's no random start
+            - self.random_step_cadence (int/None): cadence of when a randomly sampled datapoint is used in between
+            points obtained from acquisition function
+        :return: sample_type (str): "random" or "bayesian"
+        """
+
+        # initialize output
+        sample_type = "bayesian"
+
+        # self.model["covars_sampled_iter"] counts the already sampled iterations, while the present method is
+        # determining sampling type of the NEXT iteration (self.model["covars_sampled_iter"] + 1). Defining local
+        # variable to keep track of iteration number for which sampling type is being determined
+        current_iteration = self.model["covars_sampled_iter"] + 1
+
+        # random initialization
+        if current_iteration <= self.num_initial_random_points:
+            sample_type = "random"
+
+        # random sampling after Bayesian steps
+        # only go in here if user wants to do random sampling after initialization
+        elif self.random_step_cadence is not None:
+
+            # determine when random sampling is needed.
+            # the first condition picks out iterations at the cadence specified by self.random_step_cadence (using the
+            # modulo operator), the second condition makes sure that the first point after random initialization is
+            # not picked for randomization
+            if (
+                (current_iteration - self.num_initial_random_points)
+                % self.random_step_cadence
+                == 0
+            ) & (current_iteration > self.num_initial_random_points):
+                sample_type = "random"
+
+        return sample_type
+
+    def random_candidate(self):
+        """
+        returns a candidate generated via random sampling of the covariates according to the user-specified sampling
+        scheme. In first iteration will create required number of random initial candidate datapoints and store in
+        attribute "__initial_random_candidates".
+        :param
+            - self.model["covars_sampled_iter"] (int): number of covariate datapoints sampled so far
+            - self.num_initial_random_points (int): number of initial random datapoints (data points obtained from
+            random sampling and not from the acquisition function). If set to 0, there's no random start
+            - self.random_sampling_method (str): sampling method for random points. Options: "random" and "latin_hcs"
+            - self.covar_bounds (tensor, 2 X <num covariates>): upper and lower bounds for covariates provided by user
+            - self.device (torch device): computational device used
+        :return:
+        """
+
+        # get number of covariates
+        NUM_COVARS = self.covar_bounds.size()[1]
+
+        # start by creating initial random data point and storing in private attribute candidates at first iteration
+        # (if not already stored)
+        if (self.model["covars_sampled_iter"] == 0) & (
+            not hasattr(self, "__initial_random_candidates")
+        ):
+
+            # get candidates by invoking the methods "random" or "latin_hcs" (as carried by self.random_sampling_method)
+            # note: are starting from the user-provided initial guess, hence taking
+            # n_samp=self.num_initial_random_points-1
+            rand_candidates = getattr(DataSamplers, self.random_sampling_method)(
+                n_samp=self.num_initial_random_points - 1,
+                initial_guess=self.initial_guess,
+                covar_bounds=self.covar_bounds,
+                device=self.device,
+            )
+            self.__initial_random_candidates = torch.cat(
+                (self.initial_guess, rand_candidates), dim=0
+            )
+
+        # self.model["covars_sampled_iter"] counts the already sampled iterations, while the present method is
+        # determining sampling type of the NEXT iteration (self.model["covars_sampled_iter"] + 1). Defining local
+        # variable to keep track of iteration number for which sampling type is being determined
+        current_iteration = self.model["covars_sampled_iter"] + 1
+
+        # CASE 1: create random datapoints from initial random start
+        if current_iteration <= self.num_initial_random_points:
+
+            # get the candidate datapoint as a single row in the set of candidates
+            # reshape to convert row into a matrix (required through code base)
+            candidate = self.__initial_random_candidates[
+                current_iteration - 1, :
+            ].reshape((1, NUM_COVARS))
+
+        # CASE 2: create random datapoints from interdispersed random points
+        else:
+
+            # get candidates by invoking the methods "random" or "latin_hcs" (as carried by self.random_sampling_method)
+            candidate = getattr(DataSamplers, self.random_sampling_method)(
+                n_samp=1,
+                initial_guess=self.initial_guess,
+                covar_bounds=self.covar_bounds,
+                device=self.device,
             )
 
         return candidate

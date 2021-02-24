@@ -81,7 +81,8 @@ def test_acq_func_identify_new_candidate_withdatacount_functional(covars_for_cus
                                      device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     cls.covar_bounds = torch.tensor([[g[1] for g in covars], [g[2] for g in covars]], dtype=torch.double,
                                     device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-    cls.start_from_guess = False
+    cls.num_initial_random_points = 0
+    cls.random_step_cadence = 10
 
     # run test
     candidate = cls.identify_new_candidate()
@@ -132,7 +133,8 @@ def test_acq_func_identify_new_candidate_withdatacount_multivariate_functional(r
                                      device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     cls.covar_bounds = torch.tensor([[g[1] for g in covars], [g[2] for g in covars]], dtype=torch.double,
                                     device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-    cls.start_from_guess = False
+    cls.num_initial_random_points = 0
+    cls.random_step_cadence = 10
 
     # run test
     candidate = cls.identify_new_candidate()
@@ -143,3 +145,45 @@ def test_acq_func_identify_new_candidate_withdatacount_multivariate_functional(r
     for it in range(candidate.shape[1]):
         assert round(candidate[0, it].item(),4) == candidate_results[0, it].item()
 
+
+@pytest.mark.parametrize(
+    "covars_sampled_iter, num_initial_random_points, random_sampling_method",
+    [
+        [0, 3, "random"],  # initial random period
+        [8, 3, "latin_hcs"],  # interdispersed random point
+    ]
+)
+def test_AcqFunction_random_candidate_int_works(covars_sampled_iter, num_initial_random_points, random_sampling_method):
+    """
+    test that 'random_candidate' works for both initial iterations (generate during first call), as well as for
+    later interdispersed random datapoints.
+
+    Note that we only test the initial random datapoints starting at the first iteration. That's because the list of
+    random candidates for datapoints is only generated during this first step
+    """
+
+    # initialize class
+    cls = AcqFunction()
+
+    # set attributes
+    cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    cls.covar_bounds = torch.tensor([[0, 1, 1.5],[1.3, 1.8, 3.7]], dtype=torch.double, device=cls.device)
+    cls.initial_guess = torch.tensor([[0.6, 1.5, 2.2]], dtype=torch.double, device=cls.device)
+    cls.model = {"covars_sampled_iter": covars_sampled_iter}
+    cls.num_initial_random_points = num_initial_random_points
+    cls.random_sampling_method = random_sampling_method
+
+    # run method
+    candidate = cls.random_candidate()
+
+    # assert only one candidate
+    assert candidate.size()[0] == 1
+
+    # assert correct number of rows
+    assert candidate.size()[1] == cls.initial_guess.shape[1]
+
+    # assert that candidates torch tensor has been stored as attribute
+    if cls.model["covars_sampled_iter"] == 0:
+        assert hasattr(cls, "_AcqFunction__initial_random_candidates")
+        assert cls._AcqFunction__initial_random_candidates.size()[0] == num_initial_random_points
+        assert cls._AcqFunction__initial_random_candidates.size()[1] == cls.initial_guess.shape[1]

@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 
 
@@ -42,3 +43,97 @@ def __get_covars_from_kwargs(covars):
             )
 
     return covars_candidate_float_tensor
+
+
+class DataSamplers:
+    """
+    class of sample methods (random and structured random) used for initialization and for interdispersed random
+    sampling
+    """
+
+    @staticmethod
+    def random(n_samp, initial_guess, covar_bounds, device):
+        """
+        randomly samples each covariate within bounds to provice new candidate datapoint
+        :param n_samp (int): number of samples to be generated. Defines number of subsegments for each covariate, from
+        which each new candidate datapoint are obtained
+        :param initial_guess (tensor, 1 X <num covariates>): contains all initial guesses for covariate values
+            provided by user
+        :param covar_bounds (tensor, 2 X <num covariates>): upper and lower bounds for covariates provided by user
+        :param device (torch device): computational device used
+        :return: candidates (tensor, n_samp X <num covariates>): tensor of new candidates
+        """
+
+        # number of covariates
+        # initial_guess has size 1 x <num covariates>
+        NUM_COVARS = initial_guess.shape[1]
+
+        # randomly sample each covariate. Use uniform sampling probability within bounds provided (self.covar_bounds).
+        # iterate since each covariate has its own bounds on the covariate range.
+        # attribute covar_bounds stores lower bounds in row 0, upper bounds in row 1, and first tuple entry in 'size'
+        # argument determines number of repeat samples
+        candidates_array = np.random.uniform(
+            low=covar_bounds[0, :].numpy(),
+            high=covar_bounds[1, :].numpy(),
+            size=(n_samp, NUM_COVARS),
+        )
+
+        # convert to torch tensor. Each row in this tensor is a candidate
+        # the chained .double() command converts to array of data type double
+        candidates = torch.from_numpy(candidates_array).double().to(device)
+
+        return candidates
+
+    @staticmethod
+    def latin_hcs(n_samp, initial_guess, covar_bounds, device):
+        """
+        structured random sampling of covariates within bounds to provide new candidate. For details on latin hypercube
+        sampling please consult https://en.wikipedia.org/wiki/Latin_hypercube_sampling.
+
+        For each covariate, the range of possible outcomes is subdivided in n_samp bins. Each of these bins can only be
+        present once across all candidates. Since each covariate is divided into the same number of bins, this is
+        equivalent to shuffling the bins for each row independently.
+
+        NOTE: Approach in this method assumes all covariates are continuous. Reconsider when no longer the case
+
+        :param initial_guess (tensor, 1 X <num covariates>): contains all initial guesses for covariate values
+            provided by user
+        :param covar_bounds (tensor, 2 X <num covariates>): upper and lower bounds for covariates provided by user
+        :param n_samp (int): number of samples to be generated. Defines number of subsegments for each covariate, from
+        which each new candidate datapoint are obtained
+        :param device (torch device): computational device used
+        :return: candidates (tensor, n_samp X <num covariates>): tensor of new candidates
+        """
+
+        # number of covariates
+        NUM_COVARS = initial_guess.shape[
+            1
+        ]  # initial_guess has size 1 x <num covariates>
+
+        # create array of bins. Each row corresponds to a unique point in the Latin hypercube
+        bins = np.zeros((n_samp, NUM_COVARS))
+        for i in range(NUM_COVARS):
+            bins[:, i] = np.random.permutation(n_samp)
+
+        # sample within each bin for each variable (uniform sampling)
+        candidates_array = np.zeros((n_samp, NUM_COVARS))
+
+        for i in range(NUM_COVARS):
+            # bin boundaries for this covariate
+            # add a final datapoint to get the bin separations (n_samp + 1)
+            bin_boundaries_tmp = np.linspace(
+                covar_bounds[0, i].item(), covar_bounds[1, i].item(), n_samp + 1
+            )
+
+            # random sampling with uniform distribution within bin
+            # this has size 1 X n_samp
+            candidates_array[:, i] = np.random.uniform(
+                low=bin_boundaries_tmp[:-1], high=bin_boundaries_tmp[1:]
+            )
+
+        # convert to torch tensor. Each row in this tensor is a candidate
+        # the chained .double() command converts to array of data type double
+        candidates = torch.from_numpy(candidates_array).double().to(device)
+
+        # return
+        return candidates

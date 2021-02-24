@@ -1,5 +1,6 @@
 from creative_project._initializers import Initializers
 from creative_project._best_response import _find_max_response_value
+import pytest
 import torch
 
 
@@ -79,7 +80,6 @@ def test_Initializers__initialize_training_data_functional(custom_models_simple_
     cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)
 
     # assert that the data has been validated and stored in right places
-    assert cls.start_from_guess == False
     for it in range(train_X.shape[0]):
         assert cls.train_X[it].item() == train_X[it].item()
         assert cls.train_Y[it].item() == train_Y[it].item()
@@ -97,7 +97,47 @@ def test_Initializers__initialize_training_data_functional(custom_models_simple_
     cls._Initializers__initialize_training_data(train_X=None, train_Y=None)
 
     # assert that nothing has run
-    assert cls.start_from_guess == True
     assert cls.train_X == None
     assert cls.train_Y == None
     assert cls.proposed_X == None
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y, covars, random_start, num_initial_random, random_sampling_method, num_initial_random_points_res, sampling_method_res",
+    [
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), [(1,0,2), (2, 1, 3), (3, 2, 4)], False, None, None, 0, None], # Case 1
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), [(1,0,2), (2, 1, 3), (3, 2, 4)], False, 2, "random", 0, None], # Case 1. Special twist to ensure correct behavior even if user sets random parameter features while still choosing against random start
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), [(1,0,2), (2, 1, 3), (3, 2, 4)], True, None, None, 2, "latin_hcs"], # Case 2. 2 is the output from the method 'determine_number_random_samples' since its round(sqrt(3)), where 3 is the number of covariates in train_X and covars
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), [(1,0,2), (2, 1, 3), (3, 2, 4)], True, 12, "random", 12, "random"], # Case 2. Special case where both number of samples and sampling method are set by user
+        [None, None, [(1,0,2), (2, 1, 3), (3, 2, 4)], False, None, None, 2, "latin_hcs"], # Case 3
+        [None, None, [(1,0,2), (2, 1, 3), (3, 2, 4)], False, 12, "random", 2, "random"], # Case 3
+        [None, None, [(1,0,2), (2, 1, 3), (3, 2, 4)], True, None, None, 2, "latin_hcs"], # Case 4
+        [None, None, [(1,0,2), (2, 1, 3), (3, 2, 4)], True, 12, "random", 12, "random"], # Case 4
+    ]
+)
+def test_Initializers__initialize_random_start_functional(train_X, train_Y, covars, random_start, num_initial_random,
+                                                          random_sampling_method, num_initial_random_points_res,
+                                                          sampling_method_res):
+    """
+    test that initialization of random start works. There are 4 cases to consider (case -> expected behavior)
+    - CASE 1: train_X, train_Y present; random_start = False -> (self.num_initial_random_points = 0, self.random_sampling_method = None)
+    - CASE 2: train_X, train_Y present; random_start = True -> (self.num_initial_random_points = user-provided number / round(sqrt(num_covariates)), self.random_sampling_method = user-provided)
+    - CASE 3: train_X, train_Y NOT present; random_start = False -> (this is a case of INCONSISTENCY in user input. Expect user has made a mistake so proceeds but throws warning. self.num_initial_random_points = round(sqrt(num_covariates)), self.random_sampling_method = user-provided)
+    - CASE 4: train_X, train_Y NOT present; random_start = True -> (self.num_initial_random_points = user-provided number / round(sqrt(num_covariates)), self.random_sampling_method = user-provided)
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # set attributes
+    cls.train_Y = train_Y
+    cls.train_X = train_X
+    cls.covars = covars
+
+    # run method
+    cls._Initializers__initialize_random_start(random_start=random_start, num_initial_random=num_initial_random,
+                                               random_sampling_method=random_sampling_method)
+
+    # assert outcome
+    assert cls.num_initial_random_points == num_initial_random_points_res
+    assert cls.random_sampling_method == sampling_method_res

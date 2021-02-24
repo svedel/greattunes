@@ -2,10 +2,13 @@
 This file contains a helper class with initializer methods. It is only wrapped as a class for convenience. Will
 therefore only test individual functions
 """
+import math
 import pytest
 import torch
+import warnings
 from creative_project._initializers import Initializers
 import creative_project._best_response
+from creative_project.utils import DataSamplers
 
 
 @pytest.mark.parametrize("dataset_id",[0, 1])
@@ -100,8 +103,8 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
 
 def test_Initializers__initialize_training_data_unit(custom_models_simple_training_data_4elements, monkeypatch):
     """
-    test __initialize_training_data_unit with all modes that fail together with the one that passes. Monkeypatch
-    dependency to _validators.Validators.__validate_training_data
+    test '__initialize_training_data_unit' with all modes that fail together with the one that passes. Monkeypatch
+    dependency to '_validators.Validators.__validate_training_data'
     """
 
     # data
@@ -120,7 +123,6 @@ def test_Initializers__initialize_training_data_unit(custom_models_simple_traini
     cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)
 
     # assert that nothing has run
-    assert cls.start_from_guess == True
     assert cls.train_X == None
     assert cls.train_Y == None
     assert cls.proposed_X == None
@@ -137,7 +139,6 @@ def test_Initializers__initialize_training_data_unit(custom_models_simple_traini
     cls._Initializers__initialize_training_data(train_X=None, train_Y=None)
 
     # assert that nothing has run
-    assert cls.start_from_guess == True
     assert cls.train_X == None
     assert cls.train_Y == None
     assert cls.proposed_X == None
@@ -162,8 +163,150 @@ def test_Initializers__initialize_training_data_unit(custom_models_simple_traini
     cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)
 
     # assert that the data has been validated and stored in right places
-    assert cls.start_from_guess == False
     for it in range(train_X.shape[0]):
         assert cls.train_X[it].item() == train_X[it].item()
         assert cls.train_Y[it].item() == train_Y[it].item()
         assert cls.proposed_X[it].item() is not None  # proposed_X is being set to torch.empty (a random number)
+
+
+@pytest.mark.parametrize("covars",
+                         [
+                             [(1, 0, 2)],
+                             [(0.5, 0, 1), (12.5, 8, 15), (-2, -4, 1.1)]
+                         ]
+                         )
+def test_Initializers_determine_number_random_samples(covars):
+    """
+    test that 'determine_number_random_samples' returns the right number (int(round(sqrt(d))) where d is number of
+    covariates. First test should return 1, second return 2
+    :return:
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # set attribute
+    cls.covars = covars
+
+    # get result
+    num_random = cls.determine_number_random_samples()
+
+    # assert
+    assert num_random == int(round(math.sqrt(len(covars)), 0))
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y, random_start, num_initial_random, random_sampling_method, num_initial_random_points_res, sampling_method_res",
+    [
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), False, None, None, 0, None], # Case 1
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), False, 2, "random", 0, None], # Case 1. Special twist to ensure correct behavior even if user sets random parameter features while still choosing against random start
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), True, None, None, 33, "latin_hcs"], # Case 2. 33 is the output from the method 'determine_number_random_samples' which is being monkeypatched (see below)
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), True, 2, "random", 2, "random"], # Case 2. Special case where both number of samples and sampling method are set by user
+        [None, None, False, None, None, 33, "latin_hcs"], # Case 3
+        [None, None, False, 2, "random", 33, "random"], # Case 3
+        [None, None, True, None, None, 33, "latin_hcs"], # Case 4
+        [None, None, True, 12, "random", 12, "random"], # Case 4
+    ]
+)
+def test_Initializers__initialize_random_start_works(train_X, train_Y, random_start, num_initial_random,
+                                                     random_sampling_method, num_initial_random_points_res,
+                                                     sampling_method_res, monkeypatch):
+    """
+    test that initialization of random start works. Monkeypatching 'determine_number_random_samples' which determines
+    number of samples if nothing provided by user.
+    There are 4 cases to consider (case -> expected behavior)
+    - CASE 1: train_X, train_Y present; random_start = False -> (self.num_initial_random_points = 0, self.random_sampling_method = None)
+    - CASE 2: train_X, train_Y present; random_start = True -> (self.num_initial_random_points = user-provided number / round(sqrt(num_covariates)), self.random_sampling_method = user-provided)
+    - CASE 3: train_X, train_Y NOT present; random_start = False -> (this is a case of INCONSISTENCY in user input. Expect user has made a mistake so proceeds but throws warning. self.num_initial_random_points = round(sqrt(num_covariates)), self.random_sampling_method = user-provided)
+    - CASE 4: train_X, train_Y NOT present; random_start = True -> (self.num_initial_random_points = user-provided number / round(sqrt(num_covariates)), self.random_sampling_method = user-provided)
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # start by monkeypatching
+    NUM_RETURN = 33
+    def mock_determine_number_random_samples():
+        return NUM_RETURN
+    monkeypatch.setattr(cls, "determine_number_random_samples", mock_determine_number_random_samples)
+
+    # set attributes
+    cls.train_Y = train_Y
+    cls.train_X = train_X
+
+    # run method
+    cls._Initializers__initialize_random_start(random_start=random_start, num_initial_random=num_initial_random,
+                                  random_sampling_method=random_sampling_method)
+
+    # assert outcome
+    assert cls.num_initial_random_points == num_initial_random_points_res
+    assert cls.random_sampling_method == sampling_method_res
+
+
+def test_Initializers__initialize_random_start_fails(monkeypatch):
+    """
+    test that '__initialize_random_start' if nonexistent sampling method provided via input 'random_sampling_method'
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # start by monkeypatching
+    NUM_RETURN = 33
+
+    def mock_determine_number_random_samples():
+        return NUM_RETURN
+
+    monkeypatch.setattr(cls, "determine_number_random_samples", mock_determine_number_random_samples)
+
+    # set attributes
+    cls.train_Y = None
+    cls.train_X = None
+
+    # for reference, the list of acceptable sampling methods
+    SAMPLING_METHODS_LIST = [func for func in dir(DataSamplers) if
+                             callable(getattr(DataSamplers, func)) and not func.startswith("__")]
+
+    # run method
+    with pytest.raises(Exception) as e:
+        cls._Initializers__initialize_random_start(random_start=True, num_initial_random=2,
+                                                   random_sampling_method="junk")  # acceptable values of 'random_sampling_method' given in SAMPLING_METHODS_LIST
+    assert str(e.value) == "creative_project._initializers.Initializers.__initialize_random_start: The parameter 'random_sampling_method' is not among allowed values ('" + "', '".join(SAMPLING_METHODS_LIST) + "')."
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y, random_start, num_initial_random, random_sampling_method, num_initial_random_points_res, sampling_method_res",
+    [
+        [torch.tensor([[1, 2, 3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), False, 2, "random", 0, None], # Case 1. Special twist to ensure correct behavior even if user sets random parameter features while still choosing against random start
+    ]
+)
+def test_Initializers__initialize_random_start_warning(train_X, train_Y, random_start, num_initial_random,
+                                                     random_sampling_method, num_initial_random_points_res,
+                                                     sampling_method_res, monkeypatch):
+    """
+    test that the right warning message is raised
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # start by monkeypatching
+    NUM_RETURN = 33
+
+    def mock_determine_number_random_samples():
+        return NUM_RETURN
+
+    monkeypatch.setattr(cls, "determine_number_random_samples", mock_determine_number_random_samples)
+
+    # set attributes
+    cls.train_Y = train_Y
+    cls.train_X = train_X
+
+    # run method
+    cls._Initializers__initialize_random_start(random_start=random_start, num_initial_random=num_initial_random,
+                                           random_sampling_method=random_sampling_method)
+
+    # test that warning is raised
+    my_warning = "Inconsistent settings for optimization initialization: No initial data provided via 'train_X' and 'train_Y' but also 'random_start' is set to 'False'. Adjusting to start with " + str(num_initial_random) + " random datapoints."
+    with pytest.warns(UserWarning):
+        warnings.warn(my_warning, UserWarning)
