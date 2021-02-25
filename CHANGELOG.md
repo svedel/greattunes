@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.0.3] - February 25, 2021
 
 Version number for this release: 0.0.3
 
@@ -25,12 +25,13 @@ In `CreativeProject` class initialization:
     * optimization cycle counters (iteration counters) `model["covars_proposed_iter"]`, `model["covars_sampled_iter"]` and `model["response_sampled_iter"]` are set so the first iterations are taken as those from the historical data. That is, if `train_X`, `train_Y` is provided with two observations during initialization, then the counters are set as `model["covars_proposed_iter"]=2`, `model["covars_sampled_iter"]=2` and `model["response_sampled_iter"]=2`.  
 
 ### Deprecated
+None
 
 ### Removed
 Removed the attribute `start_from_random` as part of adding more elaborate random sampling functionality.
 
 ### Fixed
-
+None
 
 ## [0.0.2] - January 17, 2021
 
