@@ -189,7 +189,7 @@ would be
 train_X = torch.tensor([[1, 5.2, 4]], dtype=torch.double)
 ```
 
-#### Starting with some historical data
+#### Starting with historical data
 
 If historical data for pairs of covariates and response is available for your system, this can be added during
 initialization. In this case the optimization framework will have a better starting position and will likely converge
@@ -243,6 +243,63 @@ Y = torch.tensor([[33]], dtype=torch.double)
 # initialize class
 cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
 ```
+
+#### Random initialization
+
+Starting from a few randomly sampled datapoints typically increases the convergence of the optimization because it 
+makes it less likely that the algorithm locks onto a local maximum without consideration for an unknown global one. 
+Furthermore, in the absence of historical data, random sampling is the best option is to start.
+
+Random initialization is enabled via the parameter `random_start` during initialization and can be applied both in case 
+historical data has been added or not (default is `random_start = True`).
+
+```python
+
+# import
+import torch
+from creative_project import CreativeProject
+
+### ------ Case 1 - No historical data ------ ###
+
+# set range of data
+covars = [(1, 0, 4.4), (5.2, 1.5, 7.0), (4, 2.2, 5.1)]
+
+# define initial data
+X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
+Y = torch.tensor([[33],[37.8]], dtype=torch.double)
+
+# initialize class
+cls = CreativeProject(covars=covars, random_start=True)
+
+### ------ Case 2 - With historical data ------ ###
+
+# set range of data
+covars = [(1, 0, 4.4), (5.2, 1.5, 7.0), (4, 2.2, 5.1)]
+
+# define initial data
+X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
+Y = torch.tensor([[33],[37.8]], dtype=torch.double)
+
+# initialize class
+cls = CreativeProject(covars=covars,train_X=X, train_Y=Y, random_start=True)
+```
+
+##### Parameters for random start 
+
+**Number of random datapoints:** The number of random datapoints to be sampled is set via the kwarg `num_initial_random` during initialization. This defaults to the closest integer to $\sqrt{d}$ for a problem with $d$ covariates unless a value is provided.
+
+**Sampling method:** Two sampling methods are available: 
+* `random`: Fully random sampling within the whole hypercube specified by `covars`.
+* `latin_hcs`: [Latin hypercube sampling](https://en.wikipedia.org/wiki/Latin_hypercube_sampling) within the hypercube specified by `covars`. 
+The sampling method is determined by the kwarg `random_sampling_method` during class initialization.
+
+#### Improved convergence: adding randomly sampled points during optimization
+
+Just like random initialization helps with convergence, best practice also prescribes adding randomly sampled points 
+during the optimization run.
+
+This is easily done within this framework. The parameter `random_step_cadence` determines the cadence between randomly 
+sampled datapoints (in between points sampled via Bayesian optimization). 
 
 #### Kernels for Gaussian process surrogate model
 
