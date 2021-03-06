@@ -182,7 +182,7 @@ def tmp_modeling_class():
                           }
 
         # import method
-        from creative_project._modeling import _set_GP_model
+        from creative_project._modeling import _set_GP_model, _GP_kernel_transform
 
     # initialize class
     cls = TmpClass()
