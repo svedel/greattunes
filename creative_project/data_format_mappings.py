@@ -31,7 +31,7 @@ def pretty2tensor(x_pandas, covar_details, covar_mapped_names, device=None):
     # === adds covariates missing from x_pandas but provided previously ===
 
     # looks whether data for all required covariates is present
-    x_pandas_tmp = x_pandas
+    x_pandas_tmp = x_pandas.copy()
     covar_names = list(x_pandas.columns)
     miss_cols = set(names).difference(covar_names)
 
@@ -58,7 +58,9 @@ def pretty2tensor(x_pandas, covar_details, covar_mapped_names, device=None):
                     one_hot_column = covar_key + "_" + cat_val
 
                     # update the right one-hot encoded column
-                    x_pandas_tmp.loc[x_pandas_tmp[covar_key] == cat_val, one_hot_column] = 1.0
+                    x_pandas_tmp.loc[
+                        x_pandas_tmp[covar_key] == cat_val, one_hot_column
+                    ] = 1.0
 
     # sort according to order in covar_details and pick only the relevant columns
     x_pandas_tmp = x_pandas_tmp[covar_mapped_names]
@@ -68,7 +70,10 @@ def pretty2tensor(x_pandas, covar_details, covar_mapped_names, device=None):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # return in torch tensor and numpy array formats
-    return torch.tensor(x_pandas_tmp.values, dtype=torch.double, device=device), x_pandas_tmp.to_numpy()
+    return (
+        torch.tensor(x_pandas_tmp.values, dtype=torch.double, device=device),
+        x_pandas_tmp.to_numpy(),
+    )
 
 
 # reverse mapping (from internal format to user-readable format)
@@ -83,11 +88,13 @@ def tensor2pretty(train_X_sample, covar_details):
     """
     # check that covar_details has been populated
     if len(covar_details) == 0:
-        raise Exception("creative_project.data_format_mappings.tensor2pretty: class instance has not been properly initialized, 'covar_details' has not been initiated")
+        raise Exception(
+            "creative_project.data_format_mappings.tensor2pretty: class instance has not been properly initialized, 'covar_details' has not been initiated"
+        )
 
     # map back
     keys = list(covar_details.keys())
-    #df_out = pd.DataFrame(columns=keys)
+    # df_out = pd.DataFrame(columns=keys)
     dict_out = {}
 
     for i in range(len(covar_details)):
@@ -101,7 +108,10 @@ def tensor2pretty(train_X_sample, covar_details):
 
             # get the data element to show the user
             # convert from 'double' format in 'train_X' to integer
-            elements = [int(tensor_iter.item()) for tensor_iter in train_X_sample[:, colnum].round()]
+            elements = [
+                int(tensor_iter.item())
+                for tensor_iter in train_X_sample[:, colnum].round()
+            ]
 
             # update output
             dict_out[keys[i]] = elements
@@ -126,7 +136,9 @@ def tensor2pretty(train_X_sample, covar_details):
             # opt_names
             prefix_name = keys[i] + "_"
             prefix_length = len(prefix_name)
-            cat_names = [name[prefix_length:] for name in covar_details[keys[i]]["opt_names"]]
+            cat_names = [
+                name[prefix_length:] for name in covar_details[keys[i]]["opt_names"]
+            ]
 
             elements = [cat_names[cat_iter.item()] for cat_iter in max_index]
 
