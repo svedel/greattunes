@@ -77,8 +77,6 @@ def tensor2pretty(train_X_sample, covar_details):
     maps between the tensor format used behind the scenes and the user-facing pretty format (based on pandas). This is
     the reverse mapping to 'pretty2tensor'
 
-    ONLY WORKS FOR SINGLE ROW OF TRAIN_X???
-
     :param train_X_sample (torch tensor in format <num_observations> x <num_covars>):
     :param covar_details (dict of dicts): ...
     :return:
