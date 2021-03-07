@@ -227,3 +227,42 @@ def tmp_Initializers_with_find_max_response_value_class():
     cls = TmpClass()
 
     return cls
+
+
+@pytest.fixture(scope="module")
+def covar_details_covar_mapped_names():
+    """
+    examples of matching 'covar_details' and 'covar_mapped_names' for a case of the following variables
+    - a: int
+    - b: float
+    - c: categorical (str), with options "red", "blue" and "green"
+    """
+
+    covar_details = \
+        {
+            'a': {
+                'guess': 1,
+                'min': -1,
+                'max': 3,
+                'type': int,
+                'columns': 0,
+                },
+            'b': {
+                'guess': 2.2,
+                'min': -1.7,
+                'max': 4.2,
+                'type': float,
+                'columns': 1,
+            },
+            'c': {
+                'guess': 'red',
+                'options': {'red', 'green', 'blue'},
+                'type': str,
+                'columns': [2, 3, 4],
+                'opt_names': ['c_red', 'c_green', 'c_blue'],
+            }
+        }
+
+    covar_mapped_names = ['a', 'b', 'c_red', 'c_green', 'c_blue']
+
+    return covar_details, covar_mapped_names
