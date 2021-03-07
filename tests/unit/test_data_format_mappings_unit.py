@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-from creative_project.data_format_mappings import pretty2tensor
+from creative_project.data_format_mappings import pretty2tensor, tensor2pretty
 
 
 @pytest.mark.parametrize(
@@ -77,3 +77,30 @@ def test_pretty2tensor_adds_missing_columns_removes_extra_columns(covar_details_
     for j in range(x_numpy_check.shape[0]):
         for i in range(x_numpy_check.shape[1]):
             assert x_numpy_check[j, i]
+
+
+@pytest.mark.parametrize(
+    "train_X_sample, pandas_out",
+    [
+        [torch.tensor([[2.0, 3.2, 0.0, 0.0, 1.0]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({'a': [2], 'b': [3.2], 'c': ['blue']})],
+        [torch.tensor([[2.0, 3.2, 0.0, 0.0, 1.0], [-1.0, 1.7, 1.0, 0.0, 0.0]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({'a': [2, -1], 'b': [3.2, 1.7], 'c': ['blue', 'red']})],
+    ]
+)
+def test_tensor2pretty_works(covar_details_covar_mapped_names, train_X_sample, pandas_out):
+    """
+    tests that the reverse mapping tensor2pretty works for single and multiple observations
+    """
+
+    # get covariate details
+    covar_details = covar_details_covar_mapped_names[0]
+
+    # run the method
+    x_pandas = tensor2pretty(train_X_sample, covar_details)
+
+    # compare
+    pd_bool = (x_pandas == pandas_out).values
+    print(x_pandas)
+    print(pd_bool)
+    for j in range(pd_bool.shape[0]):
+        for i in range(pd_bool.shape[1]):
+            assert pd_bool[j, i]
