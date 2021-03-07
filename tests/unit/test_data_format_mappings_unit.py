@@ -99,8 +99,6 @@ def test_tensor2pretty_works(covar_details_covar_mapped_names, train_X_sample, p
 
     # compare
     pd_bool = (x_pandas == pandas_out).values
-    print(x_pandas)
-    print(pd_bool)
     for j in range(pd_bool.shape[0]):
         for i in range(pd_bool.shape[1]):
             assert pd_bool[j, i]
