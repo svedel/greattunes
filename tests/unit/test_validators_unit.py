@@ -79,7 +79,7 @@ def test_unit_Validators__validate_training_data(custom_models_simple_training_d
         [None, "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"],  # checks no covars data provided
         [(1, 2, 3), "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)"],  # checks fail if covars not a list of tuples
         [[1, 2, 3], "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple"],  # checks that covars is a list of tuples
-        [[("hej", 2, 3)], "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element hej in covars list is neither of type float or int"]  # test that all elements in tuples are of type int or float
+        [[({"hej"}, 2, 3)], "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element {'hej'} in covars list is neither of type float, int or str"]  # test that all elements in tuples are of type int or float
     ])
 def test_Validators__validate_covars_exceptions(covars, error_msg):
     """

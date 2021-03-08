@@ -107,11 +107,11 @@ class Validators:
 
         for entry in covars:
             for el in entry:
-                if not isinstance(el, (float, int)):
+                if not isinstance(el, (float, int, str)):
                     raise TypeError(
                         "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element "
                         + str(el)
-                        + " in covars list is neither of type float or int"
+                        + " in covars list is neither of type float, int or str"
                     )
 
         valid = True
