@@ -54,8 +54,8 @@ class Initializers(Validators):
     @staticmethod
     def __determine_tuple_datatype(x_tuple):
         """
-        determines which data type to assign to the content of the tuple 'x_tuple'. Elements must be only of types (int,
-        float, str), and the method assigns according to the following priorities
+        determines which data type to assign to the content of the tuple 'x_tuple'. Elements must be only of types
+        (int, float, str), and the method assigns according to the following priorities
         - if any entry is a str -> all entries cast as str
         - if any entry is a float -> all entries cast as float
         that means, that if any entry is a str the content of that tuple is considered str; while, if any entry in a
@@ -74,9 +74,12 @@ class Initializers(Validators):
 
         # check that only float and int types provided
         for t in set(types):
-            if not t in {int, float, str}:
+            if t not in {int, float, str}:
                 raise Exception(
-                    "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(t))
+                    "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates "
+                    "provided via tuples can only be of types ('float', 'int', 'str') but was provided "
+                    + str(t)
+                )
 
         # if any str available in tuple treat as categorical
         if str in types:
