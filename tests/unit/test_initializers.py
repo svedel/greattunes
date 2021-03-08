@@ -310,3 +310,53 @@ def test_Initializers__initialize_random_start_warning(train_X, train_Y, random_
     my_warning = "Inconsistent settings for optimization initialization: No initial data provided via 'train_X' and 'train_Y' but also 'random_start' is set to 'False'. Adjusting to start with " + str(num_initial_random) + " random datapoints."
     with pytest.warns(UserWarning):
         warnings.warn(my_warning, UserWarning)
+
+
+@pytest.mark.parametrize(
+    "x_tuple, tuple_datatype_result",
+    [
+        [(1, 0, 3), int],  # test int
+        [(2.2, 1.1, 3.3), float],  # test float
+        [(2, 1, 3.3), float],  # test float in case where only 1 float (should recast ints as float)
+        [("str", "hej"), str],  # test str (not 3 elemets)
+        [("hej", "med", "dig", "din", "fisk"), str],  # test str (not 3 elements)
+        [(1, 0.2, "hej"), str],  # test str (should default and cast everything as str)
+    ]
+)
+def test__determine_tuple_datatype_unit_works(x_tuple, tuple_datatype_result):
+    """
+    tests that method __determine_tuple_datatype works in terms of assigning the right data type for tuple content.
+    test for both a) cases where all entries are the same type (str and other), b) cases where either a float or a str
+    is present (in which case it should default to float or str)
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # run the method and assert that the right type is returned
+    tuple_datatype = cls._Initializers__determine_tuple_datatype(x_tuple)
+
+    assert tuple_datatype == tuple_datatype_result
+
+
+@pytest.mark.parametrize(
+    "x_tuple, error_msg",
+    [
+        [(1, 0, True), "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type(True))],
+        [({}, 1.1, 3.3), "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type({}))],  # test float
+        [("str", 1, []), "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type([]))],  # test float in case where only 1 float (should recast ints as float)
+    ]
+)
+def test__determine_tuple_datatype_unit_fails(x_tuple, error_msg):
+    """
+    tests that method __determine_tuple_datatype throws the correct error in case a tuple-element of data type other
+    than int, float or str is provided
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # run the method and assert that the right type is returned
+    with pytest.raises(Exception) as e:
+        tuple_datatype = cls._Initializers__determine_tuple_datatype(x_tuple)
+    assert str(e.value) == error_msg
