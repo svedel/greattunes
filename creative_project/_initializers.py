@@ -51,6 +51,43 @@ class Initializers(Validators):
                 ),
             )
 
+    @staticmethod
+    def __determine_tuple_datatype(x_tuple):
+        """
+        determines which data type to assign to the content of the tuple 'x_tuple'. Elements must be only of types (int,
+        float, str), and the method assigns according to the following priorities
+        - if any entry is a str -> all entries cast as str
+        - if any entry is a float -> all entries cast as float
+        that means, that if any entry is a str the content of that tuple is considered str; while, if any entry in a
+        tuple is a float, then elements of that tuple are considered float (even if they are originally int). A tuple
+        is considered to contain only int data type if all entries have the data type int.
+
+        :param x_tuple (tuple of int, float or str): it is to the elements of this tuple we are determining the type
+        :return tuple_datatype (type):
+        """
+
+        # initialize
+        tuple_datatype = float
+
+        # types in provided tuple
+        types = [type(i) for i in x_tuple]
+
+        # check that only float and int types provided
+        for t in set(types):
+            if not t in {int, float, str}:
+                raise Exception(
+                    "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(t))
+
+        # if any str available in tuple treat as categorical
+        if str in types:
+            tuple_datatype = str
+
+        # special case if only int data types provided
+        elif set(types) == {int}:
+            tuple_datatype = int
+
+        return tuple_datatype
+
     def __initialize_best_response(self):
         """
         initialize best response. If no data present sets to None, otherwise identifies best response up to each data
