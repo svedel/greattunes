@@ -118,7 +118,8 @@ class Validators:
 
         return valid
 
-    def __validate_num_entries_covar_tuples(self, covars, covars_tuple_datatypes):
+    @staticmethod
+    def __validate_num_entries_covar_tuples(covars, covars_tuple_datatypes):
         """
         ensures that the correct number of entries are present in the tuples of covars. covars_tuple_datatypes contains
         the tuple datatypes as determined by creative_project._initializers.__determine_tuple_datatype
@@ -128,27 +129,35 @@ class Validators:
         :return valid (bool)
         """
 
-        # STILL NEED TO WRITE TESTS AND ADD ME!!!
-
         # initialize
         valid = False
 
         # ensure the same number of entries
-        assert len(covars) == len(covars_tuple_datatypes), "creative_project._validators.__validate_num_entries_covar_tuples: dimension mismatch between the number of tuples in 'covars' and the number of datatype decisions in 'covars_tuple_datatypes'."
+        assert len(covars) == len(covars_tuple_datatypes), (
+            "creative_project._validators.__validate_num_entries_covar_tuples: dimension mismatch between the number of tuples in 'covars' and the number of datatype decisions in 'covars_tuple_datatypes'. 'covars' has length "
+            + str(len(covars))
+            + " while 'covars_tuple_datatype' has length "
+            + str(len(covars_tuple_datatypes))
+        )
 
         # check for compliance
         # int, float types must have exactly 3 entries; str must have at least 1 entry
         for i in range(len(covars)):
-            if covars_tuple_datatypes[i] in {str, float}:
-                assert len(covars[i]) == 3, "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str(covars[i])
-            elif covars_tuple_datatypes[i] in {int}:
-                assert len(covars[i]) > 0, "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types str (categorical variables) must have at least 1 entry. This is not the case for the entry " + str(covars[i])
+            if covars_tuple_datatypes[i] in {int, float}:
+                assert len(covars[i]) == 3, (
+                    "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry "
+                    + str(covars[i])
+                )
+            elif covars_tuple_datatypes[i] in {str}:
+                assert len(covars[i]) > 0, (
+                    "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types str (categorical variables) must have at least 1 entry. This is not the case for the entry "
+                    + str(covars[i])
+                )
 
         # update output parameter if no errors thrown so far
         valid = True
 
         return valid
-
 
     def __validate_num_response(self, response_array):
         """

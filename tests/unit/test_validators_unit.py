@@ -185,3 +185,51 @@ def test_Validators__continue_iterating_rel_tol_conditions_works(best_response_v
 
     # check whether the outcome is as expected
     assert continue_iterating == continue_iterating_bool
+
+@pytest.mark.parametrize(
+    "covars, covars_tuple_datatypes",
+    [
+        [[(1, 0, 2)], [int]],  # one entry, int
+        [[("hej")], [str]],  # one entry, str, only one element
+        [[(1, 0, 2.2)], [float]],  # one entry, float
+        [[("hej", "med", "dig", "hr", "kat")], [str]],  # one entry, str, more than 3 entries
+        [[(1, 0, 2), (2.2, 1.1, 3), ("hej", "med", "dig", "hr", "kat")],[int, float, str]],  # combination of types
+        ]
+)
+def test__validate_num_entries_covar_tuples_works(covars, covars_tuple_datatypes):
+    """
+    test that '__validate_num_entries_covar_tuples' works for data types int, float (must contain 3 entries) as well as
+    for str (must contain at least one entry)
+    """
+
+    # initialize class
+    cls = Validators()
+
+    # run the method
+    assert cls._Validators__validate_num_entries_covar_tuples(covars=covars,
+                                                              covars_tuple_datatypes=covars_tuple_datatypes)
+
+@pytest.mark.parametrize(
+    "covars, covars_tuple_datatypes, error_msg",
+    [
+        [[(1, 0, 3)], [int, int], "creative_project._validators.__validate_num_entries_covar_tuples: dimension mismatch between the number of tuples in 'covars' and the number of datatype decisions in 'covars_tuple_datatypes'. 'covars' has length 1 while 'covars_tuple_datatype' has length 2"],  # covars and covar_tuple_datatypes have different length (number of entries)
+        [[()], [str], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types str (categorical variables) must have at least 1 entry. This is not the case for the entry " + str(())],  # empty tuple (set type to str to trigger str error  message)
+        [[(2,1,3,0)], [int], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((2,1,3,0))],  # int with more than 3 entries (will be the same for float)
+        [[(1.1, 0.2)], [float], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((1.1, 0.2))],  # float with less than 3 entries (will be the same for int)
+        [[(1, 0, 3), (2.2, 1.1, 3.3), (2.2, 1.1)], [int, float, float], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((2.2, 1.1))],  # float with more than 3 entries in list of multiple otherwise acceptible tuples
+    ]
+)
+def test__validate_num_entries_covar_tuples_fails(covars, covars_tuple_datatypes, error_msg):
+    """
+    test that '__validate_num_entries_covar_tuples' works for data types int, float (must contain 3 entries) as well as
+    for str (must contain at least one entry)
+    """
+
+    # initialize class
+    cls = Validators()
+
+    # assert
+    with pytest.raises(Exception) as e:
+        cls._Validators__validate_num_entries_covar_tuples(covars=covars,
+                                                           covars_tuple_datatypes=covars_tuple_datatypes)
+    assert str(e.value) == error_msg
