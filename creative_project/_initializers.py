@@ -91,6 +91,290 @@ class Initializers(Validators):
 
         return tuple_datatype
 
+    def __initialize_covars_list_of_tuples(self, covars):
+        """
+        investigating the case when covars is a list of tuples, ensures only acceptable number of entries and data
+        types and creates the needed data structures 'covar_details', 'GP_kernel_mapping_covar_identification' and
+        'total_num_covars' as attributes.
+
+        assumes that covars is of type list of tuples
+
+        :param covars (list of tuples): each entry (tuple) must contain (<initial_guess>, <min>, <max>) for each input
+        variable. Currently only allows for continuous variables. Aspiration: Data type of input will be preserved and
+        code be adapted to accommodate both integer and categorical variables.
+
+            Example:
+
+                covars = [
+                            (1, 0, 2),  # will be taken as INTEGER (type: int)
+                            (1.0, 0.0, 2.0),  # will be taken as CONTINUOUS (type: float)
+                            (1, 0, 2.0),  # will be taken as CONTINUOUS (type: float)
+                            ("red", "green", "blue", "yellow"),  # will be taken as CATEGORICAL (type: str)
+                            ("volvo", "chevrolet", "ford"),  # will be taken as CATEGORICAL (type: str)
+                            ("sunny", "cloudy"),  # will be taken as CATEGORICAL (type: str)
+                        ]
+
+        :return as attributes
+            - covar_details (dict of dicts): contains a dict with details about each covariate wuth initial guess and
+            range as well as information about which column it is mapped to in train_X dataset used by the Gaussian
+            process model behind the scenes and data type of covariate. Includes one-hot encoding for categorical
+            variables. For one-hot encoded categorical variables use the naming convention
+            <covariate name>_<option name>
+            - GP_kernel_mapping_covar_identification (list of dicts): reduced version of 'covar_details' containing
+            only data type and mapped columns information
+            - covar_mapped_names (list): names of mapped covariates
+            - total_num_covars (int): total number of columns created for backend train_X dataset used by Gaussian
+            processes
+        """
+
+        # INTEGRATE !!!
+
+        # first ensure the format of 'covars' is as expected
+        assert self._Validators__validate_covars(covars=covars)
+
+        # assign names to all columns. Starting from tuples we don't have names assigned, so creating own
+        covar_names = ["covar" + str(i) for i in range(len(covars))]
+
+        # determine which datatype to assign content of each tuple and ensures these are acceptable
+        covar_types = [self.__determine_tuple_datatype(tpl) for tpl in covars]
+        assert self._Validators__validate_num_entries_covar_tuples(covars=covars, covars_tuple_datatypes=covar_types)
+
+        # initialize attributes
+        GP_kernel_mapping_covar_identification = []
+        covar_details = {}
+        covar_mapped_names = []
+
+        # loop through each entry in list of tuples and builds out 'covar_details',
+        # 'GP_kernel_mapping_covar_identification', 'covar_mapped_names' and total count with the right information
+        column_counter = 0
+
+        for i in range(len(covars)):
+
+            # case where data type is int or float. only a single column needed in train_X dataset for covariates used
+            # behind the scenes for Gaussian process modeling
+            if covar_types[i] in {int, float}:
+                covar_details[covar_names[i]] = {
+                    'guess': covars[i][0],
+                    'min': covars[i][1],
+                    'max': covars[i][2],
+                    'type': covar_types[i],
+                    'columns': column_counter,
+                }
+
+                # update book keeping
+                if covar_types[i] == int:
+                    GP_kernel_mapping_covar_identification += [{"type": int, "column": [column_counter]}]
+                else:
+                    GP_kernel_mapping_covar_identification += [{"type": float, "column": [column_counter]}]
+
+                column_counter += 1
+                covar_mapped_names += [covar_names[i]]
+
+            # special situation for categorical variables (data type is str).
+            # in this case builds the options and does the one-hot encoding mapping to split the categorical variable
+            # into a set of new continuous variables containing one new continuous variable per categorical option.
+            # For one-hot encoded categorical variables use the naming convention <covariate name>_<option name>
+            elif covar_types[i] == str:
+
+                # determines the names of the one-hot encoded continuous variables
+                num_opts = len(covars[i])
+                opt_names = [covar_names[i] + "_" + j for j in covars[i]]
+
+                covar_details[covar_names[i]] = {
+                    'guess': covars[i][0],
+                    'options': {str(j) for j in covars[i]},  # converts all entries to str if type is str
+                    'type': covar_types[i],
+                    'columns': [j + column_counter for j in range(num_opts)],  # # sets mapped one-hot columns, names
+                    'opt_names': opt_names,
+                }
+
+                # update book keeping
+                GP_kernel_mapping_covar_identification += [
+                    {"type": str, "column": [j + column_counter for j in range(num_opts)]}]
+
+                column_counter += num_opts
+                covar_mapped_names += [j for j in opt_names]
+
+        # save attributes
+        self.covar_details = covar_details
+        self.GP_kernel_mapping_covar_identification = GP_kernel_mapping_covar_identification
+        self.covar_mapped_names = covar_mapped_names
+        self.total_num_covars = column_counter
+
+    def __initialize_covars_dict_of_dicts(self, covars):
+        """
+        investigating the case when covars is a dict of dicts, ensures only acceptable number of entries and data
+        types and creates the needed data structures 'covar_details', 'GP_kernel_mapping_covar_identification' and
+        'total_num_covars' as attributes.
+
+        user-provided covars is extended with information about mapped column numbers (taking one-hot encoded
+        categorical variables into consideration) to become 'covar_details'; present method assumes that covars is of
+        type dict of dicts following the format of covar_details
+
+        :param covars (dict of dicts): each key-value pair in outer dict describes a covariate, with the key being the
+        name used for this covariate. Each covariate is defined by a dict; for covariates of types 'int' and 'float'
+        these must contain entries 'guess' (initial guess for value of covariate), 'min', 'max' and 'type' (must itself
+        be among {int, float, str}); for categorical variables (use type 'str' to identify these), the required
+        elements in the dict are 'guess', 'options' and 'type', where the middle one is a set of all possible values of
+        the categorical variable and 'type' is the data type and must be among int, float and str
+            Example:
+
+            covars = {
+                        'variable1:  # type: integer
+                            {
+                                'guess': 1,
+                                'min': 0,
+                                'max': 2,
+                                'type': int,
+                            },
+                        'variable2':  # type: continuous (float)
+                            {
+                                'guess': 12.2,
+                                'min': -3.4,
+                                'max': 30.8,
+                                'type': float,
+                            },
+                        'variable3':  # type: categorical (str)
+                            {
+                                'guess': 'red',
+                                'options': {'red', 'blue', 'green'},
+                                'type': str,
+                            }
+                        }
+
+        :return as attributes
+            - covar_details (dict of dicts): contains a dict with details about each covariate wuth initial guess and
+            range as well as information about which column it is mapped to in train_X dataset used by the Gaussian
+            process model behind the scenes and data type of covariate. Includes one-hot encoding for categorical
+            variables. For one-hot encoded categorical variables use the naming convention
+            <covariate name>_<option name>
+            - GP_kernel_mapping_covar_identification (list of dicts): reduced version of 'covar_details' containing
+            only data type and mapped columns information
+            - covar_mapped_names (list): names of mapped covariates
+            - total_num_covars (int): total number of columns created for backend train_X dataset used by Gaussian
+            processes
+        """
+
+        # INTEGRATE!!!
+
+        # check that content is dicts
+        list_content_types = [type(i) for i in list(covars.values())]
+        if not set(list_content_types) == {dict}:
+            raise Exception(
+                "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: 'covars' provided as "
+                "part of class initialization must be either a list of tuples or a dict of dicts. Current provided is "
+                "a dict containing data types "
+                + str(set(list_content_types)) + ".")
+
+        # check that each has the right elements
+        for key in covars.keys():
+            # makes sure 'guess' is provided
+            if 'guess' not in covars[key].keys():
+                raise Exception(
+                    "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'guess' "
+                    "missing for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(covars[key]) + ")."
+                )
+
+            # makes sure data type is provided
+            if 'type' not in covars[key].keys():
+                raise Exception(
+                    "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'type' missing "
+                    "for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(covars[key]) + ")."
+                )
+
+            else:
+                # warning if types beyond int, float, str are provided
+                if covars[key]["type"] not in {int, float, str}:
+                    warnings.warn(
+                        "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key "
+                        + str(key) + " will be ignored because its data type '" + str(covars[key]["type"]) + "' is not "
+                        "among supported types {int, float, str}."
+                    )
+
+                # checks for int, float
+                if covars[key]["type"] in {int, float}:
+                    if 'min' not in covars[key].keys():
+                        raise Exception(
+                            "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'min' "
+                            "missing for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(
+                                covars[key]) + ")."
+                        )
+                    if 'max' not in covars[key].keys():
+                        raise Exception(
+                            "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'max' "
+                            "missing for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(
+                                covars[key]) + ")."
+                        )
+                elif covars[key]["type"] == str:
+
+                    # checks whether "options" (set of categorical options) is present
+                    if 'options' not in covars[key].keys():
+                        raise Exception(
+                            "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key "
+                            "'options' missing for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(
+                                covars[key]) + ")."
+                        )
+
+                    # add value from "guess" to list of options if not already present
+                    if covars[key]["guess"] not in covars[key]["options"]:
+                        covars[key]["options"].add(covars[key]["guess"])
+
+        # assume that provided dict has right information except columns and opt_names in case of categorical variables
+        covar_names = list(covars.keys())
+
+        # initialize attributes
+        GP_kernel_mapping_covar_identification = []
+        covar_details = covars
+        covar_mapped_names = []
+
+        # loop through each entry in list of tuples and builds out 'covar_details',
+        # 'GP_kernel_mapping_covar_identification', 'covar_mapped_names' and total count with the right information
+        column_counter = 0
+
+        for key in covar_names:
+
+            # case where data type is int or float. only a single column needed in train_X dataset for covariates used
+            # behind the scenes for Gaussian process modeling
+            if covar_details[key]["type"] in {int, float}:
+                covar_details[key]["columns"] = column_counter
+
+                # update book keeping
+                if covar_details[key]["type"] == int:
+                    GP_kernel_mapping_covar_identification += [{"type": int, "column": [column_counter]}]
+                else:
+                    GP_kernel_mapping_covar_identification += [{"type": float, "column": [column_counter]}]
+
+                column_counter += 1
+                covar_mapped_names += [key]
+
+            # special situation for categorical variables (data type is str).
+            # in this case builds the options and does the one-hot encoding mapping to split the categorical variable
+            # into a set of new continuous variables containing one new continuous variable per categorical option.
+            # For one-hot encoded categorical variables use the naming convention <covariate name>_<option name>
+            elif covar_details[key]["type"] == str:
+
+                # determines the names of the one-hot encoded continuous variables
+                num_opts = len(covar_details[key]["options"])
+                opt_names = [key + "_" + j for j in covar_details[key]["options"]]
+
+                # sets mapped one-hot encoded continuous columns and names
+                covar_details[key]["columns"] = [j + column_counter for j in range(num_opts)]
+                covar_details[key]["opt_names"] = opt_names
+
+                # update book keeping
+                GP_kernel_mapping_covar_identification += [
+                    {"type": str, "column": [j + column_counter for j in range(num_opts)]}]
+
+                # updates counters
+                column_counter += num_opts
+                covar_mapped_names += [j for j in opt_names]
+
+        # save attributes
+        self.covar_details = covar_details
+        self.GP_kernel_mapping_covar_identification = GP_kernel_mapping_covar_identification
+        self.covar_mapped_names = covar_mapped_names
+        self.total_num_covars = column_counter
+
     def __initialize_best_response(self):
         """
         initialize best response. If no data present sets to None, otherwise identifies best response up to each data
