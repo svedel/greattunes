@@ -233,3 +233,46 @@ def test__validate_num_entries_covar_tuples_fails(covars, covars_tuple_datatypes
         cls._Validators__validate_num_entries_covar_tuples(covars=covars,
                                                            covars_tuple_datatypes=covars_tuple_datatypes)
     assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "covars, error_msg",
+    [
+        [{'var0': {'guess': 1, 'min': 0, 'max': 2}, 'var1': (1, 0, 3)}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: 'covars' provided as part of class initialization must be either a list of tuples or a dict of dicts. Current provided is a dict containing data types {<class 'dict'>, <class 'tuple'>}."],  # incorrect data type in 'covars'
+        [{'var0': {'guess': 1, 'min': 0, 'max': 2}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'type' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'max': 2})."], # should fail for not having element "type"
+        [{'var0': {'guess': 1, 'max': 2, 'type': int}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min'
+        [{'var0': {'guess': 1, 'min': 0, 'type': int}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'max' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'type': <class 'int'>})."], # should fail for missing 'max'
+        [{'var0': {'guess': 1, 'max': 2, 'type': int}, 'var1': {'guess': 'red', 'options':{'red', 'green'}, 'type': str}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min' even though more variables provided
+    ]
+)
+def test__validate_covars_dict_of_dicts_fails_unit(covars, error_msg):
+    """
+    test that the right error messages are returned from '__validate_covars_dict_of_dicts'
+    """
+
+    # initialize class
+    cls = Validators()
+
+    # assert
+    with pytest.raises(Exception) as e:
+        valid, _ = cls._Validators__validate_covars_dict_of_dicts(covars=covars)
+    assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "covars",
+    [
+        {'var0': {'guess': 1, 'min': 0, 'max': 2, 'type': int}, 'var1': {'guess': 1.2, 'min': -1.2, 'max': 3.3, 'type': float}, 'var2': {'guess': 'red', 'options': {'red', 'blue', 'green'}, 'type': str}}, {'var0': {'guess': 1, 'min': 0, 'max': 2, 'type': int}, 'var1': {'guess': 1, 'min': -1, 'max': 3, 'type': int}}
+    ]
+)
+def test__validate_covars_dict_of_dicts_works_unit(covars):
+    """
+    test that '__validate_covars_dict_of_dicts' works when provided the right input
+    """
+
+    # initialize class
+    cls = Validators()
+
+    # run method
+    valid, _ = cls._Validators__validate_covars_dict_of_dicts(covars=covars)
+    assert valid
