@@ -360,3 +360,115 @@ def test__determine_tuple_datatype_unit_fails(x_tuple, error_msg):
     with pytest.raises(Exception) as e:
         tuple_datatype = cls._Initializers__determine_tuple_datatype(x_tuple)
     assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "covars, total_num_covars, covar_mapped_names, GP_kernel_mapping_covar_identification, covar_details",
+    [
+        [[(1, 0, 2)], 1, ["covar0"], [{"type": int, "column": [0]}], {"covar0":{"guess":1, "min": 0, "max": 2, "type": int, "columns": 0}}],
+        [[(1, 0, 2), ("hej", "med", "dig", "hr")], 5, ["covar0", "covar1_hej", "covar1_med", "covar1_dig", "covar1_hr"], [{"type": int, "column": [0]}, {"type": str, "column": [1, 2, 3, 4]}], {"covar0":{"guess":1, "min": 0, "max": 2, "type": int, "columns": 0}, "covar1": {"guess": "hej", "options": {"hej", "med", "dig", "hr"}, "type": str, "columns": [1, 2, 3, 4], "opt_names": ["covar1_hej", "covar1_med", "covar1_dig", "covar1_hr"]}}],
+    ]
+)
+def test__initialize_covars_list_of_tuples_works(covars, total_num_covars, covar_mapped_names,
+                                                 GP_kernel_mapping_covar_identification, covar_details, monkeypatch):
+    """
+    test that the right attributes 'covar_details', 'GP_kernel_mapping_covar_identification', 'covar_mapped_names' and
+    'total_num_covars' are created correctly. Monkeypatches '__determine_tuple_datatype', '_Validators__validate_covars'
+    and '_Validators__validate_num_entries_covar_tuples'. Tests for both single and multiple-covariate case, and also
+    tests both numerical and categorical covariates
+
+    the method "__initialize_covars_list_of_tuples" takes list of tuples as input
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # monkeypatches
+    def mock__determine_tuple_datatype(tpl):  # beware that we use data type of first element tuple for whole tuple
+        return type(tpl[0])
+    monkeypatch.setattr(cls, "_Initializers__determine_tuple_datatype", mock__determine_tuple_datatype)
+
+    def mock__validate_covars(covars):
+        return True
+    monkeypatch.setattr(cls, "_Validators__validate_covars", mock__validate_covars)
+
+    def mock__validate_num_entries_covar_tuples(covars, covars_tuple_datatypes):
+        return True
+    monkeypatch.setattr(cls, "_Validators__validate_num_entries_covar_tuples", mock__validate_num_entries_covar_tuples)
+
+    # run the method
+    cls._Initializers__initialize_covars_list_of_tuples(covars=covars)
+
+    # assert
+    assert cls.total_num_covars == total_num_covars
+    assert cls.GP_kernel_mapping_covar_identification == GP_kernel_mapping_covar_identification
+    assert cls.covar_mapped_names == covar_mapped_names
+    assert cls.covar_details == covar_details
+
+
+@pytest.mark.parametrize(
+    "covars, total_num_covars, covar_mapped_names, GP_kernel_mapping_covar_identification, covar_details",
+    [
+        [{"var0": {"guess":1, "min": 0, "max": 2, "type": int}}, 1, ["var0"], [{"type": int, "column": [0]}], {"var0":{"guess":1, "min": 0, "max": 2, "type": int, "columns": 0}}],
+        [{"var0": {"guess":1, "min": 0, "max": 2, "type": int}, "idiot": {"guess": "hej", "options": {"hej", "med", "dig", "hr"}, "type": str}}, 5, ["var0", "idiot_hej", "idiot_med", "idiot_dig", "idiot_hr"], [{"type": int, "column": [0]}, {"type": str, "column": [1, 2, 3, 4]}], {"var0": {"guess":1, "min": 0, "max": 2, "type": int, "columns": 0}, "idiot": {"guess": "hej", "options": {"hej", "med", "dig", "hr"}, "type": str, "columns": [1, 2, 3, 4], "opt_names": ["idiot_hej", "idiot_med", "idiot_dig", "idiot_hr"]}}],
+    ]
+)
+def test__initialize_covars_dict_of_dicts_works(covars, total_num_covars, covar_mapped_names,
+                                                GP_kernel_mapping_covar_identification, covar_details):
+    """
+    test that the right attributes 'covar_details', 'GP_kernel_mapping_covar_identification', 'covar_mapped_names' and
+    'total_num_covars' are created correctly. Tests for both single and multiple-covariate case, and also
+    tests both numerical and categorical covariates
+
+    the method "__initialize_covars_dict_of_dicts" takes a dict of dicts as input
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # run method
+    cls._Initializers__initialize_covars_dict_of_dicts(covars=covars)
+
+    # assert
+    assert cls.total_num_covars == total_num_covars
+    assert cls.GP_kernel_mapping_covar_identification == GP_kernel_mapping_covar_identification
+    assert set(cls.covar_mapped_names) == set(covar_mapped_names)
+    # investigate the different layers of covar_details
+    assert cls.covar_details.keys() == covar_details.keys()
+    for k in cls.covar_details.keys():
+        for kk in cls.covar_details[k].keys():
+            # special attention to list with key "opt_names" because it is generated from a set in the method meaning
+            # that the order of the list entries can shuffle
+            if kk == "opt_names":
+                assert set(cls.covar_details[k][kk]) == set(covar_details[k][kk])
+            else:
+                assert cls.covar_details[k][kk] == covar_details[k][kk]
+
+
+@pytest.mark.parametrize(
+    "covars, error_msg",
+    [
+        [{'var0': {'guess': 1, 'min': 0, 'max': 2}, 'var1': (1, 0, 3)}, "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: 'covars' provided as part of class initialization must be either a list of tuples or a dict of dicts. Current provided is a dict containing data types {<class 'dict'>, <class 'tuple'>}."],  # incorrect data type in 'covars'
+        [{'var0': {'guess': 1, 'min': 0, 'max': 2}}, "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'type' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'max': 2})."], # should fail for not having element "type"
+        [{'var0': {'guess': 1, 'max': 2, 'type': int}}, "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min'
+        [{'var0': {'guess': 1, 'min': 0, 'type': int}}, "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'max' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'type': <class 'int'>})."], # should fail for missing 'max'
+        [{'var0': {'guess': 1, 'max': 2, 'type': int}, 'var1': {'guess': 'red', 'options':{'red', 'green'}, 'type': str}}, "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min' even though more variables provided
+        [{'var0': {'options': {'red', 'blue'}, 'type': str}}, "creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts: key 'guess' missing for covariate 'var0' (covars['var0']={'options': {'red', 'blue'}, 'type': <class 'str'>})."],  # missing 'options"
+    ]
+)
+def test__initialize_covars_dict_of_dicts_fails(covars, error_msg):
+    """
+    test that the right error message is returned if inconsistent data is provided to dict of dicts 'covars' for method
+    '__initialize_covars_dict_of_dicts'. Tests for both single and multiple-covariate case, and also tests both
+    numerical and categorical covariates
+
+    the method "__initialize_covars_dict_of_dicts" takes a dict of dicts as input
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # run method and assert
+    with pytest.raises(Exception) as e:
+        cls._Initializers__initialize_covars_dict_of_dicts(covars=covars)
+    assert str(e.value) == error_msg

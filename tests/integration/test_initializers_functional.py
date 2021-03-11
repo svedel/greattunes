@@ -141,3 +141,55 @@ def test_Initializers__initialize_random_start_functional(train_X, train_Y, cova
     # assert outcome
     assert cls.num_initial_random_points == num_initial_random_points_res
     assert cls.random_sampling_method == sampling_method_res
+
+
+@pytest.mark.parametrize(
+    "covars, total_num_covars, covar_mapped_names, GP_kernel_mapping_covar_identification, covar_details",
+    [
+        [[(1, 0, 2)], 1, ["covar0"], [{"type": int, "column": [0]}], {"covar0":{"guess":1, "min": 0, "max": 2, "type": int, "columns": 0}}],
+        [[(1, 0, 2), ("hej", "med", "dig", "hr")], 5, ["covar0", "covar1_hej", "covar1_med", "covar1_dig", "covar1_hr"], [{"type": int, "column": [0]}, {"type": str, "column": [1, 2, 3, 4]}], {"covar0":{"guess":1, "min": 0, "max": 2, "type": int, "columns": 0}, "covar1": {"guess": "hej", "options": {"hej", "med", "dig", "hr"}, "type": str, "columns": [1, 2, 3, 4], "opt_names": ["covar1_hej", "covar1_med", "covar1_dig", "covar1_hr"]}}],
+    ]
+)
+def test__initialize_covars_list_of_tuples_integration_works(covars, total_num_covars, covar_mapped_names,
+                                                 GP_kernel_mapping_covar_identification, covar_details):
+    """
+    test that the right attributes 'covar_details', 'GP_kernel_mapping_covar_identification', 'covar_mapped_names' and
+    'total_num_covars' are created correctly. Tests for both single and multiple-covariate case, and also
+    tests both numerical and categorical covariates
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # run the method
+    cls._Initializers__initialize_covars_list_of_tuples(covars=covars)
+
+    # assert
+    assert cls.total_num_covars == total_num_covars
+    assert cls.GP_kernel_mapping_covar_identification == GP_kernel_mapping_covar_identification
+    assert cls.covar_mapped_names == covar_mapped_names
+    assert cls.covar_details == covar_details
+
+
+@pytest.mark.parametrize(
+    "covars, error_msg",
+    [
+        [[(1, 0, 2, 3)], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry (1, 0, 2, 3)"], # test correct number of entries (_validators.__validate_num_entries_covar_tuples)
+        [[(1, 0, 2), ()], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry ()"], # test correct number of entries (_validators.__validate_num_entries_covar_tuples)
+        [[(1.1, 0.2, 3.4), (1, True, 2)], "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided <class 'bool'>"], # test correct data types (_validators.__validate_covars)
+    ]
+)
+def test__initialize_covars_list_of_tuples_integration_fails(covars, error_msg):
+    """
+    test that the right error messages are produced and that the method does not create the attributes 'covar_details',
+    'GP_kernel_mapping_covar_identification', 'covar_mapped_names' and 'total_num_covars' if the list of tuples 'covars'
+    does not follow required format
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # run the method
+    with pytest.raises(Exception) as e:
+        cls._Initializers__initialize_covars_list_of_tuples(covars=covars)
+    assert str(e.value) == error_msg
