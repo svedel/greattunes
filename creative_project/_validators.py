@@ -1,4 +1,5 @@
 import torch
+import warnings
 import numpy as np
 
 
@@ -162,8 +163,8 @@ class Validators:
     @staticmethod
     def __validate_covars_dict_of_dicts(covars):
         """
-        ensures that 'covars' (a dict of dicts determining the covariates for an optimization) have the right data types
-        and the right content inside those data types. See doctring for
+        ensures that 'covars' (a dict of dicts determining the covariates for an optimization) have the right data
+        types and the right content inside those data types. See doctring for
         creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts for full description of correct
         format for covars
 
@@ -191,23 +192,35 @@ class Validators:
             raise Exception(
                 "creative_project._validators.Validators.__validate_covars_dict_of_dicts: 'covars' provided as "
                 "part of class initialization must be either a list of tuples or a dict of dicts. Current provided is "
-                "a dict containing data types "
-                + str(set(list_content_types)) + ".")
+                "a dict containing data types " + str(set(list_content_types)) + "."
+            )
 
         # check that each has the right elements
         for key in covars.keys():
             # makes sure 'guess' is provided
-            if 'guess' not in covars[key].keys():
+            if "guess" not in covars[key].keys():
                 raise Exception(
                     "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'guess' "
-                    "missing for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(covars[key]) + ")."
+                    "missing for covariate '"
+                    + str(key)
+                    + "' (covars['"
+                    + str(key)
+                    + "']="
+                    + str(covars[key])
+                    + ")."
                 )
 
             # makes sure data type is provided
-            if 'type' not in covars[key].keys():
+            if "type" not in covars[key].keys():
                 raise Exception(
                     "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'type' missing "
-                    "for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(covars[key]) + ")."
+                    "for covariate '"
+                    + str(key)
+                    + "' (covars['"
+                    + str(key)
+                    + "']="
+                    + str(covars[key])
+                    + ")."
                 )
 
             else:
@@ -215,32 +228,50 @@ class Validators:
                 if covars[key]["type"] not in {int, float, str}:
                     warnings.warn(
                         "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key "
-                        + str(key) + " will be ignored because its data type '" + str(covars[key]["type"]) + "' is not "
-                                                                                                             "among supported types {int, float, str}."
+                        + str(key)
+                        + " will be ignored because its data type '"
+                        + str(covars[key]["type"])
+                        + "' is not "
+                        "among supported types {int, float, str}."
                     )
 
                 # checks for int, float
                 if covars[key]["type"] in {int, float}:
-                    if 'min' not in covars[key].keys():
+                    if "min" not in covars[key].keys():
                         raise Exception(
                             "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' "
-                            "missing for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(
-                                covars[key]) + ")."
+                            "missing for covariate '"
+                            + str(key)
+                            + "' (covars['"
+                            + str(key)
+                            + "']="
+                            + str(covars[key])
+                            + ")."
                         )
-                    if 'max' not in covars[key].keys():
+                    if "max" not in covars[key].keys():
                         raise Exception(
                             "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'max' "
-                            "missing for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(
-                                covars[key]) + ")."
+                            "missing for covariate '"
+                            + str(key)
+                            + "' (covars['"
+                            + str(key)
+                            + "']="
+                            + str(covars[key])
+                            + ")."
                         )
                 elif covars[key]["type"] == str:
 
                     # checks whether "options" (set of categorical options) is present
-                    if 'options' not in covars[key].keys():
+                    if "options" not in covars[key].keys():
                         raise Exception(
                             "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key "
-                            "'options' missing for covariate '" + str(key) + "' (covars['" + str(key) + "']=" + str(
-                                covars[key]) + ")."
+                            "'options' missing for covariate '"
+                            + str(key)
+                            + "' (covars['"
+                            + str(key)
+                            + "']="
+                            + str(covars[key])
+                            + ")."
                         )
 
                     # add value from "guess" to list of options if not already present

@@ -119,8 +119,12 @@ class Initializers(Validators):
 
         # other data types, throws error
         else:
-            raise Exception("creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is"
-                            " of type " + str(type(covars)) + " but must be of types {'list', 'dict'}.")
+            raise Exception(
+                "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is"
+                " of type "
+                + str(type(covars))
+                + " but must be of types {'list', 'dict'}."
+            )
 
         # === extract initial guesses and covariate bounds ===
 
@@ -151,7 +155,9 @@ class Initializers(Validators):
                     ub_tmp[j] = 1.0
 
         initial_guesses = torch.tensor([ig_tmp], device=self.device, dtype=self.dtype)
-        covar_bounds = torch.tensor([lb_tmp, ub_tmp], device=self.device, dtype=self.dtype)
+        covar_bounds = torch.tensor(
+            [lb_tmp, ub_tmp], device=self.device, dtype=self.dtype
+        )
 
         # initialize readable versions of train_X, train_Y for user interaction (reading)  INITIALIZE IN SEPARATE METHOD
         x_data = pd.DataFrame(columns=self.covar_mapped_names)
@@ -260,7 +266,9 @@ class Initializers(Validators):
 
         # determine which datatype to assign content of each tuple and ensures these are acceptable
         covar_types = [self.__determine_tuple_datatype(tpl) for tpl in covars]
-        assert self._Validators__validate_num_entries_covar_tuples(covars=covars, covars_tuple_datatypes=covar_types)
+        assert self._Validators__validate_num_entries_covar_tuples(
+            covars=covars, covars_tuple_datatypes=covar_types
+        )
 
         # initialize attributes
         GP_kernel_mapping_covar_identification = []
@@ -277,18 +285,22 @@ class Initializers(Validators):
             # behind the scenes for Gaussian process modeling
             if covar_types[i] in {int, float}:
                 covar_details[covar_names[i]] = {
-                    'guess': covars[i][0],
-                    'min': covars[i][1],
-                    'max': covars[i][2],
-                    'type': covar_types[i],
-                    'columns': column_counter,
+                    "guess": covars[i][0],
+                    "min": covars[i][1],
+                    "max": covars[i][2],
+                    "type": covar_types[i],
+                    "columns": column_counter,
                 }
 
                 # update book keeping
                 if covar_types[i] == int:
-                    GP_kernel_mapping_covar_identification += [{"type": int, "column": [column_counter]}]
+                    GP_kernel_mapping_covar_identification += [
+                        {"type": int, "column": [column_counter]}
+                    ]
                 else:
-                    GP_kernel_mapping_covar_identification += [{"type": float, "column": [column_counter]}]
+                    GP_kernel_mapping_covar_identification += [
+                        {"type": float, "column": [column_counter]}
+                    ]
 
                 column_counter += 1
                 covar_mapped_names += [covar_names[i]]
@@ -304,23 +316,33 @@ class Initializers(Validators):
                 opt_names = [covar_names[i] + "_" + j for j in covars[i]]
 
                 covar_details[covar_names[i]] = {
-                    'guess': covars[i][0],
-                    'options': {str(j) for j in covars[i]},  # converts all entries to str if type is str
-                    'type': covar_types[i],
-                    'columns': [j + column_counter for j in range(num_opts)],  # # sets mapped one-hot columns, names
-                    'opt_names': opt_names,
+                    "guess": covars[i][0],
+                    "options": {
+                        str(j) for j in covars[i]
+                    },  # converts all entries to str if type is str
+                    "type": covar_types[i],
+                    "columns": [
+                        j + column_counter for j in range(num_opts)
+                    ],  # # sets mapped one-hot columns, names
+                    "opt_names": opt_names,
                 }
 
                 # update book keeping
                 GP_kernel_mapping_covar_identification += [
-                    {"type": str, "column": [j + column_counter for j in range(num_opts)]}]
+                    {
+                        "type": str,
+                        "column": [j + column_counter for j in range(num_opts)],
+                    }
+                ]
 
                 column_counter += num_opts
                 covar_mapped_names += [j for j in opt_names]
 
         # save attributes
         self.covar_details = covar_details
-        self.GP_kernel_mapping_covar_identification = GP_kernel_mapping_covar_identification
+        self.GP_kernel_mapping_covar_identification = (
+            GP_kernel_mapping_covar_identification
+        )
         self.covar_mapped_names = covar_mapped_names
         self.total_num_covars = column_counter
 
@@ -402,9 +424,13 @@ class Initializers(Validators):
 
                 # update book keeping
                 if covar_details[key]["type"] == int:
-                    GP_kernel_mapping_covar_identification += [{"type": int, "column": [column_counter]}]
+                    GP_kernel_mapping_covar_identification += [
+                        {"type": int, "column": [column_counter]}
+                    ]
                 else:
-                    GP_kernel_mapping_covar_identification += [{"type": float, "column": [column_counter]}]
+                    GP_kernel_mapping_covar_identification += [
+                        {"type": float, "column": [column_counter]}
+                    ]
 
                 column_counter += 1
                 covar_mapped_names += [key]
@@ -420,12 +446,18 @@ class Initializers(Validators):
                 opt_names = [key + "_" + j for j in covar_details[key]["options"]]
 
                 # sets mapped one-hot encoded continuous columns and names
-                covar_details[key]["columns"] = [j + column_counter for j in range(num_opts)]
+                covar_details[key]["columns"] = [
+                    j + column_counter for j in range(num_opts)
+                ]
                 covar_details[key]["opt_names"] = opt_names
 
                 # update book keeping
                 GP_kernel_mapping_covar_identification += [
-                    {"type": str, "column": [j + column_counter for j in range(num_opts)]}]
+                    {
+                        "type": str,
+                        "column": [j + column_counter for j in range(num_opts)],
+                    }
+                ]
 
                 # updates counters
                 column_counter += num_opts
@@ -433,7 +465,9 @@ class Initializers(Validators):
 
         # save attributes
         self.covar_details = covar_details
-        self.GP_kernel_mapping_covar_identification = GP_kernel_mapping_covar_identification
+        self.GP_kernel_mapping_covar_identification = (
+            GP_kernel_mapping_covar_identification
+        )
         self.covar_mapped_names = covar_mapped_names
         self.total_num_covars = column_counter
 
