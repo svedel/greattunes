@@ -11,39 +11,76 @@ import creative_project._best_response
 from creative_project.utils import DataSamplers
 
 
-@pytest.mark.parametrize("dataset_id",[0, 1])
-def test_Initializers__initialize_from_covars(covars_initialization_data, dataset_id):
+@pytest.mark.parametrize(
+    "covars",
+    [
+        [(1, 0, 2), (2.2, -1.2, 4.4), ('red', 'green', 'blue')],
+        {"covar0": {"guess": 1, "min": 0, "max": 2, "type": int}, "covar1": {"guess": 2.2, "min": -1.2, "max": 4.4, "type": float}, "covar2": {"guess": "red", "options": {"red", "green", "blue"}, "type": str}}
+    ]
+)
+def test__initialize_from_covars_unit_works(covars, monkeypatch):
     """
-    test that simple data input data is processed and right class attributes set
+    tests that '__initialize_from_covars' works for cases where 'covars' is a list of tuples as well as a dict of dicts.
+    Monkeypatching the lower-level methods '__initialize_covars_list_of_tuples' and '__initialize_covars_dict_of_dicts'
+
+    have constructed input 'covars' so the same data structures will result
     """
 
-    # input data
-    covars = covars_initialization_data[dataset_id]
-    num_cols = len(covars)
-
-    # initialize class
+    # instantiate class
     cls = Initializers()
 
-    # define new class attributes from torch required for method to run (method assumes these defined under
-    # main class in creative_project.__init__.py)
+    # monkeypatch
+    def mock__initialize_covars_list_of_tuples(covars):
+        pass
+    monkeypatch.setattr(cls, "_Initializers__initialize_covars_list_of_tuples", mock__initialize_covars_list_of_tuples)
+
+    def mock__initialize_covars_dict_of_dicts(covars):
+        pass
+    monkeypatch.setattr(cls, "_Initializers__initialize_covars_dict_of_dicts", mock__initialize_covars_dict_of_dicts)
+
+    # attributes which will be generated in CreativeProject.__init__
     cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cls.dtype = torch.double
 
-    # run method
+    # define attributes to mock what would've happened in the two mocked methods
+    cls.covar_details = {"covar0": {"guess": 1, "min": 0, "max": 2, "type": int, "columns": 0}, "covar1": {"guess": 2.2, "min": -1.2, "max": 4.4, "type": float, "columns": 1}, "covar2": {"guess": "red", "options": {"red", "green", "blue"}, "type": str, "columns": [2, 3, 4]}}
+    cls.GP_kernel_mapping_covar_identification = [{"type": int, "column": [0]}, {"type": float, "column": [1]}, {"type": str, "column": [2, 3, 4]}]
+    cls.covar_mapped_names = ["covar0", "covar1", "covar2_red", "covar2_green", "covar2_blue"]
+    cls.total_num_covars = 5
+
+    # runs the method
     initial_guesses, bounds = cls._Initializers__initialize_from_covars(covars=covars)
 
-    # asserts type
-    assert isinstance(initial_guesses, torch.Tensor)
-    assert isinstance(bounds, torch.Tensor)
+    # assert the returned bounds
+    initial_guesses_result = torch.tensor([[1, 2.2, 1.0, 0, 0]], dtype=cls.dtype, device=cls.device)
+    covar_bounds_result = torch.tensor([[0, -1.2, 0, 0, 0], [2, 4.4, 1, 1, 1]], dtype=cls.dtype, device=cls.device)
+    for i in range(initial_guesses.size()[1]):
+        assert initial_guesses[0, i].item() == initial_guesses_result[0, i].item()
+    for i in range(bounds.size()[1]):
+        assert bounds[0, i].item() == covar_bounds_result[0, i].item()
+        assert bounds[1, i].item() == covar_bounds_result[1, i].item()
 
-    shape_initial_guesses = [x for x in initial_guesses.shape]
-    assert shape_initial_guesses[0] == 1
-    assert shape_initial_guesses[1] == num_cols
+def test__initialize_from_covars_unit_fails():
+    """
+    test that the correct error message is produced if incorrect input data type "covars" is given to
+    "__initialize_from_covars"
+    """
 
-    shape_bounds = [x for x in bounds.shape]
-    assert shape_bounds[0] == 2
-    assert shape_bounds[1] == num_cols
+    # instantiate class
+    cls = Initializers()
 
+    # attributes which will be generated in CreativeProject.__init__
+    cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    cls.dtype = torch.double
+
+    # covars for the test - here use tuple of tuples, which is not allowed
+    covars = ((1, 0, 2), (2.2, -1.2, 4.4), ('red', 'green', 'blue'))
+
+    # assert
+    error_msg = "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'tuple'> but must be of types {'list', 'dict'}."
+    with pytest.raises(Exception) as e:
+        _, _ = cls._Initializers__initialize_from_covars(covars=covars)
+    assert str(e.value) == error_msg
 
 def test_Initializers__initialize_best_response_first_add(custom_models_simple_training_data_4elements,
                                                           tmp_Initializers_with_find_max_response_value_class,

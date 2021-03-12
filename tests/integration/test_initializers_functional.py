@@ -4,6 +4,40 @@ import pytest
 import torch
 
 
+@pytest.mark.parametrize("dataset_id",[0, 1])
+def test_Initializers__initialize_from_covars(covars_initialization_data, dataset_id):
+    """
+    test that simple data input data is processed and right class attributes set
+    """
+
+    # input data
+    covars = covars_initialization_data[dataset_id]
+    num_cols = len(covars)
+
+    # initialize class
+    cls = Initializers()
+
+    # define new class attributes from torch required for method to run (method assumes these defined under
+    # main class in creative_project.__init__.py)
+    cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    cls.dtype = torch.double
+
+    # run method
+    initial_guesses, bounds = cls._Initializers__initialize_from_covars(covars=covars)
+
+    # asserts type
+    assert isinstance(initial_guesses, torch.Tensor)
+    assert isinstance(bounds, torch.Tensor)
+
+    shape_initial_guesses = [x for x in initial_guesses.shape]
+    assert shape_initial_guesses[0] == 1
+    assert shape_initial_guesses[1] == num_cols
+
+    shape_bounds = [x for x in bounds.shape]
+    assert shape_bounds[0] == 2
+    assert shape_bounds[1] == num_cols
+
+
 def test_Initializers__initialize_best_response_functional(custom_models_simple_training_data_4elements,
                                                            tmp_Initializers_with_find_max_response_value_class):
     """
@@ -242,7 +276,7 @@ def test__initialize_covars_dict_of_dicts_integration_works(covars, total_num_co
         [{'var0': {'guess': 1, 'max': 2, 'type': int}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min'
         [{'var0': {'guess': 1, 'min': 0, 'type': int}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'max' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'type': <class 'int'>})."], # should fail for missing 'max'
         [{'var0': {'guess': 1, 'max': 2, 'type': int}, 'var1': {'guess': 'red', 'options':{'red', 'green'}, 'type': str}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min' even though more variables provided
-        [{'var0': {'options': {'red', 'blue'}, 'type': str}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'guess' missing for covariate 'var0' (covars['var0']={'options': {'red', 'blue'}, 'type': <class 'str'>})."],  # missing 'options"
+        [{'var0': {'guess': 'red', 'type': str}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'options' missing for covariate 'var0' (covars['var0']={'guess': 'red', 'type': <class 'str'>})."],  # missing 'guess"
     ]
 )
 def test__initialize_covars_dict_of_dicts_integration_fails(covars, error_msg):
