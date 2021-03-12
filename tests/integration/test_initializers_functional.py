@@ -37,6 +37,29 @@ def test_Initializers__initialize_from_covars(covars_initialization_data, datase
     assert shape_bounds[0] == 2
     assert shape_bounds[1] == num_cols
 
+    # assert some of the new attributes created by __initialize_from_covars
+    assert hasattr(cls, "covar_details")
+    assert hasattr(cls, "GP_kernel_mapping_covar_identification")
+    assert hasattr(cls, "covar_mapped_names")
+    assert hasattr(cls, "total_num_covars")
+
+    # check that 1 covariate provided for dataset_id = 0, 3 for dataset_id = 1
+    if dataset_id == 0:
+        assert cls.total_num_covars == 1
+        assert cls.covar_mapped_names == ["covar0"]
+        assert "covar0" == list(cls.covar_details.keys())[0]
+        assert cls.covar_details["covar0"]["type"] == float
+    elif dataset_id == 3:
+        cvlist = ["covar0", "covar1", "covar2"]
+
+        assert cls.total_num_covars == 3
+        assert cls.covar_mapped_names == cvlist
+
+        for i in cls.covar_details.keys():
+            assert i in cvlist
+            assert cls.covar_details[i]["type"] == float
+
+
 
 def test_Initializers__initialize_best_response_functional(custom_models_simple_training_data_4elements,
                                                            tmp_Initializers_with_find_max_response_value_class):
