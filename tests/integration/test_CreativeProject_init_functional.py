@@ -6,17 +6,14 @@ from creative_project import CreativeProject
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [None, "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"],
+        [None, "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'NoneType'> but must be of types {'list', 'dict'}."],
         # checks no covars data provided
         [(1, 2, 3),
-         "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)"],
+         "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'tuple'> but must be of types {'list', 'dict'}."],
         # checks fail if covars not a list of tuples
         [[1, 2, 3],
          "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple"],
         # checks that covars is a list of tuples
-        [[("hej", 2, 3)],
-         "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element hej in covars list is neither of type float or int"]
-        # test that all elements in tuples are of type int or float
     ])
 def test_CreativeProject__init__covars_notrainingdata_fails_functional(covars, error_msg):
     """
