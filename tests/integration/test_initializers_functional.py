@@ -49,7 +49,7 @@ def test_Initializers__initialize_from_covars(covars_initialization_data, datase
         assert cls.covar_mapped_names == ["covar0"]
         assert "covar0" == list(cls.covar_details.keys())[0]
         assert cls.covar_details["covar0"]["type"] == float
-    elif dataset_id == 3:
+    elif dataset_id == 1:
         cvlist = ["covar0", "covar1", "covar2"]
 
         assert cls.total_num_covars == 3
@@ -59,6 +59,71 @@ def test_Initializers__initialize_from_covars(covars_initialization_data, datase
             assert i in cvlist
             assert cls.covar_details[i]["type"] == float
 
+
+@pytest.mark.parametrize(
+    "covars, total_num_covars, covar_mapped_names, GP_kernel_mapping_covar_identification, covar_details",
+    [
+        [{"var0": {"guess":1, "min": 0, "max": 2, "type": int}}, 1, ["var0"], [{"type": int, "column": [0]}], {"var0":{"guess":1, "min": 0, "max": 2, "type": int, "columns": 0}}],
+        [{"var0": {"guess":1, "min": 0, "max": 2, "type": int}, "idiot": {"guess": "hej", "options": {"hej", "med", "dig", "hr"}, "type": str}}, 5, ["var0", "idiot_hej", "idiot_med", "idiot_dig", "idiot_hr"], [{"type": int, "column": [0]}, {"type": str, "column": [1, 2, 3, 4]}], {"var0": {"guess":1, "min": 0, "max": 2, "type": int, "columns": 0}, "idiot": {"guess": "hej", "options": {"hej", "med", "dig", "hr"}, "type": str, "columns": [1, 2, 3, 4], "opt_names": ["idiot_hej", "idiot_med", "idiot_dig", "idiot_hr"]}}],
+    ]
+)
+def test__initialize_from_covars_dict_of_dicts_works(covars, total_num_covars, covar_mapped_names,
+                                                GP_kernel_mapping_covar_identification, covar_details):
+    """
+    asserts that __initialize_from_covars works when provided dict of dicts as input
+
+    test that the right attributes 'covar_details', 'GP_kernel_mapping_covar_identification', 'covar_mapped_names' and
+    'total_num_covars' are created correctly. Tests for both single and multiple-covariate case, and also
+    tests both numerical and categorical covariates. Monkeypatches validation (taken from Validators parent class, unit
+    tested there)
+    """
+
+    # number of covariates (= number of columns)
+    num_cols = len(covars)
+
+    # initialize class
+    cls = Initializers()
+
+    # define new class attributes from torch required for method to run (method assumes these defined under
+    # main class in creative_project.__init__.py)
+    cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    cls.dtype = torch.double
+
+    # run method
+    initial_guesses, bounds = cls._Initializers__initialize_from_covars(covars=covars)
+
+    # asserts type
+    assert isinstance(initial_guesses, torch.Tensor)
+    assert isinstance(bounds, torch.Tensor)
+
+    shape_initial_guesses = [x for x in initial_guesses.shape]
+    assert shape_initial_guesses[0] == 1
+    assert shape_initial_guesses[1] == num_cols
+
+    shape_bounds = [x for x in bounds.shape]
+    assert shape_bounds[0] == 2
+    assert shape_bounds[1] == num_cols
+
+    # assert some of the new attributes created by __initialize_from_covars
+    assert hasattr(cls, "covar_details")
+    assert hasattr(cls, "GP_kernel_mapping_covar_identification")
+    assert hasattr(cls, "covar_mapped_names")
+    assert hasattr(cls, "total_num_covars")
+
+    # assert details of created attributes
+    assert cls.total_num_covars == total_num_covars
+    assert cls.GP_kernel_mapping_covar_identification == GP_kernel_mapping_covar_identification
+    assert set(cls.covar_mapped_names) == set(covar_mapped_names)
+    # investigate the different layers of covar_details
+    assert cls.covar_details.keys() == covar_details.keys()
+    for k in cls.covar_details.keys():
+        for kk in cls.covar_details[k].keys():
+            # special attention to list with key "opt_names" because it is generated from a set in the method meaning
+            # that the order of the list entries can shuffle
+            if kk == "opt_names":
+                assert set(cls.covar_details[k][kk]) == set(covar_details[k][kk])
+            else:
+                assert cls.covar_details[k][kk] == covar_details[k][kk]
 
 
 def test_Initializers__initialize_best_response_functional(custom_models_simple_training_data_4elements,
