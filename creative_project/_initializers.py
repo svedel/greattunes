@@ -6,6 +6,8 @@ import torch
 
 from creative_project._validators import Validators
 from creative_project.utils import DataSamplers
+from creative_project.data_format_mappings import tensor2pretty_covariate, pretty2tensor_covariate, \
+    tensor2pretty_response
 
 
 class Initializers(Validators):
@@ -158,10 +160,6 @@ class Initializers(Validators):
         covar_bounds = torch.tensor(
             [lb_tmp, ub_tmp], device=self.device, dtype=self.dtype
         )
-
-        # initialize readable versions of train_X, train_Y for user interaction (reading)  INITIALIZE IN SEPARATE METHOD
-        x_data = pd.DataFrame(columns=self.covar_mapped_names)
-        y_data = pd.DataFrame(columns=["Response"])
 
         return initial_guesses, covar_bounds
 
@@ -525,6 +523,13 @@ class Initializers(Validators):
             # check if data has been supplied via kwargs, otherwise train_X, train_Y will be None
             if (train_X is not None) & (train_Y is not None):
 
+                # convert to tensor if data provided in pandas framework
+                if isinstance(train_X, pd.DataFrame):
+                    train_X = pretty2tensor_covariate(x_pandas=train_X,
+                                                      covar_details=self.covar_details,
+                                                      covar_mapped_names=self.covar_mapped_names,
+                                                      device=self.device)
+
                 # validate that provided training data has same number of rows in 'train_X' and 'train_Y' and that
                 # number of variables in 'train_X' correspond to number variables provided in 'covars' (under class
                 # instance initialization)
@@ -645,3 +650,46 @@ class Initializers(Validators):
         num_random = int(round(math.sqrt(NUM_COVARS), 0))
 
         return num_random
+
+    def __initialize_pretty_data(self):
+        """
+        initialize datasets for covariates and response in pandas dataframe format. This will be the primary format for
+        users to interact with the data, and it will keep variables in their original types (integer, continuous or
+        categorical).
+
+        contrary to the pretty datasets are the sets 'train_X', 'train_Y' containing the data in the continuous format
+        used for all variables in the library backend (incl one-hot encoding of categorical variables)
+
+        the names of the pretty data will be 'x_data' and 'y_data'
+        :param:
+            - self.train_X (tensor): design matrix of covariates
+            - self.train_Y (tensor): corresponding observations
+            - self.covar_details (dict of dicts): contains a dict with details about each covariate wuth initial guess and
+            range as well as information about which column it is mapped to in train_X dataset used by the Gaussian
+            process model behind the scenes and data type of covariate. Includes one-hot encoding for categorical
+            variables. For one-hot encoded categorical variables use the naming convention
+            <covariate name>_<option name>
+        :return x_data (pandas df): named dataframe of covariates. If no data present will be just named, empty df
+        :return y_data (pandas df): named dataframe of response. If no data present will be just named, empty df
+        """
+
+        # validate that the right attributes are present to proceed
+        if not hasattr(self, "covar_details"):
+            raise Exception("creative_project._initializers.Initializers.__initialize_pretty_data: attribute "
+                            "'covar_details' is missing so cannot initialize pretty data. Try running method "
+                            "'_initializers.Initializers.__initialize_from_covars'.")
+
+        # initialize readable versions of train_X, train_Y for user interaction (reading)
+        covariate_names = list(self.covar_details.keys())
+        x_data = pd.DataFrame(columns=covariate_names)
+        y_data = pd.DataFrame(columns=["Response"])
+
+        # add historical data if provided
+        if (self.train_X is not None)&(self.train_Y is not None):
+            tmp_x = tensor2pretty_covariate(self.train_X, self.covar_details)
+            tmp_y = tensor2pretty_response(self.train_Y)
+
+            x_data = x_data.append(tmp_x)
+            y_data = y_data.append(tmp_y)
+
+        return x_data, y_data

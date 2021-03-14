@@ -3,6 +3,8 @@ This file contains a helper class with initializer methods. It is only wrapped a
 therefore only test individual functions
 """
 import math
+import numpy as np
+import pandas as pd
 import pytest
 import torch
 import warnings
@@ -486,3 +488,59 @@ def test__initialize_covars_dict_of_dicts_works(covars, total_num_covars, covar_
                 assert set(cls.covar_details[k][kk]) == set(covar_details[k][kk])
             else:
                 assert cls.covar_details[k][kk] == covar_details[k][kk]
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y",
+    [
+        [None, None],
+        [torch.tensor([[1.0, 1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 0.0]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), torch.tensor([[1.7],[2.3]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))],
+    ]
+)
+def test__initialize_pretty_data_unit_works(train_X, train_Y):
+    """
+    test that '__initialize_pretty_data' works both when historical data is present (train_X, train_Y not None) and
+    when it isn't
+    """
+
+    # initialize class
+    cls = Initializers()
+
+    # add required attributes
+    cls.covar_details = {
+        "var0": {"guess": 1, "min": 0, "max": 2, "type": int, "columns": 0},
+        "idiot": {"guess": "hej", "options": {"hej", "med", "dig", "hr"}, "type": str, "columns": [1, 2, 3, 4],
+                  "opt_names": ["idiot_hej", "idiot_med", "idiot_dig", "idiot_hr"]}
+    }
+    cls.train_X = train_X
+    cls.train_Y = train_Y
+
+    # run pretty data initialization method
+    x_data, y_data = cls._Initializers__initialize_pretty_data()
+
+    # check the data type
+    assert isinstance(x_data, pd.DataFrame)
+    assert isinstance(y_data, pd.DataFrame)
+
+    # check column names
+    covarnames = list(cls.covar_details.keys())
+    assert set(x_data.columns.to_list()) == set(covarnames)
+    assert y_data.columns.to_list()[0] == "Response"
+
+    # assert values of train_X, train_Y
+    if (train_X is not None)&(train_Y is not None):
+
+        # the expected response
+        x_res = pd.DataFrame({"var0": [1, 0], "idiot": ["hej", "dig"]})
+        x_res_tmp = x_res.values
+
+        # the response we had returned from method
+        xtmp = x_data.values
+        ytmp = y_data.values
+
+        for i in range(xtmp.shape[0]):
+
+            assert ytmp[i, 0] == train_Y[i, 0].item()
+
+            for j in range(xtmp.shape[1]):
+                assert xtmp[i, j] == x_res_tmp[i, j]
