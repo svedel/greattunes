@@ -8,10 +8,10 @@ import pandas as pd
 import torch
 
 
-def pretty2tensor(x_pandas, covar_details, covar_mapped_names, device=None):
+def pretty2tensor_covariate(x_pandas, covar_details, covar_mapped_names, device=None):
     """
     maps between the pretty format (based on pandas) and to the tensor format used behind the scenes. This is
-    the reverse mapping to 'tensor2pretty'
+    the reverse mapping to 'tensor2pretty_covariate'
 
     :param x_pandas (data frame): dataframe containing one or multiple covariate observations (one or multiple rows) in
     the natural format (i.e. for categorical variables give just the categorical observation without the full range of
@@ -77,10 +77,10 @@ def pretty2tensor(x_pandas, covar_details, covar_mapped_names, device=None):
 
 
 # reverse mapping (from internal format to user-readable format)
-def tensor2pretty(train_X_sample, covar_details):
+def tensor2pretty_covariate(train_X_sample, covar_details):
     """
     maps between the tensor format used behind the scenes and the user-facing pretty format (based on pandas). This is
-    the reverse mapping to 'pretty2tensor'
+    the reverse mapping to 'pretty2tensor_covariate'
 
     :param train_X_sample (torch tensor in format <num_observations> x <num_covars>):
     :param covar_details (dict of dicts): ...
@@ -89,12 +89,11 @@ def tensor2pretty(train_X_sample, covar_details):
     # check that covar_details has been populated
     if len(covar_details) == 0:
         raise Exception(
-            "creative_project.data_format_mappings.tensor2pretty: class instance has not been properly initialized, 'covar_details' has not been initiated"
+            "creative_project.data_format_mappings.tensor2pretty_covariate: class instance has not been properly initialized, 'covar_details' has not been initiated"
         )
 
     # map back
     keys = list(covar_details.keys())
-    # df_out = pd.DataFrame(columns=keys)
     dict_out = {}
 
     for i in range(len(covar_details)):
@@ -162,3 +161,39 @@ def tensor2pretty(train_X_sample, covar_details):
     df_out = pd.DataFrame.from_dict(dict_out)
 
     return df_out
+
+def pretty2tensor_response(y_pandas, device=None):
+    """
+    maps between the pretty format for the response "y_pandas" and the tensor format used behind the scenes. Accepts
+    only continuous response variables
+
+    if "device"=None, then the device of the current system will be assigned
+    :param y_pandas (single-row data frame): response recordings
+    :return: tensor_out (torch tensor, size <num_observations> X 1)
+    """
+
+    # set the device if None provided
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # get the data
+    # casting as float64 datatype translates to the same as "torch.double"
+    tensor_out = torch.from_numpy(y_pandas.values.astype("float64")).to(device)
+
+    return tensor_out
+
+
+def tensor2pretty_response(train_Y_sample):
+    """
+    maps between the tensor format used behind the scenes and the pretty format for the response "y_pandas"
+
+    :param train_Y_sample (tensor, size <num_observations> X 1):
+    :return: y_pandas
+    """
+
+    # get the data
+    resp_list = [i[0] for i in train_Y_sample.numpy()]
+    y_pandas = pd.DataFrame({"Response": resp_list})
+
+    return y_pandas
+
