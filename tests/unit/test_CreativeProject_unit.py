@@ -109,6 +109,7 @@ def test_CreativeProject__init__covars_trainingdata_works(covars_for_custom_mode
     assert cls.best_response_value == tmp_val
 
 def test_CreativeProject__init__covars_trainingdata_none(covars_for_custom_models_simple_training_data_4elements,
+covar_details_covars_for_custom_models_simple_training_data_4elements,
                                                           monkeypatch):
     """
     tests class initialization with training data provided
@@ -118,11 +119,16 @@ def test_CreativeProject__init__covars_trainingdata_none(covars_for_custom_model
     train_X = None
     train_Y = None
 
+    covar_details = covar_details_covars_for_custom_models_simple_training_data_4elements[0]
+    covar_mapped_names = covar_details_covars_for_custom_models_simple_training_data_4elements[1]
+
     # monkeypatch inherited private method _Initializers__initialize_from_covars
     def mock__initialize_from_covars(self, covars):
         guesses = [[g[0] for g in covars]]
         lb = [g[1] for g in covars]
         ub = [g[2] for g in covars]
+        self.covar_details = covar_details
+        self.covar_mapped_names = covar_mapped_names
         return torch.tensor(guesses, dtype=torch.double), torch.tensor([lb, ub], dtype=torch.double)
     monkeypatch.setattr(
         CreativeProject, "_Initializers__initialize_from_covars", mock__initialize_from_covars
