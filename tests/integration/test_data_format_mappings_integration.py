@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import torch
-from creative_project.data_format_mappings import pretty2tensor, tensor2pretty
+from creative_project.data_format_mappings import pretty2tensor_covariate, tensor2pretty_covariate
 
 @pytest.mark.parametrize(
     "x_pandas",
@@ -20,10 +20,10 @@ def test_pretty2tensor_then_tensor2pretty(covar_details_covar_mapped_names, x_pa
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # run the forward mapping
-    x_torch, x_numpy = pretty2tensor(x_pandas, covar_details, covar_mapped_names, device=device)
+    x_torch, x_numpy = pretty2tensor_covariate(x_pandas, covar_details, covar_mapped_names, device=device)
 
     # run the reverse mapping
-    x_pandas_returned = tensor2pretty(x_torch, covar_details)
+    x_pandas_returned = tensor2pretty_covariate(x_torch, covar_details)
 
     # compare
     pd_bool = (x_pandas == x_pandas_returned).values
