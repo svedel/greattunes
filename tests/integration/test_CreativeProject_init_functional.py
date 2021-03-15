@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 import torch
 from creative_project import CreativeProject
@@ -61,6 +62,8 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_works_functiona
     """
     passing test with multivariate initialization, multiple observations. test that class initialization works with
     multivariate train_X data (3 covars) with multiple observations (3)
+
+    also investigate that pretty data x_data and y_data is created
     """
 
     # data
@@ -96,6 +99,18 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_works_functiona
     for it in range(train_X.shape[1]):
         assert cls.covars_best_response_value[2, it].item() == train_X[1, it].item()
     assert cls.best_response_value[2].item() == train_Y[1].item()
+
+    # assert that pretty data x_data, y_data is created
+    assert hasattr(cls, "x_data")
+    assert hasattr(cls, "y_data")
+
+    tmp_x_data = cls.x_data.values
+
+    # assert that the numbers are correct in pretty data
+    for i in range(train_X.shape[0]):
+        assert cls.y_data["Response"].iloc[i] == train_Y[i,0].item()
+        for j in range(train_X.shape[1]):
+            assert tmp_x_data[i,j] == train_X[i,j].item()
 
 
 def test_CreativeProject__init__covars_trainingdata_multivariate_fails_functional(training_data_covar_complex):
