@@ -79,7 +79,7 @@ def test__initialize_from_covars_dict_of_dicts_works(covars, total_num_covars, c
     """
 
     # number of covariates (= number of columns)
-    num_cols = len(covars)
+    num_cols = total_num_covars
 
     # initialize class
     cls = Initializers()
