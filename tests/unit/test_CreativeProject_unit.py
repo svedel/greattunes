@@ -4,7 +4,10 @@ from creative_project import CreativeProject
 
 
 @pytest.mark.parametrize("nu", [None, 2.5])
-def test_CreativeProject__init__covars_notrainingdata_works(covars_for_custom_models_simple_training_data_4elements, nu, monkeypatch):
+def test_CreativeProject__init__covars_notrainingdata_works(covars_for_custom_models_simple_training_data_4elements,
+                                                            nu,
+                                                            covar_details_covars_for_custom_models_simple_training_data_4elements,
+                                                            monkeypatch):
     """
     test CreativeProject class initialization under conditions where it should work (no data provided). Kwarg nu is
     tested for None and numerical value
@@ -12,12 +15,16 @@ def test_CreativeProject__init__covars_notrainingdata_works(covars_for_custom_mo
 
     # data
     covars = covars_for_custom_models_simple_training_data_4elements
+    covar_details = covar_details_covars_for_custom_models_simple_training_data_4elements[0]
+    covar_mapped_names = covar_details_covars_for_custom_models_simple_training_data_4elements[1]
 
     # monkeypatch inherited private method _Initializers__initialize_from_covars
     def mock__initialize_from_covars(self, covars):
         guesses = [[g[0] for g in covars]]
         lb = [g[1] for g in covars]
         ub = [g[2] for g in covars]
+        self.covar_details = covar_details
+        self.covar_mapped_names = covar_mapped_names
         return torch.tensor(guesses, dtype=torch.double), torch.tensor([lb, ub], dtype=torch.double)
     monkeypatch.setattr(
         CreativeProject, "_Initializers__initialize_from_covars", mock__initialize_from_covars
@@ -57,7 +64,9 @@ def test_CreativeProject__init__covars_notrainingdata_works(covars_for_custom_mo
 
 
 def test_CreativeProject__init__covars_trainingdata_works(covars_for_custom_models_simple_training_data_4elements,
-                                                          custom_models_simple_training_data_4elements, monkeypatch):
+                                                          custom_models_simple_training_data_4elements,
+                                                          covar_details_covars_for_custom_models_simple_training_data_4elements,
+                                                          monkeypatch):
     """
     tests class initialization with training data provided 
     """
@@ -65,12 +74,16 @@ def test_CreativeProject__init__covars_trainingdata_works(covars_for_custom_mode
     covars = covars_for_custom_models_simple_training_data_4elements
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
+    covar_details = covar_details_covars_for_custom_models_simple_training_data_4elements[0]
+    covar_mapped_names = covar_details_covars_for_custom_models_simple_training_data_4elements[1]
 
     # monkeypatch inherited private method _Initializers__initialize_from_covars
     def mock__initialize_from_covars(self, covars):
         guesses = [[g[0] for g in covars]]
         lb = [g[1] for g in covars]
         ub = [g[2] for g in covars]
+        self.covar_details = covar_details
+        self.covar_mapped_names = covar_mapped_names
         return torch.tensor(guesses, dtype=torch.double), torch.tensor([lb, ub], dtype=torch.double)
     monkeypatch.setattr(
         CreativeProject, "_Initializers__initialize_from_covars", mock__initialize_from_covars
