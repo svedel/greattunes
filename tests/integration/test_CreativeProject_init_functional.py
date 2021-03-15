@@ -132,6 +132,36 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_fails_functiona
     assert cls.train_Y is None
 
 
+def test_CreativeProject__init__covars_dict_of_dicts_works():
+    """
+    test that initializing the whole framework from a dict of dict works. also test that pretty data for train_X, train_Y
+    with categorical variable works
+    """
+
+    covars = [(1, 0, 3), (1.1, -1.2, 3.4), ("red", "green", "blue")]
+    train_X = torch.tensor([[2, -0.7, 1.0, 0.0, 0.0], [1, 1.1, 0.0, 0.0, 1.0]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    train_X_interrogate = pd.DataFrame({'covar0':[2, 1], 'covar1': [-0.7, 1.1], 'covar2': ["red", "blue"]})
+    train_Y = torch.tensor([[1.1], [3.5]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+
+    # test that attributes have been created
+    assert hasattr(cls, "train_X")
+    assert hasattr(cls, "train_Y")
+    assert hasattr(cls, "x_data")
+    assert hasattr(cls, "y_data")
+    assert hasattr(cls, "covar_details")
+
+    # assert x_data, y_data
+    tmp_xdata = cls.x_data.values
+    tmp_x_interrogate = train_X_interrogate.values
+    for i in range(2):
+        assert cls.y_data["Response"].iloc[i] == train_Y[i,0].item()
+        for j in range(3):
+            assert tmp_xdata[i,j] == tmp_x_interrogate[i,j]
+
+
+
 @pytest.mark.parametrize(
     "random_start, num_initial_random, random_sampling_method, train_X, train_Y, num_samples_res, method_sampling_res",
     [
