@@ -7,7 +7,7 @@ import torch
 from creative_project._validators import Validators
 from creative_project.utils import DataSamplers
 from creative_project.data_format_mappings import tensor2pretty_covariate, pretty2tensor_covariate, \
-    tensor2pretty_response
+    tensor2pretty_response, pretty2tensor_response
 
 
 class Initializers(Validators):
@@ -524,11 +524,14 @@ class Initializers(Validators):
             if (train_X is not None) & (train_Y is not None):
 
                 # convert to tensor if data provided in pandas framework
-                if isinstance(train_X, pd.DataFrame):
-                    train_X = pretty2tensor_covariate(x_pandas=train_X,
+                if isinstance(train_X, pd.DataFrame)&isinstance(train_Y, pd.DataFrame):
+
+                    train_X, _ = pretty2tensor_covariate(x_pandas=train_X,
                                                       covar_details=self.covar_details,
                                                       covar_mapped_names=self.covar_mapped_names,
                                                       device=self.device)
+                    train_Y = pretty2tensor_response(y_pandas=train_Y,
+                                                     device=self.device)
 
                 # validate that provided training data has same number of rows in 'train_X' and 'train_Y' and that
                 # number of variables in 'train_X' correspond to number variables provided in 'covars' (under class
