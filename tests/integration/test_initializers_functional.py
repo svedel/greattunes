@@ -128,6 +128,7 @@ def test__initialize_from_covars_dict_of_dicts_works(covars, total_num_covars, c
 
 
 def test_Initializers__initialize_best_response_functional(custom_models_simple_training_data_4elements,
+                                                           custom_models_simple_training_data_4elements_covar_details,
                                                            tmp_Initializers_with_find_max_response_value_class):
     """
     test initialization of best response data structures based on input data
@@ -136,6 +137,10 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
     # data
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
+
+    # covar details
+    covar_details = custom_models_simple_training_data_4elements_covar_details[0]
+    covar_mapped_names = custom_models_simple_training_data_4elements_covar_details[1]
 
     # create test version of Initializers to endow it with the property from _find_max_response_value, which is
     # otherwise defined as a static method in ._best_response
@@ -153,6 +158,10 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
     cls.train_X = train_X
     cls.train_Y = train_Y
 
+    # add attributes
+    cls.covar_details = covar_details
+    cls.covar_mapped_names = covar_mapped_names
+
     # define required attributes for test to pass (IRL set in CreativeProject which is a child of Initializers)
     cls.dtype = torch.double
     cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -164,6 +173,10 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
     assert isinstance(cls.covars_best_response_value, torch.Tensor)
     assert isinstance(cls.best_response_value, torch.Tensor)
 
+    # assert that pretty format data structures have been created
+    assert isinstance(cls.covars_best_response, pd.DataFrame)
+    assert isinstance(cls.best_response, pd.DataFrame)
+
     # check size
     assert cls.covars_best_response_value.shape[0] == train_X.shape[0]
     assert cls.best_response_value.shape[0] == train_Y.shape[0]
@@ -174,8 +187,14 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
     test_max_covars_test = torch.tensor([[-1.0], [-1.0], [-0.5], [1.0]], dtype=torch.double)
     test_max_response_test = torch.tensor([[0.2], [0.2], [0.5], [2.0]], dtype=torch.double)
     for it in range(train_X.shape[0]):
+
+        # test that tensor-format best response and covars has right values
         assert cls.covars_best_response_value[it].item() == test_max_covars_test[it].item()
         assert cls.best_response_value[it].item() == test_max_response_test[it].item()
+
+        # test that pretty-format best response and covars has right values
+        assert cls.covars_best_response["covar0"].iloc[it] == test_max_covars_test[it].item()
+        assert cls.best_response["Response"].iloc[it] == test_max_response_test[it].item()
 
 
 def test_Initializers__initialize_training_data_functional(custom_models_simple_training_data_4elements,

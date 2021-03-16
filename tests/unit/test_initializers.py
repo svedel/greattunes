@@ -86,6 +86,7 @@ def test__initialize_from_covars_unit_fails():
 
 def test_Initializers__initialize_best_response_first_add(custom_models_simple_training_data_4elements,
                                                           tmp_Initializers_with_find_max_response_value_class,
+                                                          custom_models_simple_training_data_4elements_covar_details,
                                                           monkeypatch):
     """
     test initialization of best response data structures based on input data
@@ -94,6 +95,10 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
     # data
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
+
+    # covar details
+    covar_details = custom_models_simple_training_data_4elements_covar_details[0]
+    covar_mapped_names = custom_models_simple_training_data_4elements_covar_details[1]
 
     # create test version of Initializers to endow it with the property from _find_max_response_value, which is
     # otherwise defined as a static method in ._best_response
@@ -113,6 +118,10 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
     #cls = Initializers()
     cls.train_X = train_X
     cls.train_Y = train_Y
+
+    # add attributes
+    cls.covar_details = covar_details
+    cls.covar_mapped_names = covar_mapped_names
 
     # define required attributes for test to pass (IRL set in CreativeProject which is a child of Initializers)
     cls.dtype = torch.double

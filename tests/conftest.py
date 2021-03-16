@@ -48,6 +48,16 @@ def custom_models_simple_training_data_4elements():
     train_Y = torch.tensor([[0.2], [0.15], [0.5], [2.0]], dtype=torch.double)
     return train_X, train_Y
 
+@pytest.fixture(scope="class")
+def custom_models_simple_training_data_4elements_covar_details():
+    """
+    defines covar_details and covar_mapped_names that work with custom_models_simple_training_data_4elements
+    """
+
+    covar_details = {"covar0": {"guess": 0.0, "min": -2.0, "max": 2.0, "type": float, "columns": 0}}
+    covar_mapped_names = ["covar0"]
+    return covar_details, covar_mapped_names
+
 
 @pytest.fixture(scope="class")
 def covars_for_custom_models_simple_training_data_4elements():
