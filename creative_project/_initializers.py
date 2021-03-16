@@ -475,8 +475,14 @@ class Initializers(Validators):
         point.
         """
 
+        # initialize tensor variables
         self.covars_best_response_value = None
         self.best_response_value = None
+
+        # initialize pretty variables
+        self.covars_best_response = None
+        self.best_response = None
+
         first = True
 
         if self.train_Y is not None:
@@ -486,15 +492,33 @@ class Initializers(Validators):
                 )
 
                 if first:
+
+                    # tensor format
                     self.covars_best_response_value = max_X
                     self.best_response_value = max_Y
+
+                    # pretty format
+                    self.covars_best_response = tensor2pretty_covariate(train_X_sample=max_X,
+                                                                        covar_details=self.covar_details)
+                    self.best_response = tensor2pretty_response(train_Y_sample=max_Y)
+
                     first = False
                 else:
+
+                    # tensor format
                     self.covars_best_response_value = torch.cat(
                         (self.covars_best_response_value, max_X), dim=0
                     )
                     self.best_response_value = torch.cat(
                         (self.best_response_value, max_Y), dim=0
+                    )
+
+                    # pretty format
+                    self.covars_best_response = self.covars_best_response.append(
+                        tensor2pretty_covariate(train_X_sample=max_X, covar_details=self.covar_details)
+                    )
+                    self.best_response = self.best_response.append(
+                        tensor2pretty_response(train_Y_sample=max_Y)
                     )
 
     def __initialize_training_data(self, train_X, train_Y):
