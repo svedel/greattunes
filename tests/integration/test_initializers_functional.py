@@ -1,5 +1,6 @@
 from creative_project._initializers import Initializers
 from creative_project._best_response import _find_max_response_value
+import pandas as pd
 import pytest
 import torch
 
@@ -222,6 +223,56 @@ def test_Initializers__initialize_training_data_functional(custom_models_simple_
     assert cls.train_X == None
     assert cls.train_Y == None
     assert cls.proposed_X == None
+
+
+@pytest.mark.parametrize(
+    "train_X, train_Y, initial_guess, train_X_created, train_Y_created",
+    [
+        [pd.DataFrame({"a": [1], "b":[0.2], "c":["red"]}), pd.DataFrame({"Response": [1.2]}), [0, 2.2, 1.0, 0.0, 0.0], torch.tensor([[1, 0.2, 1.0, 0.0, 0.0]], dtype=torch.double), torch.tensor([[1.2]], dtype=torch.double)]
+    ]
+)
+def test_initialize_training_data_and_pretty_data(train_X, train_Y, initial_guess, train_X_created,
+                                                              train_Y_created, covar_details_covar_mapped_names):
+    """
+    test that initialization of training data works when provided in pretty format
+
+    test for all data types (integer, continuous, categorical)
+    """
+
+    # initialize class and register required attributes
+    cls = Initializers()
+    cls.model = {  # set required attributes
+        "covars_sampled_iter": 0,
+        "response_sampled_iter": 0
+    }
+    cls.initial_guess = torch.tensor([initial_guess], dtype=torch.double)
+    cls.covar_details = covar_details_covar_mapped_names[0]
+    cls.covar_mapped_names = covar_details_covar_mapped_names[1]
+    cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # run the method to initialize training data
+    cls._Initializers__initialize_training_data(train_X=train_X, train_Y=train_Y)
+
+    # run the method to initialize pretty data
+    cls.x_data, cls.y_data = cls._Initializers__initialize_pretty_data()
+
+    # test train_X, train_Y created
+    for i in range(cls.train_X.size()[0]):
+        assert cls.train_Y[i,0].item() == train_Y_created[i,0].item()
+        for j in range(cls.train_X.size()[1]):
+            assert cls.train_X[i, j].item() == train_X_created[i, j].item()
+
+    # test that x_data and y_data are equal to initially provided train_X, train_Y (these provided in pandas)
+    xdf_tmp = train_X.values
+    ydf_tmp = train_Y.values
+
+    xret_tmp = cls.x_data.values
+    yret_tmp = cls.y_data.values
+
+    for i in range(xret_tmp.shape[0]):
+        assert ydf_tmp[i,0] == yret_tmp[i,0]
+        for j in range(xret_tmp.shape[1]):
+            assert xdf_tmp[i,j] == xret_tmp[i,j]
 
 
 @pytest.mark.parametrize(
