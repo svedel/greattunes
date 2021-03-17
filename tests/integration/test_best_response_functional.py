@@ -1,8 +1,10 @@
+import pandas as pd
 import pytest
 import torch
 
 
-def test_update_max_response_value_unit(custom_models_simple_training_data_4elements, tmp_best_response_class):
+def test_update_max_response_value_unit(custom_models_simple_training_data_4elements, tmp_best_response_class,
+                                        custom_models_simple_training_data_4elements_covar_details):
     """
     test that _update_max_response_value works for univariate data
     """
@@ -11,6 +13,8 @@ def test_update_max_response_value_unit(custom_models_simple_training_data_4elem
     max_index = 3
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
+    covar_details = custom_models_simple_training_data_4elements_covar_details[0]
+    covar_mapped_names = custom_models_simple_training_data_4elements_covar_details[1]
 
     # test class
     cls = tmp_best_response_class
@@ -19,6 +23,8 @@ def test_update_max_response_value_unit(custom_models_simple_training_data_4elem
     cls.train_X = train_X
     cls.proposed_X = train_X
     cls.train_Y = train_Y
+    cls.covar_details = covar_details
+    cls.covar_mapped_names = covar_mapped_names
 
     # test that it initializes storage of best results when none present
     cls._update_max_response_value()
@@ -71,6 +77,8 @@ def test_update_max_response_value_multivariate_functional(training_data_covar_c
     covars = training_data_covar_complex[0]
     train_X = training_data_covar_complex[1]
     train_Y = training_data_covar_complex[2]
+    covar_details = training_data_covar_complex[3]
+    covar_mapped_names = training_data_covar_complex[4]
 
     # test class
     cls = tmp_best_response_class
@@ -79,9 +87,20 @@ def test_update_max_response_value_multivariate_functional(training_data_covar_c
     cls.train_X = train_X
     cls.proposed_X = train_X
     cls.train_Y = train_Y
+    cls.covar_details = covar_details
+    cls.covar_mapped_names = covar_mapped_names
+    cls.x_data = pd.DataFrame(columns=covar_mapped_names)
+    cls.y_data = pd.DataFrame(columns=["Response"])
 
     cls.covars_best_response_value = initial_best_covars
     cls.best_response_value = initial_best_response
+    if initial_best_covars is None:
+        cls.covars_best_response = cls.x_data
+        cls.best_response = cls.y_data
+
+    else:
+        cls.covars_best_response = pd.DataFrame({"covar0": [initial_best_covars[0,0].item()], "covar1": [initial_best_covars[0,1].item()], "covar2": [initial_best_covars[0,2].item()]})
+        cls.best_response = pd.DataFrame({"Response": [initial_best_response[0,0].item()]})
 
     # test that it initializes storage of best results when none present
     cls._update_max_response_value()

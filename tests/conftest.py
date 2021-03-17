@@ -106,7 +106,15 @@ def training_data_covar_complex(covars_initialization_data):
     train_X = torch.tensor([[x[0]+y for x in covars] for y in [0, -0.5, 1.2]], dtype=torch.double)
     train_Y = torch.tensor([[1.1], [5.5], [0.1]], dtype=torch.double)
 
-    return covars, train_X, train_Y
+    # the covars initialization data
+    covar_details = {}
+    covar_mapped_names = []
+    for i in range(len(covars)):
+        name = "covar" + str(i)
+        covar_details["name"] = {"guess": covars[i][0], "min": covars[i][1], "max": covars[i][2], "type": float, "columns": i}
+        covar_mapped_names += [name]
+
+    return covars, train_X, train_Y, covar_details, covar_mapped_names
 
 
 ### Trained GP model
@@ -224,6 +232,8 @@ def tmp_best_response_class():
 
             self.covars_best_response_value = None
             self.best_response_value = None
+            self.covars_best_response = None
+            self.best_response = None
 
         # import methods
         from creative_project._best_response import _find_max_response_value, _update_max_response_value, \
