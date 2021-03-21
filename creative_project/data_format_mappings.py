@@ -3,7 +3,6 @@ mapping between the pretty format which users understand (named variables) and t
 framework by the Gaussian Process models (torch tensor, double data type and one-hot encoding for categorical
 variables)
 """
-import numpy as np
 import pandas as pd
 import torch
 
@@ -162,6 +161,7 @@ def tensor2pretty_covariate(train_X_sample, covar_details):
 
     return df_out
 
+
 def pretty2tensor_response(y_pandas, device=None):
     """
     maps between the pretty format for the response "y_pandas" and the tensor format used behind the scenes. Accepts
@@ -196,4 +196,3 @@ def tensor2pretty_response(train_Y_sample):
     y_pandas = pd.DataFrame({"Response": resp_list})
 
     return y_pandas
-
