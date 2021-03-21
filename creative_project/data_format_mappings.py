@@ -16,8 +16,8 @@ def pretty2tensor_covariate(x_pandas, covar_details, covar_mapped_names, device=
     the natural format (i.e. for categorical variables give just the categorical observation without the full range of
     possible outcomes)
     :param covar_details (dict of dicts): ...
-    :param covar_mapped_names (list of str): contains the names of all columns and order of all covariates in the tensor
-    format used behind the scenes (incl one-hot encoded columns)
+    :param covar_mapped_names (list of str): contains the names of all columns and order of all covariates in the
+        tensor format used behind the scenes (incl one-hot encoded columns)
     :param device (torch.device; default None): the device for torch calculations determining whether CPU or GPU is
     used. Uses device of local machine if 'None' provided
     :return mapped covariates in tensor format (torch)
@@ -118,12 +118,13 @@ def tensor2pretty_covariate(train_X_sample, covar_details):
         elif covar_details[keys[i]]["type"] == str:
 
             # get right columns in train_X
-            # use covar_details[key]["columns"] to extract column info. This is an list of integers for data type 'str' (categorical variable) since we are using one-hot encoding. Only pick category with largest value
+            # use covar_details[key]["columns"] to extract column info. This is an list of integers for data type
+            # 'str' (categorical variable) since we are using one-hot encoding. Only pick category with largest value
             colnums = covar_details[keys[i]]["columns"]
 
             # get max value from one-hot encoding columns for each row
-            # max_index is a tensor of size num_observations x 1 containing the entry in train_X_sample[:, colnums] that
-            # has the highest value at each row
+            # max_index is a tensor of size num_observations x 1 containing the entry in train_X_sample[:, colnums]
+            # that has the highest value at each row
             _, max_index = torch.topk(train_X_sample[:, colnums], 1)
 
             # get the categorical names for the max one-hot column at each row

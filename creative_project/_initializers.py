@@ -35,8 +35,8 @@ class Initializers(Validators):
         dict of dicts (one embedded dict per covariate). For the former, each tuple defines the range the variable can
         vary within, and the data type of the covariate (integer, continuous or categorical) is automatically derived
         from the content of each tuple. Integer and continous variables must have 3 entries in the tuple as follows
-        (<guessed_value>,<minimum_value>,<maximum_value>); categorical variables can have any number of elements as long
-        as at least one element is provided.
+        (<guessed_value>,<minimum_value>,<maximum_value>); categorical variables can have any number of elements as
+        long as at least one element is provided.
 
             Example:
 
@@ -54,7 +54,8 @@ class Initializers(Validators):
         types 'int' and 'float' these must contain entries 'guess' (initial guess for value of covariate), 'min', 'max'
         and 'type' (must itself be among {int, float, str}); for categorical variables (use type 'str' to identify
         these), the required elements in the dict are 'guess', 'options' and 'type', where the middle one is a set of
-        all possible values of the categorical variable and 'type' is the data type and must be among int, float and str
+        all possible values of the categorical variable and 'type' is the data type and must be among int, float and
+        str
 
             Example:
 
@@ -703,8 +704,8 @@ class Initializers(Validators):
         :param:
             - self.train_X (tensor): design matrix of covariates
             - self.train_Y (tensor): corresponding observations
-            - self.covar_details (dict of dicts): contains a dict with details about each covariate wuth initial guess and
-            range as well as information about which column it is mapped to in train_X dataset used by the Gaussian
+            - self.covar_details (dict of dicts): contains a dict with details about each covariate wuth initial guess
+            and range as well as information about which column it is mapped to in train_X dataset used by the Gaussian
             process model behind the scenes and data type of covariate. Includes one-hot encoding for categorical
             variables. For one-hot encoded categorical variables use the naming convention
             <covariate name>_<option name>

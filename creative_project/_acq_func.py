@@ -163,7 +163,8 @@ class AcqFunction:
             not hasattr(self, "__initial_random_candidates")
         ):
 
-            # get candidates by invoking the methods "random" or "latin_hcs" (as carried by self.random_sampling_method)
+            # get candidates by invoking the methods "random" or "latin_hcs" (as carried by
+            # self.random_sampling_method)
             # note: are starting from the user-provided initial guess, hence taking
             # n_samp=self.num_initial_random_points-1
             rand_candidates = getattr(DataSamplers, self.random_sampling_method)(
@@ -193,7 +194,8 @@ class AcqFunction:
         # CASE 2: create random datapoints from interdispersed random points
         else:
 
-            # get candidates by invoking the methods "random" or "latin_hcs" (as carried by self.random_sampling_method)
+            # get candidates by invoking the methods "random" or "latin_hcs" (as carried by
+            # self.random_sampling_method)
             candidate = getattr(DataSamplers, self.random_sampling_method)(
                 n_samp=1,
                 initial_guess=self.initial_guess,

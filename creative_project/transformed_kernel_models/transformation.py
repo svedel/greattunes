@@ -1,10 +1,11 @@
 import torch
 
+
 # kernel transformation mapping
 def GP_kernel_transform(x, GP_kernel_mapping_covar_identification):
     """
-    performs transformation of covariates to enable Gaussian Process models to also do Bayesian optimization for integer
-    and categorical variables. The transformation is part of the solution described in this paper:
+    performs transformation of covariates to enable Gaussian Process models to also do Bayesian optimization for
+    integer and categorical variables. The transformation is part of the solution described in this paper:
     E.C. Garrido-Merchán and D. Hernandéz-Lobato: Dealing with categorical and integer-valued variables in Bayesian
     Optimization with Gaussian processes, Neurocomputing vol. 380, 7 March 2020, pp. 20-35
     (https://arxiv.org/pdf/1805.03463.pdf, https://www.sciencedirect.com/science/article/abs/pii/S0925231219315619)
@@ -20,7 +21,8 @@ def GP_kernel_transform(x, GP_kernel_mapping_covar_identification):
     :param x (torch tensor, <num_rows> x <num_covariates> (number of GP covariates))
     :param: GP_kernel_mapping_covar_identification (list of dicts): contains information about all covariates
         requiring special attention (name, type and which columns in train_X, train_Y)
-    :return x_output (torch tensor, <num_rows> x <num_covariates> (number of GP covariates)) with transformation applied
+    :return x_output (torch tensor, <num_rows> x <num_covariates> (number of GP covariates)) with transformation
+        applied
     """
 
     x_output = x

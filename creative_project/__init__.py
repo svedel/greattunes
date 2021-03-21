@@ -10,6 +10,23 @@ class CreativeProject(Initializers, AcqFunction):
     user-facing functionality to balance exploration and exploitation for creative projects.
     Note: Initializers is a child of Validators class (from ._validators.py) so all validator methods are available to
     CreativeProject
+
+    TODO
+        #- Add initializing method for pretty x_data, y_data in pandas format (remember to clean up _initializers.Initializers.__initialize_from_covars)
+        #- Add integration tests for this ^
+        #- Extend tests of CreativeProject.__init__ to also see that x_data, y_data added when initializing with historical data
+        #- Extend tests of CreativeProject.__init__ to also initialize with train_X, train_Y in pandas format
+        #- Allow user to add train_X, train_Y data in pretty format
+        #- Apply transformation in kernels
+        #- Determine when to update data sets for pretty x_data, y_data: at each iteration, only when queried?
+        - Update data sets for pretty x_data, y_data after iteration (in campaign)
+        - Add test that pretty x_data, y_data is updated after iteration
+        #- Update data sets for best response after each iteration in pretty format
+        - Update format of .current_best method output to include covariate names
+        - Test best response in pretty format after each iteration
+        - Update manual input of covariates and response to handle pretty format and named variables (also when prompting for input)
+        #- Update integration tests to also probe cases when "covars" provided at class initialization is of type dict of dicts
+        - Add new examples illustrating integer and categorical variable
     """
 
     # Initialize class instance
@@ -44,7 +61,8 @@ class CreativeProject(Initializers, AcqFunction):
             [allows for batched models] OR num_obs X num_output_models)
             - kernel (str): kernel used to define custom GP models (not currently in use)
             - nu (float): kernel parameter for Matern kernel
-            - num_initial_random (int): number of initial random points. Only changes anything if 'random_start' is True
+            - num_initial_random (int): number of initial random points. Only changes anything if 'random_start' is
+            True
             - random_sampling_method (str): sampling method for random points. Options: "random" and "latin_hcs" (latin
             hypercube sampling)
         """
@@ -99,6 +117,9 @@ class CreativeProject(Initializers, AcqFunction):
         self._Initializers__initialize_training_data(
             train_X=kwargs.get("train_X"), train_Y=kwargs.get("train_Y")
         )
+
+        # initialize pretty data (for user interaction)
+        self.x_data, self.y_data = self._Initializers__initialize_pretty_data()
 
         # set plan for initialization with random samples. In some cases (if train_X, train_Y is accepted) will not set
         # any random initial points

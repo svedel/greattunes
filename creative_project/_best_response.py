@@ -1,4 +1,3 @@
-import pandas as pd
 import torch
 from creative_project.data_format_mappings import (
     tensor2pretty_covariate,
