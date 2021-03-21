@@ -1,6 +1,9 @@
 import pandas as pd
 import torch
-from creative_project.data_format_mappings import tensor2pretty_covariate, tensor2pretty_response
+from creative_project.data_format_mappings import (
+    tensor2pretty_covariate,
+    tensor2pretty_response,
+)
 
 
 @staticmethod
@@ -52,7 +55,9 @@ def _update_max_response_value(self):
 
         # pretty data format (pandas)
         self.covars_best_response = self.covars_best_response.append(
-            tensor2pretty_covariate(train_X_sample=max_X, covar_details=self.covar_details)
+            tensor2pretty_covariate(
+                train_X_sample=max_X, covar_details=self.covar_details
+            )
         )
         self.best_response = self.best_response.append(
             tensor2pretty_response(train_Y_sample=max_Y)
@@ -66,14 +71,17 @@ def _update_max_response_value(self):
         self.best_response_value = max_Y
 
         # pretty data format (pandas)
-        #self.covars_best_response = self.covars_best_response.append(
+        # self.covars_best_response = self.covars_best_response.append(
         #    tensor2pretty_covariate(train_X_sample=max_X, covar_details=self.covar_details)
-        #)
-        #self.best_response = self.best_response.append(
+        # )
+        # self.best_response = self.best_response.append(
         #    tensor2pretty_response(train_Y_sample=max_Y)
-        #)
-        self.covars_best_response = tensor2pretty_covariate(train_X_sample=max_X, covar_details=self.covar_details)
+        # )
+        self.covars_best_response = tensor2pretty_covariate(
+            train_X_sample=max_X, covar_details=self.covar_details
+        )
         self.best_response = tensor2pretty_response(train_Y_sample=max_Y)
+
 
 def current_best(self):
     """
