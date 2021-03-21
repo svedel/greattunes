@@ -6,8 +6,12 @@ import torch
 
 from creative_project._validators import Validators
 from creative_project.utils import DataSamplers
-from creative_project.data_format_mappings import tensor2pretty_covariate, pretty2tensor_covariate, \
-    tensor2pretty_response, pretty2tensor_response
+from creative_project.data_format_mappings import (
+    tensor2pretty_covariate,
+    pretty2tensor_covariate,
+    tensor2pretty_response,
+    pretty2tensor_response,
+)
 
 
 class Initializers(Validators):
@@ -498,8 +502,9 @@ class Initializers(Validators):
                     self.best_response_value = max_Y
 
                     # pretty format
-                    self.covars_best_response = tensor2pretty_covariate(train_X_sample=max_X,
-                                                                        covar_details=self.covar_details)
+                    self.covars_best_response = tensor2pretty_covariate(
+                        train_X_sample=max_X, covar_details=self.covar_details
+                    )
                     self.best_response = tensor2pretty_response(train_Y_sample=max_Y)
 
                     first = False
@@ -515,7 +520,9 @@ class Initializers(Validators):
 
                     # pretty format
                     self.covars_best_response = self.covars_best_response.append(
-                        tensor2pretty_covariate(train_X_sample=max_X, covar_details=self.covar_details)
+                        tensor2pretty_covariate(
+                            train_X_sample=max_X, covar_details=self.covar_details
+                        )
                     )
                     self.best_response = self.best_response.append(
                         tensor2pretty_response(train_Y_sample=max_Y)
@@ -548,14 +555,19 @@ class Initializers(Validators):
             if (train_X is not None) & (train_Y is not None):
 
                 # convert to tensor if data provided in pandas framework
-                if isinstance(train_X, pd.DataFrame)&isinstance(train_Y, pd.DataFrame):
+                if isinstance(train_X, pd.DataFrame) & isinstance(
+                    train_Y, pd.DataFrame
+                ):
 
-                    train_X, _ = pretty2tensor_covariate(x_pandas=train_X,
-                                                      covar_details=self.covar_details,
-                                                      covar_mapped_names=self.covar_mapped_names,
-                                                      device=self.device)
-                    train_Y = pretty2tensor_response(y_pandas=train_Y,
-                                                     device=self.device)
+                    train_X, _ = pretty2tensor_covariate(
+                        x_pandas=train_X,
+                        covar_details=self.covar_details,
+                        covar_mapped_names=self.covar_mapped_names,
+                        device=self.device,
+                    )
+                    train_Y = pretty2tensor_response(
+                        y_pandas=train_Y, device=self.device
+                    )
 
                 # validate that provided training data has same number of rows in 'train_X' and 'train_Y' and that
                 # number of variables in 'train_X' correspond to number variables provided in 'covars' (under class
@@ -702,9 +714,11 @@ class Initializers(Validators):
 
         # validate that the right attributes are present to proceed
         if not hasattr(self, "covar_details"):
-            raise Exception("creative_project._initializers.Initializers.__initialize_pretty_data: attribute "
-                            "'covar_details' is missing so cannot initialize pretty data. Try running method "
-                            "'_initializers.Initializers.__initialize_from_covars'.")
+            raise Exception(
+                "creative_project._initializers.Initializers.__initialize_pretty_data: attribute "
+                "'covar_details' is missing so cannot initialize pretty data. Try running method "
+                "'_initializers.Initializers.__initialize_from_covars'."
+            )
 
         # initialize readable versions of train_X, train_Y for user interaction (reading)
         covariate_names = list(self.covar_details.keys())
@@ -712,7 +726,7 @@ class Initializers(Validators):
         y_data = pd.DataFrame(columns=["Response"])
 
         # add historical data if provided
-        if (self.train_X is not None)&(self.train_Y is not None):
+        if (self.train_X is not None) & (self.train_Y is not None):
             tmp_x = tensor2pretty_covariate(self.train_X, self.covar_details)
             tmp_y = tensor2pretty_response(self.train_Y)
 
