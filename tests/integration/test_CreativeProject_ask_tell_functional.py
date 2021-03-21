@@ -1139,7 +1139,7 @@ def test_CreativeProject_integration_ask_tell_ask_tell_randon_start_works(train_
     Monkeypatching user input
     """
 
-    covars = [(1, 0, 2), (1.5, -1, 3), (22, 15, 27)]
+    covars = [(1, 0, 2), (1.5, -1, 3), (22.0, 15, 27)]
     num_initial_random = 1
 
     # initialize the class

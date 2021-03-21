@@ -78,7 +78,7 @@ def test_sample_problems_asktell_2d_maximization(max_iter, error_lim, x0_0, x1_0
         return torch.cos(x[0]) * torch.cos(x[1]) * torch.exp(-(x[0] ** 2 + x[1] ** 2))
 
     # define the range of interest
-    covars2d = [(x0_0, -5, 5), (x1_0, -5, 5)]
+    covars2d = [(x0_0, -5, 5.0), (x1_0, -5, 5.0)]
 
     # initialize class instance
     cc2 = CreativeProject(covars=covars2d)

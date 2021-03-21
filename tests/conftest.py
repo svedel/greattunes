@@ -56,7 +56,8 @@ def custom_models_simple_training_data_4elements_covar_details():
 
     covar_details = {"covar0": {"guess": 0.0, "min": -2.0, "max": 2.0, "type": float, "columns": 0}}
     covar_mapped_names = ["covar0"]
-    return covar_details, covar_mapped_names
+    GP_kernel_mapping_covar_identification = [{"type": float, "column": [0]}]
+    return covar_details, covar_mapped_names, GP_kernel_mapping_covar_identification
 
 
 @pytest.fixture(scope="class")
@@ -109,12 +110,14 @@ def training_data_covar_complex(covars_initialization_data):
     # the covars initialization data
     covar_details = {}
     covar_mapped_names = []
+    GP_kernel_mapping_covar_identification = []
     for i in range(len(covars)):
         name = "covar" + str(i)
         covar_details["name"] = {"guess": covars[i][0], "min": covars[i][1], "max": covars[i][2], "type": float, "columns": i}
         covar_mapped_names += [name]
+        GP_kernel_mapping_covar_identification += [{"type": float, "column": [i]}]
 
-    return covars, train_X, train_Y, covar_details, covar_mapped_names
+    return covars, train_X, train_Y, covar_details, covar_mapped_names, GP_kernel_mapping_covar_identification
 
 
 ### Trained GP model
@@ -210,7 +213,7 @@ def tmp_modeling_class():
                           }
 
         # import method
-        from creative_project._modeling import _set_GP_model, _GP_kernel_transform
+        from creative_project._modeling import _set_GP_model #, _GP_kernel_transform
 
     # initialize class
     cls = TmpClass()
