@@ -11,7 +11,9 @@ Optimization with Gaussian processes, Neurocomputing vol. 380, 7 March 2020, pp.
 from botorch.models import SingleTaskGP
 from gpytorch.distributions.multivariate_normal import MultivariateNormal
 
-from creative_project.transformed_kernel_models.transformation import GP_kernel_transform
+from creative_project.transformed_kernel_models.transformation import (
+    GP_kernel_transform,
+)
 
 
 class SingleTaskGP_transformed(SingleTaskGP):
