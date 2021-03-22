@@ -27,6 +27,18 @@ class CreativeProject(Initializers, AcqFunction):
         - Update manual input of covariates and response to handle pretty format and named variables (also when prompting for input)
         #- Update integration tests to also probe cases when "covars" provided at class initialization is of type dict of dicts
         - Add new examples illustrating integer and categorical variable
+
+    TODO
+        - auto
+            - user-provided or automatically provided covariates can also be given as pandas
+            - user-provided response function must accept pandas as input
+        - ask
+            - named variables when prompting for user-input (show the covariate names)
+        - tell
+            - covariates as pandas (named)
+            - autmatically-provided covariates and response as pandas
+        - in general
+            - make sure pandas covariates are sorted
     """
 
     # Initialize class instance
