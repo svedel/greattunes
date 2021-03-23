@@ -3,6 +3,7 @@ Methods for observing responses and the associated covariates
 """
 import torch
 from .utils import __get_covars_from_kwargs
+from .data_format_mappings import tensor2pretty_covariate
 
 
 # === Response methods ===
@@ -161,16 +162,15 @@ def _print_candidate_to_prompt(self, candidate):
             "Expecting torch tensor of size 1 X num_covariates"
         )
 
-    # convert 'candidate' to list from tensor (becomes list of lists), and pick the first of these nested lists
-    cand_list = candidate.tolist()[0]
+    # convert candidate to named tensor
+    cand_pretty = tensor2pretty_covariate(train_X_sample=candidate, covar_details=self.covar_details)
+
+    # add data type to column names
+    new_cand_names = [i + " (" + str(self.covar_details[i]["type"]) + ")" for i in list(cand_pretty.columns)]
+    cand_pretty.columns = new_cand_names
 
     # create string
-    input_request = (
-        "ITERATION "
-        + str(self.model["covars_proposed_iter"])
-        + " - NEW datapoint to sample: "
-        + ", ".join([str(x) for x in cand_list])
-    )
+    input_request = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(index=False)
 
     return input_request
 

@@ -1,6 +1,7 @@
 import pytest
 import torch
 import creative_project.utils
+from creative_project.data_format_mappings import tensor2pretty_covariate
 
 @pytest.mark.parametrize("method, tmp_val",
                          [
@@ -240,18 +241,23 @@ def test_observe_print_candidate_to_prompt_works_unit(tmp_observe_class, candida
     tmp_covars_proposed_iter = 2
     cls.model = {"covars_proposed_iter": tmp_covars_proposed_iter}
 
+    # add covariate details to tmp_observe_class
+    covar_details = {}
+    for i in range(candidate.size()[1]):
+        key = "covar" + str(i)
+        val = candidate[0,i].item()
+        covar_details[key] = {"guess": val, "min": val-1.0, "max": val+1.0, "type": float, "columns": i}
+    cls.covar_details = covar_details
+
     # run the method: generate the string to be printed
     input_request = cls._print_candidate_to_prompt(candidate=candidate)
 
     # build expected output
-    first = True
-    outtext = "ITERATION " + str(tmp_covars_proposed_iter) + " - NEW datapoint to sample: "
-    for tmp in candidate[0]:
-        if first:
-            outtext += str(tmp.item())
-            first = False
-        else:
-            outtext += ", " + str(tmp.item())
+    cand_pretty = tensor2pretty_covariate(train_X_sample=candidate, covar_details=covar_details)
+    new_cand_names = [i + " (" + str(covar_details[i]["type"]) + ")" for i in list(cand_pretty.columns)]
+    cand_pretty.columns = new_cand_names
+
+    outtext = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(index=False)
 
     # assert
     assert input_request == outtext
