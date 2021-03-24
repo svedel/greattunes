@@ -105,10 +105,16 @@ def _get_response_function_input(self):
     """
 
     # the covariates determined as new datapoint by acquisition function
-    covars = self.train_X[-1]
+    num_covars = self.train_X.shape[1]
+    covars = self.train_X[-1].reshape(1, num_covars)
+
+    # converts covariates for function to pretty format
+    covars_pretty = tensor2pretty_covariate(train_X_sample=covars, covar_details=self.covar_details)
 
     # the corresponding response
-    resp = self.sampling["response_func"](covars)
+    resp = self.sampling["response_func"](covars_pretty)
+
+    # cast response as tensor
     response_candidate_float_tensor = torch.tensor(
         [[resp]], device=self.device, dtype=self.dtype
     )

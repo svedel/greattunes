@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 import torch
 import numpy as np
@@ -24,7 +25,7 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
 
     # define response function
     def f(x):
-        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+        return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
     cc = CreativeProject(covars=x_input, model=model_type)
@@ -71,7 +72,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
 
     # define response function
     def f(x):
-        return (-(6 * x[0] - 2) ** 2 * torch.sin(12 * x[0] - 4))*(-(6 * x[1] - 2) ** 2 * torch.sin(12 * x[1] - 4))
+        return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (-(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
 
     # initialize class instance
     cc = CreativeProject(covars=covars, model=model_type)
@@ -125,7 +126,7 @@ def test_CreativeProject_auto_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num
 
     # define response function
     def f(x):
-        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+        return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
     cc = CreativeProject(covars=x_input)
@@ -185,7 +186,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
 
     # define response function
     def f(x):
-        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+        return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
     cc = CreativeProject(covars=x_input)

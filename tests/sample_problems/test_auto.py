@@ -24,7 +24,7 @@ def test_sample_problems_auto_1d_maximization(max_iter, max_response, error_lim,
 
     # define response function
     def f(x):
-        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+        return -(6 * x["covar0"].iloc[0] - 2) ** 2 * np.sin(12 * x["covar0"].iloc[0] - 4)
 
     # initialize class instance
     cc = CreativeProject(covars=x_input, model=model_type)
@@ -77,7 +77,7 @@ def test_sample_problems_auto_1d_maximization_rel_tol_test(max_iter, rel_tol, re
 
     # define response function
     def f(x):
-        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+        return -(6 * x["covar0"].iloc[0] - 2) ** 2 * np.sin(12 * x["covar0"].iloc[0] - 4)
 
     # initialize class instance
     cc = CreativeProject(covars=x_input, model=model_type)
@@ -144,7 +144,7 @@ def test_sample_problems_auto_2d_maximization(max_iter, error_lim, x0_0, x1_0):
 
     # define the function (negative of the Easom function)
     def f2(x):
-        return torch.cos(x[0]) * torch.cos(x[1]) * torch.exp(-(x[0] ** 2 + x[1] ** 2))
+        return np.cos(x["covar0"].iloc[0]) * np.cos(x["covar1"].iloc[0]) * np.exp(-(x["covar0"].iloc[0] ** 2 + x["covar1"].iloc[0] ** 2))
 
     # define the range of interest
     covars2d = [(x0_0, -5, 5.0), (x1_0, -5, 5.0)]

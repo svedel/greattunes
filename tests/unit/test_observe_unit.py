@@ -118,9 +118,11 @@ def test_observe_get_response_function_input_unit(tmp_observe_class, training_da
 
     # data
     train_X = training_data_covar_complex[1]
+    covar_details = training_data_covar_complex[3]
 
     # set attributes on class, required for test
     cls.train_X = None
+    cls.covar_details = covar_details
     if FLAG_TRAINING_DATA:
         cls.train_X = train_X
 
@@ -144,7 +146,7 @@ def test_observe_get_response_function_input_unit(tmp_observe_class, training_da
     else:
         with pytest.raises(Exception) as e:
             assert output == cls._get_response_function_input()
-        assert str(e.value) == "'NoneType' object is not subscriptable"
+        assert str(e.value) == "'NoneType' object has no attribute 'shape'"
 
 
 @pytest.mark.parametrize(

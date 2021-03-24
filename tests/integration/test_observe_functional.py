@@ -66,6 +66,7 @@ def test_observe_get_and_verify_response_input_functions_functional(tmp_observe_
     cls = tmp_observe_class
     cls.sampling["method"] = "functions"
     cls.train_X = training_data_covar_complex[1]
+    cls.covar_details = training_data_covar_complex[3]
 
     # add simple response function
     tmp_val = 2.2
