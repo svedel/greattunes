@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import math
 import pandas as pd
 import warnings
@@ -259,6 +261,7 @@ class Initializers(Validators):
             - covar_mapped_names (list): names of mapped covariates
             - total_num_covars (int): total number of columns created for backend train_X dataset used by Gaussian
             processes
+            - sorted_pandas_columns (list): ordered list of names of columns for pretty data (pandas)
         """
 
         # first ensure the format of 'covars' is as expected
@@ -275,7 +278,7 @@ class Initializers(Validators):
 
         # initialize attributes
         GP_kernel_mapping_covar_identification = []
-        covar_details = {}
+        covar_details = OrderedDict()
         covar_mapped_names = []
 
         # loop through each entry in list of tuples and builds out 'covar_details',
@@ -293,6 +296,7 @@ class Initializers(Validators):
                     "max": covars[i][2],
                     "type": covar_types[i],
                     "columns": column_counter,
+                    "pandas_column": i,
                 }
 
                 # update book keeping
@@ -328,6 +332,7 @@ class Initializers(Validators):
                         j + column_counter for j in range(num_opts)
                     ],  # # sets mapped one-hot columns, names
                     "opt_names": opt_names,
+                    "pandas_column": i,
                 }
 
                 # update book keeping
@@ -348,6 +353,7 @@ class Initializers(Validators):
         )
         self.covar_mapped_names = covar_mapped_names
         self.total_num_covars = column_counter
+        self.sorted_pandas_columns = covar_names
 
     def __initialize_covars_dict_of_dicts(self, covars):
         """
@@ -401,6 +407,7 @@ class Initializers(Validators):
             - covar_mapped_names (list): names of mapped covariates
             - total_num_covars (int): total number of columns created for backend train_X dataset used by Gaussian
             processes
+            - sorted_pandas_columns (list): ordered list of names of columns for pretty data (pandas)
         """
 
         # validate provided covars, for all categorical variables add 'guess' to 'options' in case missed
@@ -411,12 +418,16 @@ class Initializers(Validators):
 
         # initialize attributes
         GP_kernel_mapping_covar_identification = []
-        covar_details = covars
+        #covar_details = covars
+        covar_details = OrderedDict()
+        for key, value in covars.items():
+            covar_details[key] = value
         covar_mapped_names = []
 
         # loop through each entry in list of tuples and builds out 'covar_details',
         # 'GP_kernel_mapping_covar_identification', 'covar_mapped_names' and total count with the right information
         column_counter = 0
+        original_column_counter = 0
 
         for key in covar_names:
 
@@ -424,6 +435,7 @@ class Initializers(Validators):
             # behind the scenes for Gaussian process modeling
             if covar_details[key]["type"] in {int, float}:
                 covar_details[key]["columns"] = column_counter
+                covar_details[key]["pandas_column"] = original_column_counter
 
                 # update book keeping
                 if covar_details[key]["type"] == int:
@@ -436,6 +448,7 @@ class Initializers(Validators):
                     ]
 
                 column_counter += 1
+                original_column_counter += 1
                 covar_mapped_names += [key]
 
             # special situation for categorical variables (data type is str).
@@ -453,6 +466,7 @@ class Initializers(Validators):
                     j + column_counter for j in range(num_opts)
                 ]
                 covar_details[key]["opt_names"] = opt_names
+                covar_details[key]["pandas_column"] = original_column_counter
 
                 # update book keeping
                 GP_kernel_mapping_covar_identification += [
@@ -464,6 +478,7 @@ class Initializers(Validators):
 
                 # updates counters
                 column_counter += num_opts
+                original_column_counter += 1
                 covar_mapped_names += [j for j in opt_names]
 
         # save attributes
@@ -473,6 +488,8 @@ class Initializers(Validators):
         )
         self.covar_mapped_names = covar_mapped_names
         self.total_num_covars = column_counter
+        self.sorted_pandas_columns = covar_names
+
 
     def __initialize_best_response(self):
         """
