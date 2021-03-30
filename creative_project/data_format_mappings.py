@@ -21,7 +21,7 @@ def pretty2tensor_covariate(x_pandas, covar_details, covar_mapped_names, device=
     :param device (torch.device; default None): the device for torch calculations determining whether CPU or GPU is
     used. Uses device of local machine if 'None' provided
     :return mapped covariates in tensor format (torch)
-    :return  mapped covariates in array format (numpy)
+    :return mapped covariates in array format (numpy)
     """
 
     # list of all covariates reported in covar_details
