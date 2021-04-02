@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 import torch
 
@@ -66,6 +67,7 @@ def test_observe_get_and_verify_response_input_functions_functional(tmp_observe_
     cls = tmp_observe_class
     cls.sampling["method"] = "functions"
     cls.train_X = training_data_covar_complex[1]
+    cls.covar_details = training_data_covar_complex[3]
 
     # add simple response function
     tmp_val = 2.2
@@ -96,7 +98,9 @@ def test_observe_get_and_verify_response_input_functions_functional(tmp_observe_
         [[1.1, 2.2, 200, -1.7], [1.1, 2.2, 200, -1.7]],
     ]
 )
-def test_get_and_verify_covars_input_with_dependencies_works(tmp_observe_class, covariates, kwarg_covariates, monkeypatch):
+def test_get_and_verify_covars_input_with_dependencies_works(tmp_observe_class,
+                                                             covar_details_mapped_covar_mapped_names_tmp_observe_class,
+                                                             covariates, kwarg_covariates, monkeypatch):
     """
     test _get_and_verify_covars_input which depends on _read_covars_manual_input and
     _validators.Validators.__validate_num_covars. monkeypatch the user input (when needed), also test the programmatic
@@ -115,6 +119,9 @@ def test_get_and_verify_covars_input_with_dependencies_works(tmp_observe_class, 
     # define required attributes
     cls.proposed_X = covars_tensor
     cls.initial_guess = covars_tensor
+    cls.covar_details = covar_details_mapped_covar_mapped_names_tmp_observe_class[0]
+    cls.covar_mapped_names = covar_details_mapped_covar_mapped_names_tmp_observe_class[1]
+    cls.sorted_pandas_columns = covar_details_mapped_covar_mapped_names_tmp_observe_class[2]
 
     # monkeypatch
     def mock_input(x):  # mock function to replace 'input' for unit testing purposes
@@ -175,17 +182,20 @@ def test_get_and_verify_covars_input_with_dependencies_fails(tmp_observe_class, 
 
 
 @pytest.mark.parametrize(
-    "train_X, covars_proposed_iter, covars_sampled_iter, covariates, kwarg_covariates",
+    "train_X, x_data, covars_proposed_iter, covars_sampled_iter, covariates, kwarg_covariates",
     [
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, [1.1, 2.2, 200, -1.7], [1.1, 2.2, 200, -1.7]],
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, [1.1, 2.2, 200, -1.7], None],
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1, [1.1, 2.2, 200, -1.7], torch.tensor([[1.1, 2.2, 200, -1.7]], dtype=torch.double)],
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1, [1.1, 2.2, 200, -1.7], None],
-        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 0, 0, [1.1, 2.2, 200, -1.7], None],
-        [None, 0, 0, [1.1, 2.2, 200, -1.7], None],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({"covar0": [0.1], "covar1": [2.5], "covar2": [12], "covar3": [0.22]}), 2, 1, [1.1, 2.2, 200, -1.7], [1.1, 2.2, 200, -1.7]],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({"covar0": [0.1], "covar1": [2.5], "covar2": [12], "covar3": [0.22]}), 2, 1, [1.1, 2.2, 200, -1.7], None],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({"covar0": [0.1], "covar1": [2.5], "covar2": [12], "covar3": [0.22]}), 2, 1, [1.1, 2.2, 200, -1.7], torch.tensor([[1.1, 2.2, 200, -1.7]], dtype=torch.double)],
+        [torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({"covar0": [0.1], "covar1": [2.5], "covar2": [12], "covar3": [0.22]}), 1, 1, [1.1, 2.2, 200, -1.7], None],
+        #[torch.tensor([[0.1, 2.5, 12, 0.22]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({"covar0": [0.1], "covar1": [2.5], "covar2": [12], "covar3": [0.22]}), 0, 0, [1.1, 2.2, 200, -1.7], None],
+        [None, None, 0, 0, [1.1, 2.2, 200, -1.7], None],
     ]
 )
-def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, covars_proposed_iter, covars_sampled_iter, covariates, kwarg_covariates, monkeypatch):
+def test_covars_datapoint_observation_int_works(tmp_observe_class,
+                                                covar_details_mapped_covar_mapped_names_tmp_observe_class,
+                                                train_X, x_data, covars_proposed_iter, covars_sampled_iter, covariates,
+                                                kwarg_covariates, monkeypatch):
     """
     test that _get_covars_datapoint works. Monkeypatching build-in method "input"
     """
@@ -203,8 +213,12 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
     cls.initial_guess = covars_tensor
     cls.proposed_X = covars_tensor
     cls.train_X = train_X
+    cls.x_data = x_data
     cls.model = {"covars_proposed_iter": covars_proposed_iter,
                  "covars_sampled_iter": covars_sampled_iter}
+    cls.covar_details = covar_details_mapped_covar_mapped_names_tmp_observe_class[0]
+    cls.covar_mapped_names = covar_details_mapped_covar_mapped_names_tmp_observe_class[1]
+    cls.sorted_pandas_columns = covar_details_mapped_covar_mapped_names_tmp_observe_class[2]
 
     # monkeypatch
     def mock_input(x):  # mock function to replace 'input' for unit testing purposes
@@ -236,18 +250,21 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class, train_X, cova
 @pytest.mark.parametrize(
     "covariate_str, error_msg",
     [
-        ["", "could not convert string to float: ''"],
+        #["", "could not convert string to float: ''"],
+        ["", "creative_project._observe._read_covars_manual_input: incorrect number of covariates (1) provided, was expecting 4"],
         ["1, a, 2, 3", "could not convert string to float: ' a'"],
         [" , a, 2, 3", "could not convert string to float: ''"]
     ]
 )
-def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str, error_msg, monkeypatch, pythontestvers):
+def test_covars_datapoint_observation_int_fails(tmp_observe_class,
+                                                covar_details_mapped_covar_mapped_names_tmp_observe_class,
+                                                covariate_str, error_msg, monkeypatch, pythontestvers):
     """
     test that _get_covars_datapoint fails. Monkeypatching build-in method "input"
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
-    if pythontestvers == "3.7" and covariate_str != "1, a, 2, 3":
+    if pythontestvers == "3.7" and covariate_str not in ["1, a, 2, 3", ""]:
         # removes the '' from the error message
         error_msg = error_msg[:-2]
 
@@ -267,6 +284,11 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str
     cls.train_X = initial_guess
     cls.model = {"covars_proposed_iter": 1,
                  "covars_sampled_iter": 1}
+    cls.covar_details = covar_details_mapped_covar_mapped_names_tmp_observe_class[0]
+    cls.covar_mapped_names = covar_details_mapped_covar_mapped_names_tmp_observe_class[1]
+    cls.sorted_pandas_columns = covar_details_mapped_covar_mapped_names_tmp_observe_class[2]
+    cls.x_data = pd.DataFrame(columns=["covar0", "covar1", "covar2", "covar3"])
+    cls.x_data.loc[0] = init_guess
 
     # monkeypatch
     def mock_input(x):  # mock function to replace 'input' for unit testing purposes
@@ -276,7 +298,8 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str
     # covariate kwargs is set to None so input-based method is used
     kwarg_covariates = None
 
-    with pytest.raises(ValueError) as e:
+    #with pytest.raises(ValueError) as e:
+    with pytest.raises(Exception) as e:
         # run the method
         cls._get_covars_datapoint(covars=kwarg_covariates)
     assert str(e.value) == error_msg
@@ -286,10 +309,12 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class, covariate_str
     "kwarg_covariates, error_msg",
     [
         [[1.1, 2.2, -1.7], "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  1.1000,   2.2000, 200.0000,  -1.7000], dtype=torch.float64)', but got 'tensor([[ 1.1000,  2.2000, -1.7000]], dtype=torch.float64)'"],
-        [torch.tensor([1.1, 2.2, 200, -1.7], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size [4]"]
+        [torch.tensor([1.1, 2.2, 200, -1.7], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size (4)."]
     ]
 )
-def test_get_covars_datapoint_kwargs_data_int_fails(tmp_observe_class, kwarg_covariates, error_msg):
+def test_get_covars_datapoint_kwargs_data_int_fails(tmp_observe_class,
+                                                    covar_details_mapped_covar_mapped_names_tmp_observe_class,
+                                                    kwarg_covariates, error_msg):
     """
     test that _get_covars_datapoint fails when providing incorrect kwargs
     """
@@ -310,6 +335,9 @@ def test_get_covars_datapoint_kwargs_data_int_fails(tmp_observe_class, kwarg_cov
     cls.train_X = initial_guess
     cls.model = {"covars_proposed_iter": 1,
                  "covars_sampled_iter": 1}
+    cls.covar_details = covar_details_mapped_covar_mapped_names_tmp_observe_class[0]
+    cls.covar_mapped_names = covar_details_mapped_covar_mapped_names_tmp_observe_class[1]
+    cls.sorted_pandas_columns = covar_details_mapped_covar_mapped_names_tmp_observe_class[2]
 
     with pytest.raises(Exception) as e:
         # run the method
@@ -318,15 +346,15 @@ def test_get_covars_datapoint_kwargs_data_int_fails(tmp_observe_class, kwarg_cov
 
 
 @pytest.mark.parametrize(
-    "train_Y, covars_proposed_iter, response_sampled_iter",
+    "train_Y, y_data, covars_proposed_iter, response_sampled_iter",
     [
-        [torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 2, 1],
-        [torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 1, 1],
-        [torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), 0, 0],
-        [None, 0, 0],
+        [torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({"Response": [0.1]}), 2, 1],
+        [torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({"Response": [0.1]}), 1, 1],
+        #[torch.tensor([[0.1]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), pd.DataFrame({"Response": [0.1]}), 0, 0],
+        [None, None, 0, 0],
     ]
 )
-def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars_proposed_iter, response_sampled_iter, monkeypatch):
+def test_response_datapoint_observation_works(tmp_observe_class, train_Y, y_data, covars_proposed_iter, response_sampled_iter, monkeypatch):
     """
     test that _get_response_datapoint works. Monkeypatching build-in method "input"
     """
@@ -347,6 +375,7 @@ def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars
     cls.train_Y = train_Y
     cls.model = {"covars_proposed_iter": covars_proposed_iter,
                  "response_sampled_iter": response_sampled_iter}
+    cls.y_data = y_data
 
     # monkeypatch
     def mock_input(x):  # mock function to replace 'input' for unit testing purposes
@@ -385,7 +414,7 @@ def test_response_datapoint_observation_works(tmp_observe_class, train_Y, covars
         [" , a", None, "could not convert string to float: ''"],
         ["1", [1, 2], "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
         ["1", ['a'], "too many dimensions 'str'"],
-        ["1", torch.tensor([[1, 2]], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"]
+        ["1", torch.tensor([[1, 2]], dtype=torch.double), "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (1, 2)."]
     ]
 )
 def test_response_datapoint_observation_fails(tmp_observe_class, response_str, kwarg_response, error_msg, monkeypatch, pythontestvers):

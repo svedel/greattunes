@@ -10,35 +10,6 @@ class CreativeProject(Initializers, AcqFunction):
     user-facing functionality to balance exploration and exploitation for creative projects.
     Note: Initializers is a child of Validators class (from ._validators.py) so all validator methods are available to
     CreativeProject
-
-    TODO
-        #- Add initializing method for pretty x_data, y_data in pandas format (remember to clean up _initializers.Initializers.__initialize_from_covars)
-        #- Add integration tests for this ^
-        #- Extend tests of CreativeProject.__init__ to also see that x_data, y_data added when initializing with historical data
-        #- Extend tests of CreativeProject.__init__ to also initialize with train_X, train_Y in pandas format
-        #- Allow user to add train_X, train_Y data in pretty format
-        #- Apply transformation in kernels
-        #- Determine when to update data sets for pretty x_data, y_data: at each iteration, only when queried?
-        - Update data sets for pretty x_data, y_data after iteration (in campaign)
-        - Add test that pretty x_data, y_data is updated after iteration
-        #- Update data sets for best response after each iteration in pretty format
-        - Update format of .current_best method output to include covariate names
-        - Test best response in pretty format after each iteration
-        - Update manual input of covariates and response to handle pretty format and named variables (also when prompting for input)
-        #- Update integration tests to also probe cases when "covars" provided at class initialization is of type dict of dicts
-        - Add new examples illustrating integer and categorical variable
-
-    TODO
-        - auto
-            - user-provided or automatically provided covariates can also be given as pandas
-            - user-provided response function must accept pandas as input
-        - ask
-            - named variables when prompting for user-input (show the covariate names)
-        - tell
-            - covariates as pandas (named)
-            - autmatically-provided covariates and response as pandas
-        - in general
-            - make sure pandas covariates are sorted
     """
 
     # Initialize class instance
