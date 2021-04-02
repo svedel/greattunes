@@ -1,9 +1,15 @@
 """
 Methods for observing responses and the associated covariates
 """
+import pandas as pd
+import numpy as np
 import torch
-from .utils import __get_covars_from_kwargs
-from .data_format_mappings import tensor2pretty_covariate
+from .utils import __get_covars_from_kwargs, __get_response_from_kwargs
+from .data_format_mappings import (
+    pretty2tensor_covariate,
+    tensor2pretty_covariate,
+    tensor2pretty_response,
+)
 
 
 # === Response methods ===
@@ -32,14 +38,38 @@ def _get_response_datapoint(self, response):
     # store data
     # first datapoint
     if self.train_Y is None:
+
+        # backend format
         self.train_Y = response_datapoint
+
+        # user-facing pretty format
+        self.y_data = tensor2pretty_response(train_Y_sample=response_datapoint)
+
     # case where sampling this iteration for the second time, overwriting first sampled datapoint
     elif self.train_Y.shape[0] >= obs_counter:
+
+        # backend data format
         # self.train_Y[obs_counter - 1, :] = response_datapoint --- won't work since train_Y has only one element
         self.train_Y[obs_counter - 1] = response_datapoint
+
+        # user-facing pretty format
+        # first add replacing row as new row, then remove the to-be-replaced row, and finally reset indicies
+        self.y_data = self.y_data.append(
+            tensor2pretty_response(train_Y_sample=response_datapoint), ignore_index=True
+        )
+        self.y_data.drop([obs_counter - 1], inplace=True)
+        self.y_data.reset_index(drop=True, inplace=True)
+
     else:
+
+        # backend data format
         # self.train_Y.append(response_datapoint)
         self.train_Y = torch.cat((self.train_Y, response_datapoint), dim=0)
+
+        # user-facing pretty format
+        self.y_data = self.y_data.append(
+            tensor2pretty_response(train_Y_sample=response_datapoint)
+        )
 
     # update counter
     self.model["response_sampled_iter"] = obs_counter
@@ -64,7 +94,11 @@ def _get_and_verify_response_input(self, **kwargs):
 
         # get from programmatic input
         if kwarg_response is not None:
-            response_datapoint = __get_covars_from_kwargs(kwarg_response)
+
+            # response_datapoint = __get_covars_from_kwargs(kwarg_response)
+            response_datapoint = __get_response_from_kwargs(
+                kwarg_response, device=self.device
+            )
 
         # get from manual input from prompt
         else:
@@ -109,7 +143,9 @@ def _get_response_function_input(self):
     covars = self.train_X[-1].reshape(1, num_covars)
 
     # converts covariates for function to pretty format
-    covars_pretty = tensor2pretty_covariate(train_X_sample=covars, covar_details=self.covar_details)
+    covars_pretty = tensor2pretty_covariate(
+        train_X_sample=covars, covar_details=self.covar_details
+    )
 
     # the corresponding response
     resp = self.sampling["response_func"](covars_pretty)
@@ -169,14 +205,21 @@ def _print_candidate_to_prompt(self, candidate):
         )
 
     # convert candidate to named tensor
-    cand_pretty = tensor2pretty_covariate(train_X_sample=candidate, covar_details=self.covar_details)
+    cand_pretty = tensor2pretty_covariate(
+        train_X_sample=candidate, covar_details=self.covar_details
+    )
 
     # add data type to column names
-    new_cand_names = [i + " (" + str(self.covar_details[i]["type"]) + ")" for i in list(cand_pretty.columns)]
+    new_cand_names = [
+        i + " (" + str(self.covar_details[i]["type"]) + ")"
+        for i in list(cand_pretty.columns)
+    ]
     cand_pretty.columns = new_cand_names
 
     # create string
-    input_request = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(index=False)
+    input_request = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(
+        index=False
+    )
 
     return input_request
 
@@ -201,13 +244,40 @@ def _get_covars_datapoint(self, covars):
     # store data
     # first datapoint
     if self.train_X is None:
+        # backend data
         self.train_X = covars_datapoint
+
+        # user-facing pretty data
+        self.x_data = tensor2pretty_covariate(
+            train_X_sample=covars_datapoint, covar_details=self.covar_details
+        )
 
     # case where sampling this iteration for the second time, overwriting first sampled datapoint
     elif self.train_X.shape[0] >= obs_counter:
+        # backend data
         self.train_X[obs_counter - 1, :] = covars_datapoint
+
+        # user-facing data
+        # first add replacing row as new row, then remove the to-be-replaced row, and finally reset indicies
+        self.x_data = self.x_data.append(
+            tensor2pretty_covariate(
+                train_X_sample=covars_datapoint, covar_details=self.covar_details
+            ),
+            ignore_index=True,
+        )
+        self.x_data.drop([obs_counter - 1], inplace=True)
+        self.x_data.reset_index(drop=True, inplace=True)
+
     else:
+        # backend data
         self.train_X = torch.cat((self.train_X, covars_datapoint), dim=0)
+
+        # user-facing pretty data
+        self.x_data = self.x_data.append(
+            tensor2pretty_covariate(
+                train_X_sample=covars_datapoint, covar_details=self.covar_details
+            )
+        )
 
     # update counter
     self.model["covars_sampled_iter"] = obs_counter
@@ -234,7 +304,12 @@ def _get_and_verify_covars_input(self, covars):
 
         # read covars
         if covars is not None:
-            covars_candidate_float_tensor = __get_covars_from_kwargs(covars)
+            covars_candidate_float_tensor = __get_covars_from_kwargs(
+                covars,
+                device=self.device,
+                covar_details=self.covar_details,
+                covar_mapped_names=self.covar_mapped_names,
+            )
         else:
             covars_candidate_float_tensor = self._read_covars_manual_input(
                 additional_text
@@ -285,19 +360,61 @@ def _read_covars_manual_input(self, additional_text):
         "Was expecting 'str' but received " + str(type(additional_text))
     )
 
-    # read candidate
     covars_candidate_string = input(
         "ITERATION "
         + str(self.model["covars_proposed_iter"])
         + additional_text
-        + " - Please provide observed covariates separated by commas (proposed datapoint: "
-        + ", ".join([str(tmp.item()) for tmp in self.proposed_X[-1]])
-        + " covariates): "
+        + " - Please provide observed covariates separated by commas (covariates: "
+        + ", ".join(
+            [
+                k + " (" + str(self.covar_details[k]["type"]) + ")"
+                for k in self.covar_details.keys()
+            ]
+        )
+        + "): "
     )
-    covars_candidate_float_tensor = torch.tensor(
-        [[float(z) for z in covars_candidate_string.split(",")]],
+
+    # assess correct number of covariates provided
+    # convert input str to pandas
+    covar_str = covars_candidate_string.split(",")
+
+    if not len(covar_str) == len(self.covar_details):
+        raise Exception(
+            "creative_project._observe._read_covars_manual_input: incorrect number of covariates ("
+            + str(len(covar_str))
+            + ") provided, was expecting "
+            + str(len(self.covar_details))
+        )
+
+    # extract data values, convert to right type, assemble in pretty data format (pandas dataframe)
+    covar_converted_types = [None for x in covar_str]  # initialize
+    for key in self.covar_details:
+        entry = self.covar_details[key]["pandas_column"]
+        entry_datatype = self.covar_details[key]["type"]
+        if np.isnan(entry_datatype(covar_str[entry])):
+            raise Exception(
+                "creative_project._observe._read_covars_manual_input: provided '"
+                + covar_str[entry]
+                + "' becomes 'nan' when converting to expected datatype "
+                + str(entry_datatype)
+                + " for this "
+                "entry position."
+            )
+        covar_converted_types[entry] = entry_datatype(covar_str[entry])
+
+        # removes trailing/leading empty spaces for string type
+        if entry_datatype == str:
+            covar_converted_types[entry] = covar_converted_types[entry].strip()
+
+    covar_df_tmp = pd.DataFrame(columns=self.sorted_pandas_columns)
+    covar_df_tmp.loc[0] = covar_converted_types
+
+    # convert to tensor using pretty2tensor
+    covars_candidate_float_tensor, _ = pretty2tensor_covariate(
+        x_pandas=covar_df_tmp,
+        covar_details=self.covar_details,
+        covar_mapped_names=self.covar_mapped_names,
         device=self.device,
-        dtype=self.dtype,
     )
 
     return covars_candidate_float_tensor
