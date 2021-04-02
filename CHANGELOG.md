@@ -5,9 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.2] - January 17, 2021
+## [unreleased] - 
 
-Version number for this release: 0.0.3
+Version for this release: 0,0.4
 
 ### Added
 
@@ -19,6 +19,39 @@ Version number for this release: 0.0.3
 
 ### Fixed
 
+## [0.0.3] - February 25, 2021
+
+Version number for this release: 0.0.3
+
+### Added
+* Added new random sampling functionality with two purposes. Firstly, during initialization it is known to be good to 
+  start with random sampling if no data is available. Secondly, and also to ensure speedier optimization convergence, a 
+  single randomly sampled point every now and then in between Bayesian points is known to increase convergence. Random 
+  sampling is now available for both `auto` approach and `ask`-`tell` approach with the following features
+  * During class initialization, using random initialization or not is controlled by `random_start` (default: `True`)
+  * Additional parameters during initialization
+    * `num_initial_random`: number of initial random; no default, if not specified will be set to $\sqrt{# dimensions}$
+    * `random_sampling_method`: sampling method with options `random` (completely random) and `latin_hcs` (latin hypercube sampling); defaults to `latin_hcs`
+    * `random_step_cadence`: the cadence of random sampling after initialization (default: 10)
+
+### Changed
+In `CreativeProject` class initialization:
+* If historical data is added via `train_X`, `train_Y`
+  * `proposed_X` has been changed to be a zero tensor of the same size as `train_X`. This replaces an empty tensor for 
+    `proposed_X`, which confusingly could take any values.
+  * optimization cycle counters (iteration counters) `model["covars_proposed_iter"]`, `model["covars_sampled_iter"]` 
+    and `model["response_sampled_iter"]` are set so the first iterations are taken as those from the historical data. 
+    That is, if `train_X`, `train_Y` is provided with two observations during initialization, then the counters are set 
+    as `model["covars_proposed_iter"]=2`, `model["covars_sampled_iter"]=2` and `model["response_sampled_iter"]=2`.
+
+### Deprecated
+None
+
+### Removed
+Removed the attribute `start_from_random` as part of adding more elaborate random sampling functionality.
+
+### Fixed
+None
 
 ## [0.0.2] - January 17, 2021
 
