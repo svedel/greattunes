@@ -53,8 +53,8 @@ def test_sample_problems_asktell_1d_maximization(max_iter, max_response, error_l
     cc.current_best()
     captured = capsys.readouterr()
 
-    assert abs(cc.best["covars"][0] - THEORETICAL_MAX_COVAR) < error_lim
-    assert abs(cc.best["response"] - max_response) < error_lim
+    assert abs(cc.best["covars"].values[0][0] - THEORETICAL_MAX_COVAR) < error_lim
+    assert abs(cc.best["response"].values[0][0] - max_response) < error_lim
     assert cc.best["iteration_when_recorded"] == max_iter
 
 
@@ -105,6 +105,6 @@ def test_sample_problems_asktell_2d_maximization(max_iter, error_lim, x0_0, x1_0
     y_true = 1
 
     for it in range(len(covars2d)):
-        assert abs(cc2.best["covars"][it] - x_true[it]) < error_lim
-    assert abs(cc2.best["response"] - y_true) < error_lim
+        assert abs(cc2.best["covars"].values[0][it] - x_true[it]) < error_lim
+    assert abs(cc2.best["response"].values[0][0] - y_true) < error_lim
     assert cc2.best["iteration_when_recorded"] == max_iter
