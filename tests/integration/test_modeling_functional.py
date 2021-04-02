@@ -17,6 +17,7 @@ def test_modeling__set_GP_model_functional(training_data_covar_complex, tmp_mode
     covars = training_data_covar_complex[0]
     train_X = training_data_covar_complex[1]
     train_Y = training_data_covar_complex[2]
+    GP_kernel_mapping_covar_identification = training_data_covar_complex[5]
 
     cls = tmp_modeling_class
 
@@ -24,6 +25,7 @@ def test_modeling__set_GP_model_functional(training_data_covar_complex, tmp_mode
     cls.train_X = train_X
     cls.proposed_X = train_X
     cls.train_Y = train_Y
+    cls.GP_kernel_mapping_covar_identification = GP_kernel_mapping_covar_identification
 
     cls.model["model_type"] = model_type
     cls.model["response_sampled_iter"] = cls.train_X.shape[0]

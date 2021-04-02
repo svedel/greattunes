@@ -44,7 +44,8 @@ class CreativeProject(Initializers, AcqFunction):
             [allows for batched models] OR num_obs X num_output_models)
             - kernel (str): kernel used to define custom GP models (not currently in use)
             - nu (float): kernel parameter for Matern kernel
-            - num_initial_random (int): number of initial random points. Only changes anything if 'random_start' is True
+            - num_initial_random (int): number of initial random points. Only changes anything if 'random_start' is
+            True
             - random_sampling_method (str): sampling method for random points. Options: "random" and "latin_hcs" (latin
             hypercube sampling)
         """
@@ -99,6 +100,9 @@ class CreativeProject(Initializers, AcqFunction):
         self._Initializers__initialize_training_data(
             train_X=kwargs.get("train_X"), train_Y=kwargs.get("train_Y")
         )
+
+        # initialize pretty data (for user interaction)
+        self.x_data, self.y_data = self._Initializers__initialize_pretty_data()
 
         # set plan for initialization with random samples. In some cases (if train_X, train_Y is accepted) will not set
         # any random initial points

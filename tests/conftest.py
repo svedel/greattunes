@@ -48,6 +48,17 @@ def custom_models_simple_training_data_4elements():
     train_Y = torch.tensor([[0.2], [0.15], [0.5], [2.0]], dtype=torch.double)
     return train_X, train_Y
 
+@pytest.fixture(scope="class")
+def custom_models_simple_training_data_4elements_covar_details():
+    """
+    defines covar_details and covar_mapped_names that work with custom_models_simple_training_data_4elements
+    """
+
+    covar_details = {"covar0": {"guess": 0.0, "min": -2.0, "max": 2.0, "type": float, "columns": 0}}
+    covar_mapped_names = ["covar0"]
+    GP_kernel_mapping_covar_identification = [{"type": float, "column": [0]}]
+    return covar_details, covar_mapped_names, GP_kernel_mapping_covar_identification
+
 
 @pytest.fixture(scope="class")
 def covars_for_custom_models_simple_training_data_4elements():
@@ -57,6 +68,16 @@ def covars_for_custom_models_simple_training_data_4elements():
     """
     covars = [(0.0, -2.0, 2.0)]
     return covars
+
+@pytest.fixture(scope="class")
+def covar_details_covars_for_custom_models_simple_training_data_4elements():
+    """
+    covar_details corresponding to the covars in covars_for_custom_models_simple_training_data_4elements
+    """
+
+    covar_details = {"covar0": {"guess": 0.0, "min": -2.0, "max": 2.0, "type": int, "columns": 0}}
+    covar_mapped_names = ["covar0"]
+    return covar_details, covar_mapped_names
 
 
 @pytest.fixture(scope="class")
@@ -86,7 +107,17 @@ def training_data_covar_complex(covars_initialization_data):
     train_X = torch.tensor([[x[0]+y for x in covars] for y in [0, -0.5, 1.2]], dtype=torch.double)
     train_Y = torch.tensor([[1.1], [5.5], [0.1]], dtype=torch.double)
 
-    return covars, train_X, train_Y
+    # the covars initialization data
+    covar_details = {}
+    covar_mapped_names = []
+    GP_kernel_mapping_covar_identification = []
+    for i in range(len(covars)):
+        name = "covar" + str(i)
+        covar_details["name"] = {"guess": covars[i][0], "min": covars[i][1], "max": covars[i][2], "type": float, "columns": i}
+        covar_mapped_names += [name]
+        GP_kernel_mapping_covar_identification += [{"type": float, "column": [i]}]
+
+    return covars, train_X, train_Y, covar_details, covar_mapped_names, GP_kernel_mapping_covar_identification
 
 
 ### Trained GP model
@@ -174,6 +205,8 @@ def tmp_modeling_class():
             self.train_X = None
             self.proposed_X = None
             self.train_Y = None
+            self.x_data = None
+            self.y_data = None
 
             self.model = {"model_type": None,
                           "likelihood": None,
@@ -204,6 +237,8 @@ def tmp_best_response_class():
 
             self.covars_best_response_value = None
             self.best_response_value = None
+            self.covars_best_response = None
+            self.best_response = None
 
         # import methods
         from creative_project._best_response import _find_max_response_value, _update_max_response_value, \
@@ -227,3 +262,90 @@ def tmp_Initializers_with_find_max_response_value_class():
     cls = TmpClass()
 
     return cls
+
+
+@pytest.fixture(scope="module")
+def covar_details_covar_mapped_names():
+    """
+    examples of matching 'covar_details' and 'covar_mapped_names' for a case of the following variables
+    - a: int
+    - b: float
+    - c: categorical (str), with options "red", "blue" and "green"
+    """
+
+    covar_details = \
+        {
+            'a': {
+                'guess': 1,
+                'min': -1,
+                'max': 3,
+                'type': int,
+                'columns': 0,
+                },
+            'b': {
+                'guess': 2.2,
+                'min': -1.7,
+                'max': 4.2,
+                'type': float,
+                'columns': 1,
+            },
+            'c': {
+                'guess': 'red',
+                'options': {'red', 'green', 'blue'},
+                'type': str,
+                'columns': [2, 3, 4],
+                'opt_names': ['c_red', 'c_green', 'c_blue'],
+            }
+        }
+
+    covar_mapped_names = ['a', 'b', 'c_red', 'c_green', 'c_blue']
+
+    return covar_details, covar_mapped_names
+
+
+@pytest.fixture(scope="module")
+def covar_details_mapped_covar_mapped_names_tmp_observe_class():
+    """
+    covar_details and covar_mapped_names corresponding to the sample problems being tested by tmp_observe_class in
+    tests/unit/test_observe_unit.py
+    """
+
+    covar_details = {
+        "covar0": {
+            "guess": 0.1,
+            "min": -1.0,
+            "max": 2.0,
+            "type": float,
+            "columns": 0,
+            "pandas_column": 0,
+        },
+        "covar1": {
+            "guess": 2.5,
+            "min": -1.0,
+            "max": 3.0,
+            "type": float,
+            "columns": 1,
+            "pandas_column": 1,
+        },
+        "covar2": {
+            "guess": 12,
+            "min": 0,
+            "max": 250,
+            "type": float,
+            "columns": 2,
+            "pandas_column": 2,
+        },
+        "covar3": {
+            "guess": 0.22,
+            "min": -2.0,
+            "max": 1.0,
+            "type": float,
+            "columns": 3,
+            "pandas_column": 3,
+        },
+    }
+
+    covar_mapped_names = ["covar0", "covar1", "covar2", "covar3"]
+    sorted_pandas_columns = ["covar0", "covar1", "covar2", "covar3"]
+
+    return covar_details, covar_mapped_names, sorted_pandas_columns

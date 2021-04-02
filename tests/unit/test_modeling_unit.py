@@ -1,3 +1,4 @@
+import torch
 import pytest
 from creative_project._modeling import _set_GP_model
 

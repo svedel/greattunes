@@ -48,7 +48,7 @@ def test_find_max_response_value_multivariate(training_data_covar_complex, tmp_b
 
 
 def test_update_max_response_value_unit(custom_models_simple_training_data_4elements, tmp_best_response_class,
-                                        monkeypatch):
+                                        custom_models_simple_training_data_4elements_covar_details, monkeypatch):
     """
     test that _update_max_response_value works for univariate data
     """
@@ -56,6 +56,8 @@ def test_update_max_response_value_unit(custom_models_simple_training_data_4elem
     # data -- max at 4th element
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
+    covar_details = custom_models_simple_training_data_4elements_covar_details[0]
+    covar_mapped_names = custom_models_simple_training_data_4elements_covar_details[1]
 
     # test class
     cls = tmp_best_response_class
@@ -64,14 +66,16 @@ def test_update_max_response_value_unit(custom_models_simple_training_data_4elem
     cls.train_X = train_X
     cls.proposed_X = train_X
     cls.train_Y = train_Y
+    cls.covar_details = covar_details
+    cls.covar_mapped_names = covar_mapped_names
 
     # monkeypatch
     max_X = 1.0
     max_Y = 2.0
     def mock_find_max_response_value(train_X, train_Y):
-        mX = torch.tensor([max_X], dtype=torch.double,
+        mX = torch.tensor([[max_X]], dtype=torch.double,
                           device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-        mY = torch.tensor([max_Y], dtype=torch.double,
+        mY = torch.tensor([[max_Y]], dtype=torch.double,
                           device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         return mX, mY
     monkeypatch.setattr(
@@ -102,6 +106,16 @@ def test_current_best_univariate_unit(tmp_best_response_class, response_sampled_
 
     # set attribute
     cls.model = {"response_sampled_iter": response_sampled_iter}
+    cls.covar_details = {}
+    for i in range(len(covars_best)):
+        tmp_key = "covar" + str(i)
+        cls.covar_details[tmp_key] = {"guess": covars_best[i],
+                                      "min": covars_best[i]-1,
+                                      "max": covars_best[i]+1,
+                                      "type": float,
+                                      "columns": i,
+                                      "pandas_column": i}
+    cls.total_num_covars = len(covars_best)
 
     # set best response variables
     cls.covars_best_response_value = torch.tensor([covars_best], dtype=torch.double)
@@ -112,8 +126,8 @@ def test_current_best_univariate_unit(tmp_best_response_class, response_sampled_
 
     # assert
     for it in range(len(covars_best)):
-        assert cls.best["covars"][it] == covars_best[it]
-    assert cls.best["response"] == response_best[0]
+        assert cls.best["covars"].values[0][it] == covars_best[it]
+    assert cls.best["response"].values[0][0] == response_best[0]
     assert cls.best["iteration_when_recorded"] == response_sampled_iter
 
 

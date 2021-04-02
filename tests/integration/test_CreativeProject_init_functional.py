@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 import torch
 from creative_project import CreativeProject
@@ -6,17 +7,14 @@ from creative_project import CreativeProject
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [None, "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"],
+        [None, "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'NoneType'> but must be of types {'list', 'dict'}."],
         # checks no covars data provided
         [(1, 2, 3),
-         "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)"],
+         "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'tuple'> but must be of types {'list', 'dict'}."],
         # checks fail if covars not a list of tuples
         [[1, 2, 3],
          "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple"],
         # checks that covars is a list of tuples
-        [[("hej", 2, 3)],
-         "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element hej in covars list is neither of type float or int"]
-        # test that all elements in tuples are of type int or float
     ])
 def test_CreativeProject__init__covars_notrainingdata_fails_functional(covars, error_msg):
     """
@@ -64,6 +62,8 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_works_functiona
     """
     passing test with multivariate initialization, multiple observations. test that class initialization works with
     multivariate train_X data (3 covars) with multiple observations (3)
+
+    also investigate that pretty data x_data and y_data is created
     """
 
     # data
@@ -100,6 +100,18 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_works_functiona
         assert cls.covars_best_response_value[2, it].item() == train_X[1, it].item()
     assert cls.best_response_value[2].item() == train_Y[1].item()
 
+    # assert that pretty data x_data, y_data is created
+    assert hasattr(cls, "x_data")
+    assert hasattr(cls, "y_data")
+
+    tmp_x_data = cls.x_data.values
+
+    # assert that the numbers are correct in pretty data
+    for i in range(train_X.shape[0]):
+        assert cls.y_data["Response"].iloc[i] == train_Y[i,0].item()
+        for j in range(train_X.shape[1]):
+            assert tmp_x_data[i,j] == train_X[i,j].item()
+
 
 def test_CreativeProject__init__covars_trainingdata_multivariate_fails_functional(training_data_covar_complex):
     """
@@ -118,6 +130,36 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_fails_functiona
 
     assert cls.train_X is None
     assert cls.train_Y is None
+
+
+def test_CreativeProject__init__covars_dict_of_dicts_works():
+    """
+    test that initializing the whole framework from a dict of dict works. also test that pretty data for train_X, train_Y
+    with categorical variable works
+    """
+
+    covars = [(1, 0, 3), (1.1, -1.2, 3.4), ("red", "green", "blue")]
+    train_X = torch.tensor([[2, -0.7, 1.0, 0.0, 0.0], [1, 1.1, 0.0, 0.0, 1.0]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    train_X_interrogate = pd.DataFrame({'covar0':[2, 1], 'covar1': [-0.7, 1.1], 'covar2': ["red", "blue"]})
+    train_Y = torch.tensor([[1.1], [3.5]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+
+    # test that attributes have been created
+    assert hasattr(cls, "train_X")
+    assert hasattr(cls, "train_Y")
+    assert hasattr(cls, "x_data")
+    assert hasattr(cls, "y_data")
+    assert hasattr(cls, "covar_details")
+
+    # assert x_data, y_data
+    tmp_xdata = cls.x_data.values
+    tmp_x_interrogate = train_X_interrogate.values
+    for i in range(2):
+        assert cls.y_data["Response"].iloc[i] == train_Y[i,0].item()
+        for j in range(3):
+            assert tmp_xdata[i,j] == tmp_x_interrogate[i,j]
+
 
 
 @pytest.mark.parametrize(

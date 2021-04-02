@@ -5,6 +5,10 @@ from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.means import ConstantMean
 from gpytorch.models import ExactGP
 
+from creative_project.transformed_kernel_models.transformation import (
+    GP_kernel_transform,
+)
+
 
 class SimpleCustomMaternGP(ExactGP, GPyTorchModel):
     """
@@ -13,9 +17,12 @@ class SimpleCustomMaternGP(ExactGP, GPyTorchModel):
 
     _num_outputs = 1  # to inform GPyTorchModel API
 
-    def __init__(self, train_X, train_Y, nu):
+    def __init__(self, train_X, train_Y, nu, GP_kernel_mapping_covar_identification):
         # squeeze output dim before passing train_Y to ExactGP
         super().__init__(train_X, train_Y.squeeze(-1), GaussianLikelihood())
+        self.GP_kernel_mapping_covar_identification = (
+            GP_kernel_mapping_covar_identification
+        )
         self.mean_module = ConstantMean()
 
         if nu is not None:
@@ -33,5 +40,8 @@ class SimpleCustomMaternGP(ExactGP, GPyTorchModel):
 
     def forward(self, x):
         mean_x = self.mean_module(x)
-        covar_x = self.covar_module(x)
+        covar_x = self.covar_module(
+            GP_kernel_transform(x, self.GP_kernel_mapping_covar_identification)
+        )
+        # covar_x = self.covar_module(x)
         return MultivariateNormal(mean_x, covar_x)

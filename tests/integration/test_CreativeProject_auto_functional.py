@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 import torch
 import numpy as np
@@ -24,7 +25,7 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
 
     # define response function
     def f(x):
-        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+        return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
     cc = CreativeProject(covars=x_input, model=model_type)
@@ -71,7 +72,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
 
     # define response function
     def f(x):
-        return (-(6 * x[0] - 2) ** 2 * torch.sin(12 * x[0] - 4))*(-(6 * x[1] - 2) ** 2 * torch.sin(12 * x[1] - 4))
+        return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (-(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
 
     # initialize class instance
     cc = CreativeProject(covars=covars, model=model_type)
@@ -125,7 +126,7 @@ def test_CreativeProject_auto_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num
 
     # define response function
     def f(x):
-        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+        return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
     cc = CreativeProject(covars=x_input)
@@ -172,8 +173,8 @@ def test_CreativeProject_auto_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num
 # test also printed stuff
 @pytest.mark.parametrize("max_iter, max_resp, covar_max_resp",
                          [
-                             [2, "-9.09297e-01", "5.00000e-01"],
-                             [10, "4.81834e+00", "8.02452e-01"]
+                             [2, "-9.09297e-01", 0.500000],
+                             [10, "4.81834e+00", 0.802452]
                          ])
 def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_resp, capsys):
     """
@@ -185,7 +186,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
 
     # define response function
     def f(x):
-        return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+        return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
     cc = CreativeProject(covars=x_input)
@@ -201,7 +202,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
     outtext = ""
     for it in range(1,max_iter+1):
         outtext += "ITERATION " + str(it) + ": Identify new covariate datapoint... Get response for new datapoint... Successfully trained GP model... Finish iteration...\n"
-    outtext += "Maximum response value Y (iteration " + str(it) + "): max_Y =" + max_resp + "\n"
-    outtext += "Corresponding covariate values resulting in max_Y: [" + covar_max_resp + "]\n"
+    outtext += "Maximum response value Y (iteration " + str(it) + "): max_Y = " + max_resp + "\n"
+    outtext += "Corresponding covariate values resulting in max_Y:\n\t" + pd.DataFrame({"covar0": [covar_max_resp]}).to_string() + "\n"
 
     assert captured.out == outtext

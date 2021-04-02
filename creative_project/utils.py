@@ -1,17 +1,30 @@
 import numpy as np
+import pandas as pd
 import torch
+from creative_project.data_format_mappings import (
+    pretty2tensor_covariate,
+    pretty2tensor_response,
+)
 
 
-def __get_covars_from_kwargs(covars):
+def __get_covars_from_kwargs(covars, **kwargs):
     """
     get covariates of observation from "covars" and returns in tensor format. "covars" originates as kwarg in
     _campaign.tell. Validation of content of covars is done in _observe._get_and_verify_covars_input
-    :param covars (list or torch tensor of size 1 X num_covars):
+    :param covars (list or torch tensor of size 1 X num_covars or pandas dataframe):
+    :param kwargs if provided covars in pandas format:
+        - covar_details (dict of dicts): contains a dict with details about each covariate wuth initial guess and
+        range as well as information about which column it is mapped to in train_X dataset used by the Gaussian
+        process model behind the scenes and data type of covariate. Includes one-hot encoding for categorical
+        variables. For one-hot encoded categorical variables uses the naming convention
+        <covariate name>_<option name>
+        - covar_mapped_names (list): names of mapped covariates
+        - device (torch device)
     :return: covars_candidate_float_tensor (tensor of size 1 X num_covars)
     """
 
     # verify covars datatype
-    if not isinstance(covars, (list, torch.DoubleTensor)):
+    if not isinstance(covars, (list, torch.DoubleTensor, pd.DataFrame)):
         raise Exception(
             "creative_project.utils.__get_covars_from_kwargs: datatype of provided 'covars' is not allowed."
             "Only accept types 'list' and 'torch.DoubleTensor', got "
@@ -23,6 +36,23 @@ def __get_covars_from_kwargs(covars):
 
         try:
             covars_candidate_float_tensor = torch.tensor([covars], dtype=torch.double)
+        except Exception as e:  # to catch any error in reading the provided "covars"
+            raise e
+
+    # handle the case where a pandas dataframe is provided
+    elif isinstance(covars, pd.DataFrame):
+
+        try:
+            covar_details = kwargs.get("covar_details")
+            covar_mapped_names = kwargs.get("covar_mapped_names")
+            device = kwargs.get("device")
+
+            covars_candidate_float_tensor = pretty2tensor_covariate(
+                x_pandas=covars,
+                covar_details=covar_details,
+                covar_mapped_names=covar_mapped_names,
+                device=device,
+            )
         except Exception as e:  # to catch any error in reading the provided "covars"
             raise e
 
@@ -38,11 +68,73 @@ def __get_covars_from_kwargs(covars):
         else:
             raise Exception(
                 "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'."
-                " Was expecting torch tensor of size (1,<num_covariates>) but received one of size "
-                + str(covars_size_list)
+                " Was expecting torch tensor of size (1,<num_covariates>) but received one of size ("
+                + ", ".join([str(ent) for ent in covars_size_list])
+                + ")."
             )
 
     return covars_candidate_float_tensor
+
+
+def __get_response_from_kwargs(response, **kwargs):
+    """
+    get response of observation from "response" and returns in tensor format. "response" originates as kwarg in
+    _campaign.tell. Validation of response is done in _observe._get_and_verify_response_input
+    :param response (list or torch tensor of size 1 X 1 or pandas dataframe):
+    :param kwargs:
+        - device (torch device)
+    :return: response_candidate_float_tensor (tensor of size 1 X 1)
+    """
+
+    # verify response datatype
+    if not isinstance(response, (list, torch.DoubleTensor, pd.DataFrame)):
+        raise Exception(
+            "creative_project.utils.__get_response_from_kwargs: datatype of provided 'response' is not allowed."
+            "Only accept types 'list' and 'torch.DoubleTensor', got "
+            + str(type(response))
+        )
+
+    # handle case when a list is provided
+    if isinstance(response, list):
+
+        try:
+            device = kwargs.get("device")
+
+            response_candidate_float_tensor = torch.tensor(
+                [response], dtype=torch.double, device=device
+            )
+        except Exception as e:  # to catch any error in reading the provided "covars"
+            raise e
+
+    # handle the case where a pandas dataframe is provided
+    elif isinstance(response, pd.DataFrame):
+
+        try:
+            device = kwargs.get("device")
+            response_candidate_float_tensor = pretty2tensor_response(
+                y_pandas=response, device=device
+            )
+        except Exception as e:  # to catch any error in reading the provided "covars"
+            raise e
+
+    # handle the case where a torch tensor is provided
+    elif isinstance(response, torch.DoubleTensor):
+
+        # get size of response
+        resp_size_list = list(response.size())
+
+        # check that there's only a single entry in response
+        if resp_size_list[0] == 1 and resp_size_list[1] == 1:
+            response_candidate_float_tensor = response
+        else:
+            raise Exception(
+                "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'."
+                " Was expecting torch tensor of size (1,1) but received one of size ("
+                + ", ".join([str(ent) for ent in resp_size_list])
+                + ")."
+            )
+
+    return response_candidate_float_tensor
 
 
 class DataSamplers:

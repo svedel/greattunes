@@ -1,8 +1,10 @@
 from botorch.fit import fit_gpytorch_model
-from botorch.models import SingleTaskGP
 from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from creative_project.custom_models.simple_matern_model import SimpleCustomMaternGP
+from creative_project.transformed_kernel_models.GPregression import (
+    SingleTaskGP_transformed,
+)
 
 
 def _set_GP_model(self, **kwargs):
@@ -28,7 +30,9 @@ def _set_GP_model(self, **kwargs):
     if self.model["model_type"] == "SingleTaskGP":
 
         # set up the model
-        model_obj = SingleTaskGP(self.train_X, self.train_Y)
+        model_obj = SingleTaskGP_transformed(
+            self.train_X, self.train_Y, self.GP_kernel_mapping_covar_identification
+        )
 
         # the likelihood
         lh = model_obj.likelihood
@@ -42,7 +46,9 @@ def _set_GP_model(self, **kwargs):
         nu = kwargs.get("nu")
 
         # set up the model
-        model_obj = SimpleCustomMaternGP(self.train_X, self.train_Y, nu)
+        model_obj = SimpleCustomMaternGP(
+            self.train_X, self.train_Y, nu, self.GP_kernel_mapping_covar_identification
+        )
 
         # likelihood
         lh = GaussianLikelihood()

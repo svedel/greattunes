@@ -2,6 +2,7 @@ import functools
 import pytest
 import torch
 from creative_project import CreativeProject
+from creative_project.data_format_mappings import tensor2pretty_response, tensor2pretty_covariate
 
 
 @pytest.mark.parametrize(
@@ -651,7 +652,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_response_wor
         [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 2.2]], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([1.5000], dtype=torch.float64)', but got 'tensor([[1.8000, 2.2000]], dtype=torch.float64)'"],
         [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, ['b', 12.5], "too many dimensions 'str'"],
         [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8, 0.2, 103, 12]], dtype=torch.double), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  1.1355,  -3.1246, 105.4396], dtype=torch.float64)', but got 'tensor([[  0.8000,   0.2000, 103.0000,  12.0000]], dtype=torch.float64)'"],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([0.8, 0.2, 103], dtype=torch.double), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size [3]"],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([0.8, 0.2, 103], dtype=torch.double), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size (3)."],
         [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, [1, 2, 'a'], "must be real number, not str"]
     ]
 )
@@ -698,14 +699,14 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_fails(covars
 @pytest.mark.parametrize(
     "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, kwarg_response, error_msg",
     [
-        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8, 2.2]], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],  # the case where no data is available (starts by training model)
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, torch.tensor([[1.8, 2.2]], dtype=torch.double), "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (1, 2)."],  # the case where no data is available (starts by training model)
         [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, ['a'], "too many dimensions 'str'"],  # the case where no data is available (starts by training model)
         [[(1, 0.5, 1.5)], "SingleTaskGP", None, None, 0, 0, 0, [12, 'a'], "must be real number, not str"],  # the case where no data is available (starts by training model)
-        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 2.2]], dtype=torch.double), "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[1.8, 2.2]], dtype=torch.double), "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (1, 2)."],
         [[(1, 0.5, 1.5)], "SingleTaskGP", torch.tensor([[0.8]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, ['b', 12.5], "too many dimensions 'str'"],
         [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, [0.8, 'b'], "must be real number, not str"],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8], [103]], dtype=torch.double), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size [2, 1]"],
-        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([0.8, 103], dtype=torch.double), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size [2]"],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([[0.8], [103]], dtype=torch.double), "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (2, 1)."],
+        [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "SingleTaskGP", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, torch.tensor([0.8, 103], dtype=torch.double), "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (2)."],
         [[(1, 0.5, 1.5), (-3, -4, 1.1), (100, 98.0, 106.7)], "Custom", torch.tensor([[0.8, 0.2, 102]], dtype=torch.double), torch.tensor([[22]], dtype=torch.double), 1, 1, 1, [1, 'a'], "must be real number, not str"]
     ]
 )
@@ -832,6 +833,17 @@ def test_CreativeProject_integration_ask_tell_ask_works(covars, model_type, trai
     # assert that the right elements have been added to the response observation
     assert cc.train_Y[-1, 0].item() == resp_tensor[0, 0].item()
 
+    # assert that ONE observation has been added for x_data
+    assert cc.x_data.shape[0] == 1
+
+    for i in range(cc.x_data.shape[1]):
+        col = cc.x_data.columns[i]
+        cc.x_data[col].iloc[0] == candidate_tensor[0, i].item()
+
+    # assert that ONE observation has been added to y_data
+    assert cc.y_data.shape[0] == 1
+    assert cc.y_data["Response"].iloc[0] == resp_tensor[0, 0].item()
+
 
 @pytest.mark.parametrize(
     "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter",
@@ -952,6 +964,8 @@ def test_CreativeProject_integration_ask_tell_tell_overwrite_covar_resp_works(co
     cc.train_X = train_X
     cc.proposed_X = train_X
     cc.train_Y = train_Y
+    cc.x_data = tensor2pretty_covariate(train_X_sample=train_X, covar_details=cc.covar_details)
+    cc.y_data = tensor2pretty_response(train_Y_sample=train_Y)
     cc.model["covars_proposed_iter"] = covars_proposed_iter
     cc.model["covars_sampled_iter"] = covars_sampled_iter
     cc.model["response_sampled_iter"] = response_sampled_iter
@@ -1010,18 +1024,23 @@ def test_CreativeProject_integration_ask_tell_tell_overwrite_covar_resp_works(co
 
     # assert that ONLY ONE new observation has been added for covariates
     assert cc.train_X.size()[0] == train_X.size()[0] + 1
+    assert cc.x_data.shape[0] == cc.train_X.size()[0]
 
     # assert that the right elements have been added to the covariate observation (should be candidate_tensor with
     # "add_one" applied twice, i.e. adding 2.0 to each entry)
     for i in range(cc.train_X.size()[1]):
         assert cc.train_X[-1, i].item() == candidate_tensor[0, i].item() + 2.0
+        col = cc.x_data.columns[i]
+        assert cc.x_data[col].iloc[-1] == candidate_tensor[0, i].item() + 2.0
 
     # assert that ONLY ONE new observation has been added for the response
     assert cc.train_Y.size()[0] == train_Y.size()[0] + 1
+    assert cc.y_data.shape[0] == train_Y.size()[0] + 1
 
     # assert that the right elements have been added to the response observation (should be resp_tensor with "add_one"
     # applied twice, i.e. adding 2.0 to each entry)
     assert cc.train_Y[-1, 0].item() == resp_tensor[0, 0].item() + 2.0
+    assert cc.y_data["Response"].iloc[-1] == resp_tensor[0, 0].item() + 2.0
 
 
 # test that model is updated (overwritten)
@@ -1090,6 +1109,14 @@ def test_CreativeProject_integration_ask_tell_ask_works(covars, model_type, trai
     # run the tell method
     cc.tell()
 
+    # test that data is added to pretty formats
+    assert cc.x_data.shape[0] == 1
+    for i in range(candidate_tensor.size()[1]):
+        col = cc.x_data.columns[i]
+        assert cc.x_data[col].iloc[-1] == candidate_tensor[0, i].item() + 1
+    assert cc.y_data.shape[0] == 1
+    assert cc.y_data["Response"].iloc[-1] == resp_tensor[0, 0].item() + 1
+
     # grab the model state
     surrogate_model1 = cc.model["model"]
 
@@ -1101,6 +1128,16 @@ def test_CreativeProject_integration_ask_tell_ask_works(covars, model_type, trai
 
     # run the tell method AGAIN
     cc.tell()
+
+    # test that new rows are added to pretty format data
+    print(candidate_tensor)
+    print(cc.x_data)
+    assert cc.x_data.shape[0] == 2
+    for i in range(candidate_tensor.size()[1]):
+        col = cc.x_data.columns[i]
+        assert cc.x_data[col].iloc[-1] == candidate_tensor[0, i].item() + 2
+    assert cc.y_data.shape[0] == 2
+    assert cc.y_data["Response"].iloc[-1] == resp_tensor[0, 0].item() + 2
 
     # grab the model state
     surrogate_model2 = cc.model["model"]
@@ -1139,7 +1176,7 @@ def test_CreativeProject_integration_ask_tell_ask_tell_randon_start_works(train_
     Monkeypatching user input
     """
 
-    covars = [(1, 0, 2), (1.5, -1, 3), (22, 15, 27)]
+    covars = [(1, 0, 2), (1.5, -1, 3), (22.0, 15, 27)]
     num_initial_random = 1
 
     # initialize the class
