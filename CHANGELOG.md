@@ -7,15 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] - 
 
-Version for this release: 0,0.4
+Version for this release: 0.0.4
 
 ### Added
+* Functionality to use integer and categorical variables
+* Named covariates
+* Pretty data format for covariates (`x_data`) and response (`y_data`) which keeps track of observations in their
+natural data types (`float` for doubles, `int` for integers and `str` for categorical variables).
 
 ### Changed
+In `_best_response.current_best`: switched to storing in pretty user-facing format (`pandas` df), updated output 
+slightly
 
 ### Deprecated
 
 ### Removed
+If using `ask`-`tell`-approach: reporting observations via `covars` and `response` entries to `tell`-method cannot be
+done via the backend data format (`torch` tensor of same format as `train_X` and `train_Y`). Instead, use the same 
+user-facing format (in `pandas` df) to report all entries, including integer and categorical variables in their natural
+data types (`int` and `str`).
 
 ### Fixed
 
