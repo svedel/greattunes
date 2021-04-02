@@ -2,6 +2,10 @@
 Methods for running campaigns. These are the key user-facing methods
 """
 import torch
+from creative_project.data_format_mappings import (
+    tensor2pretty_covariate,
+    tensor2pretty_response,
+)
 
 
 def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=None):
@@ -83,11 +87,26 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
 
         # store candidate, update counters
         if self.proposed_X is None:  # use proposed_X as proxy also for train_X
-            self.proposed_X = candidate
+
+            # the backend data format
+            self.proposed_X = candidate  # keeps track of the proposal made
             self.train_X = candidate
+
+            # the pretty data format for users
+            self.x_data = tensor2pretty_covariate(
+                train_X_sample=candidate, covar_details=self.covar_details
+            )
         else:
+            # the backend data format
             self.proposed_X = torch.cat((self.proposed_X, candidate), dim=0)
             self.train_X = torch.cat((self.train_X, candidate), dim=0)
+
+            # the pretty data format for users
+            self.x_data = self.x_data.append(
+                tensor2pretty_covariate(
+                    train_X_sample=candidate, covar_details=self.covar_details
+                )
+            )
 
         self.model["covars_proposed_iter"] += 1
         self.model["covars_sampled_iter"] += 1
@@ -97,10 +116,21 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
         # get response and store
         response = self._get_and_verify_response_input()
         if self.train_Y is None:
+
+            # the backend data format
             self.train_Y = response
+
+            # the pretty data format for users
+            self.y_data = tensor2pretty_response(train_Y_sample=response)
         else:
-            # self.train_Y.append(response)
+            # the backend data format
             self.train_Y = torch.cat((self.train_Y, response), dim=0)
+
+            # the pretty data format for users
+            self.y_data = self.y_data.append(
+                tensor2pretty_response(train_Y_sample=response)
+            )
+
         self.model["response_sampled_iter"] += 1
 
         # update surrogate model
