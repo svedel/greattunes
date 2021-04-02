@@ -106,6 +106,16 @@ def test_current_best_univariate_unit(tmp_best_response_class, response_sampled_
 
     # set attribute
     cls.model = {"response_sampled_iter": response_sampled_iter}
+    cls.covar_details = {}
+    for i in range(len(covars_best)):
+        tmp_key = "covar" + str(i)
+        cls.covar_details[tmp_key] = {"guess": covars_best[i],
+                                      "min": covars_best[i]-1,
+                                      "max": covars_best[i]+1,
+                                      "type": float,
+                                      "columns": i,
+                                      "pandas_column": i}
+    cls.total_num_covars = len(covars_best)
 
     # set best response variables
     cls.covars_best_response_value = torch.tensor([covars_best], dtype=torch.double)
@@ -116,8 +126,8 @@ def test_current_best_univariate_unit(tmp_best_response_class, response_sampled_
 
     # assert
     for it in range(len(covars_best)):
-        assert cls.best["covars"][it] == covars_best[it]
-    assert cls.best["response"] == response_best[0]
+        assert cls.best["covars"].values[0][it] == covars_best[it]
+    assert cls.best["response"].values[0][0] == response_best[0]
     assert cls.best["iteration_when_recorded"] == response_sampled_iter
 
 
