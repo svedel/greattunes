@@ -205,6 +205,8 @@ def tmp_modeling_class():
             self.train_X = None
             self.proposed_X = None
             self.train_Y = None
+            self.x_data = None
+            self.y_data = None
 
             self.model = {"model_type": None,
                           "likelihood": None,
@@ -299,3 +301,51 @@ def covar_details_covar_mapped_names():
     covar_mapped_names = ['a', 'b', 'c_red', 'c_green', 'c_blue']
 
     return covar_details, covar_mapped_names
+
+
+@pytest.fixture(scope="module")
+def covar_details_mapped_covar_mapped_names_tmp_observe_class():
+    """
+    covar_details and covar_mapped_names corresponding to the sample problems being tested by tmp_observe_class in
+    tests/unit/test_observe_unit.py
+    """
+
+    covar_details = {
+        "covar0": {
+            "guess": 0.1,
+            "min": -1.0,
+            "max": 2.0,
+            "type": float,
+            "columns": 0,
+            "pandas_column": 0,
+        },
+        "covar1": {
+            "guess": 2.5,
+            "min": -1.0,
+            "max": 3.0,
+            "type": float,
+            "columns": 1,
+            "pandas_column": 1,
+        },
+        "covar2": {
+            "guess": 12,
+            "min": 0,
+            "max": 250,
+            "type": float,
+            "columns": 2,
+            "pandas_column": 2,
+        },
+        "covar3": {
+            "guess": 0.22,
+            "min": -2.0,
+            "max": 1.0,
+            "type": float,
+            "columns": 3,
+            "pandas_column": 3,
+        },
+    }
+
+    covar_mapped_names = ["covar0", "covar1", "covar2", "covar3"]
+    sorted_pandas_columns = ["covar0", "covar1", "covar2", "covar3"]
+
+    return covar_details, covar_mapped_names, sorted_pandas_columns
