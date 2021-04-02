@@ -264,9 +264,9 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class,
     """
 
     # special case for python version 3.7 (handled via new keyword argument to pytest)
-    if pythontestvers == "3.7" and covariate_str != "1, a, 2, 3":
-        # removes the '' from the error message
-        error_msg = error_msg[:-2]
+    # if pythontestvers == "3.7" and covariate_str != "1, a, 2, 3":
+    #     # removes the '' from the error message
+    #     error_msg = error_msg[:-2]
 
     # device for torch tensor definitions
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
