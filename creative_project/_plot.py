@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import copy
 import gpytorch
 import torch
+import pandas as pd
+from creative_project.data_format_mappings import tensor2pretty_covariate
 
 
 def _covars_ref_plot_1d(self):
@@ -107,7 +109,11 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
         and self.sampling["response_func"] is not None
     ):
         include_resp = True
-        actual_resp = self.sampling["response_func"](Xnew)
+        #Xnew_df = tensor2pretty_covariate(train_X_sample=Xnew, covar_details=self.covar_details)
+        #actual_resp = self.sampling["response_func"](Xnew)
+        #actual_resp = self.sampling["response_func"](Xnew_df)
+        colname = list(self.covar_details.keys())[0]
+        actual_resp = [self.sampling["response_func"](pd.DataFrame({colname: [x.item()]})) for x in Xnew]
 
     # acquisition function
     acq_func = self.acq_func["object"](Xnew.unsqueeze(-1).unsqueeze(-1)).detach()
@@ -131,7 +137,7 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
 
     # Add actual response (if known)
     if include_resp:
-        ax1.plot(Xnew.numpy(), actual_resp.numpy(), "--k", label="Actual Response")
+        ax1.plot(Xnew.numpy(), actual_resp, "--k", label="Actual Response")
 
     # Shade between the lower and upper confidence bounds
     ax1.fill_between(
