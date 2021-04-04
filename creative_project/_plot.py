@@ -3,7 +3,6 @@ import copy
 import gpytorch
 import torch
 import pandas as pd
-from creative_project.data_format_mappings import tensor2pretty_covariate
 
 
 def _covars_ref_plot_1d(self):
