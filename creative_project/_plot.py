@@ -108,11 +108,14 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
         and self.sampling["response_func"] is not None
     ):
         include_resp = True
-        #Xnew_df = tensor2pretty_covariate(train_X_sample=Xnew, covar_details=self.covar_details)
-        #actual_resp = self.sampling["response_func"](Xnew)
-        #actual_resp = self.sampling["response_func"](Xnew_df)
+        # Xnew_df = tensor2pretty_covariate(train_X_sample=Xnew, covar_details=self.covar_details)
+        # actual_resp = self.sampling["response_func"](Xnew)
+        # actual_resp = self.sampling["response_func"](Xnew_df)
         colname = list(self.covar_details.keys())[0]
-        actual_resp = [self.sampling["response_func"](pd.DataFrame({colname: [x.item()]})) for x in Xnew]
+        actual_resp = [
+            self.sampling["response_func"](pd.DataFrame({colname: [x.item()]}))
+            for x in Xnew
+        ]
 
     # acquisition function
     acq_func = self.acq_func["object"](Xnew.unsqueeze(-1).unsqueeze(-1)).detach()
