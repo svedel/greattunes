@@ -82,13 +82,7 @@ def _set_GP_model(self, **kwargs):
                 model_obj.load_state_dict(pretrained_dict)
 
     # fit the underlying model
-    print("mll before")
-    print(ll)
-
     fit_gpytorch_model(ll)
-
-    print("mll after")
-    print(ll)
 
     # return model + likelihood
     self.model["model"] = model_obj
