@@ -78,13 +78,11 @@ def _set_GP_model(self, **kwargs):
                 model_dict.update(pretrained_dict)
 
                 # Load parameters without standard shape checking.
-                #model_obj.load_strict_shapes(False)
+                model_obj.load_strict_shapes(False)
 
                 # load the new state dict
-                #model_obj.load_state_dict(pretrained_dict)
+                model_obj.load_state_dict(pretrained_dict)
 
-                #if self.model["model_type"] == "Custom":
-                #    print(pretrained_dict)
 
     # fit the underlying model
     fit_gpytorch_model(ll)
