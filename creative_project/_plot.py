@@ -44,13 +44,14 @@ def predictive_results(self, pred_X):
     # set model to produce predictive results
     model_local = copy.deepcopy(self.model["model"])  # self.model["model"]
     model_local.eval()
-    likelihood_local = copy.deepcopy(
-        self.model["likelihood"]
-    )  # self.model["likelihood"]
-    likelihood_local.eval()
+    model_local.likelihood.eval()
+    # likelihood_local = copy.deepcopy(
+    #     self.model["likelihood"]
+    # )  # self.model["likelihood"]
+    # likelihood_local.eval()
 
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
-        observed_pred = likelihood_local(model_local(pred_X))
+        observed_pred = model_local.likelihood(model_local(pred_X))#likelihood_local(model_local(pred_X))
 
     # Get upper and lower confidence bounds, mean
     lower_bound, upper_bound = observed_pred.confidence_region()
@@ -100,6 +101,11 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
 
     # Gaussian process results
     mean_result, lower_bound, upper_bound = self.predictive_results(Xnew)
+
+    print("lower bound")
+    print(lower_bound)
+    print("upper bound")
+    print(upper_bound)
 
     # get actual response if this is a known function
     include_resp = False
