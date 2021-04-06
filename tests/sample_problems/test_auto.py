@@ -9,7 +9,7 @@ from creative_project import CreativeProject
     [
         [10, 4.81856, 5e-2, "SingleTaskGP"],
         [50, 6.02073, 1e-3, "SingleTaskGP"],
-        [50, 5.99716, 7e-3, "Custom"],
+        [50, 5.99716, 9e-3, "Custom"],
     ]
 )
 def test_sample_problems_auto_1d_maximization(max_iter, max_response, error_lim, model_type, capsys):
@@ -55,7 +55,7 @@ def test_sample_problems_auto_1d_maximization(max_iter, max_response, error_lim,
         [50, 1e-12, None, 2, 1.5, 0.5, "SingleTaskGP"],  # test that iteration stops if relative improvement in one step is below rel_tol
         [50, 1e-12, None, 2, 1.5, 0.5, "Custom"],  # test that iteration stops if relative improvement in one step is below rel_tol
         [50, 1e-10, 5, 8, 2e-1, 0.07, "SingleTaskGP"],  # same as second case above but with realistic rel_tol
-        [50, 1e-10, 5, 12, 9e-2, 0.04, "Custom"],  # same as second case above but with realistic rel_tol
+        [50, 1e-10, 5, 15, 9e-2, 0.04, "Custom"],  # same as second case above but with realistic rel_tol
     ]
 )
 def test_sample_problems_auto_1d_maximization_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num_iterations_exp,

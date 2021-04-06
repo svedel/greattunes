@@ -64,7 +64,7 @@ def _set_GP_model(self, **kwargs):
     # add stored model if present
     if "model" in self.model:
         if self.model["model"] is not None:
-            if self.model["model"] != "Custom":
+            if self.model["model_type"] != "Custom":
                 if self.model["model"].state_dict() is not None:
 
                     model_dict = model_obj.state_dict()

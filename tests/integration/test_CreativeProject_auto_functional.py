@@ -10,7 +10,7 @@ from creative_project import CreativeProject
     [
         [10, 4.81856, 5e-2, "SingleTaskGP"],
         [30, 6.02073, 1e-3, "SingleTaskGP"],
-        [10, 5.49629, 5e-2, "Custom"],
+        [10, 5.49629, 0.51, "Custom"],
         [50, 6.02073, 2.5e-2, "Custom"],
     ]
 )

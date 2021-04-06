@@ -8,7 +8,7 @@ from creative_project import CreativeProject
     [
         [10, 4.81856, 5e-2, "SingleTaskGP"],
         [50, 6.02073, 1e-3, "SingleTaskGP"],
-        [50, 5.99716, 7e-3, "Custom"],
+        [50, 5.99716, 9e-3, "Custom"],
     ]
 )
 def test_sample_problems_asktell_1d_maximization(max_iter, max_response, error_lim, model_type, capsys):
