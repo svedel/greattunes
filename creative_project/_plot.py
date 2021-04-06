@@ -102,11 +102,6 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
     # Gaussian process results
     mean_result, lower_bound, upper_bound = self.predictive_results(Xnew)
 
-    print("lower bound")
-    print(lower_bound)
-    print("upper bound")
-    print(upper_bound)
-
     # get actual response if this is a known function
     include_resp = False
     if (
