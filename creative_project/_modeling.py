@@ -64,24 +64,25 @@ def _set_GP_model(self, **kwargs):
     # add stored model if present
     if "model" in self.model:
         if self.model["model"] is not None:
-            if self.model["model"].state_dict() is not None:
+            if self.model["model"] != "Custom":
+                if self.model["model"].state_dict() is not None:
 
-                model_dict = model_obj.state_dict()
-                pretrained_dict = self.model["model"].state_dict()
+                    model_dict = model_obj.state_dict()
+                    pretrained_dict = self.model["model"].state_dict()
 
-                # filter unnecessary keys
-                pretrained_dict = {
-                    k: v for k, v in pretrained_dict.items() if k in model_dict
-                }
+                    # filter unnecessary keys
+                    pretrained_dict = {
+                        k: v for k, v in pretrained_dict.items() if k in model_dict
+                    }
 
-                # overwrite entries in the existing state dict
-                model_dict.update(pretrained_dict)
+                    # overwrite entries in the existing state dict
+                    model_dict.update(pretrained_dict)
 
-                # Load parameters without standard shape checking.
-                model_obj.load_strict_shapes(False)
+                    # Load parameters without standard shape checking.
+                    #model_obj.load_strict_shapes(False)
 
-                # load the new state dict
-                model_obj.load_state_dict(pretrained_dict)
+                    # load the new state dict
+                    model_obj.load_state_dict(pretrained_dict)
 
 
     # fit the underlying model
