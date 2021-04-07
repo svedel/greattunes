@@ -219,7 +219,7 @@ def _print_candidate_to_prompt(self, candidate):
     # create string
     input_request = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(
         index=False
-    )
+    ).replace("\n", "\n\t")
 
     return input_request
 

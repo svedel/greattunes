@@ -261,7 +261,7 @@ def test_observe_print_candidate_to_prompt_works_unit(tmp_observe_class, candida
     new_cand_names = [i + " (" + str(covar_details[i]["type"]) + ")" for i in list(cand_pretty.columns)]
     cand_pretty.columns = new_cand_names
 
-    outtext = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(index=False)
+    outtext = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(index=False).replace("\n", "\n\t")
 
     # assert
     assert input_request == outtext
