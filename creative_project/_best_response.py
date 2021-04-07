@@ -110,7 +110,7 @@ def current_best(self):
         + "{:.5e}".format(max_Y)
     )
     print(
-        "\tCorresponding covariate values resulting in max_Y:\n\t"
+        "Corresponding covariate values resulting in max_Y:\n\t"
         + max_X_df.to_string(index=False).replace("\n", "\n\t")
     )
 
