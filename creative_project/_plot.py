@@ -51,7 +51,9 @@ def predictive_results(self, pred_X):
     # likelihood_local.eval()
 
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
-        observed_pred = model_local.likelihood(model_local(pred_X))#likelihood_local(model_local(pred_X))
+        observed_pred = model_local.likelihood(
+            model_local(pred_X)
+        )  # likelihood_local(model_local(pred_X))
 
     # Get upper and lower confidence bounds, mean
     lower_bound, upper_bound = observed_pred.confidence_region()
