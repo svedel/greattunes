@@ -151,9 +151,25 @@ def _get_response_function_input(self):
     resp = self.sampling["response_func"](covars_pretty)
 
     # cast response as tensor
-    response_candidate_float_tensor = torch.tensor(
-        [[resp]], device=self.device, dtype=self.dtype
-    )
+    if isinstance(resp, (int, float, np.floating, np.integer)):
+        response_candidate_float_tensor = torch.tensor(
+            [[resp]], device=self.device, dtype=self.dtype
+        )
+    # for types list, numpy array take the last element
+    elif type(resp) in {list, np.ndarray}:
+        response_candidate_float_tensor = torch.tensor(
+            [resp[-1]], device=self.device, dtype=self.dtype
+        )
+    # for pandas take the last element from column "Response"
+    elif type(resp) == pd.DataFrame:
+        response_candidate_float_tensor = torch.tensor(
+            [[resp["Response"].iloc[-1]]], device=self.device, dtype=self.dtype
+        )
+    else:
+        raise Exception("creative_project._observe._get_response_function_input: response function provided does not"
+                        " return acceptable output types ('int','float','list','numpy.ndarray','pandas.DataFrame'), "
+                        " but returned " + str(type(resp)))
+
 
     return response_candidate_float_tensor
 
