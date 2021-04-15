@@ -162,7 +162,7 @@ def _get_response_function_input(self):
     elif type(resp) in {list, np.ndarray}:
         response_candidate_float_tensor = torch.tensor(
             [resp[-1]], device=self.device, dtype=self.dtype
-        )
+        ).reshape(1,1)
     # for pandas take the last element from column "Response"
     elif type(resp) == pd.DataFrame:
         response_candidate_float_tensor = torch.tensor(
