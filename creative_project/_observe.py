@@ -134,7 +134,10 @@ def _get_response_function_input(self):
     Assumes response is univariate.
     :input
         - self.train_X: latest proposed covariates
-        - self.sampling["response_func"]: the response function (applied to last row in self.train_X)
+        - self.sampling["response_func"]: the response function (applied to last row in self.train_X). The function must
+        accept a pandas data frame as input (in the format of the pretty data 'x_data' for the class) and must return a
+        single element as response; acceptable formats for return are: int, float, any numpy float, any numpy int, list,
+        numpy array, pandas dataframe (with response column named "Response").
     :return response_candidate_float_tensor (torch tensor): a 1x1 torch tensor with response to last datapoint
     """
 
