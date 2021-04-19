@@ -47,7 +47,7 @@ def __get_covars_from_kwargs(covars, **kwargs):
             covar_mapped_names = kwargs.get("covar_mapped_names")
             device = kwargs.get("device")
 
-            covars_candidate_float_tensor = pretty2tensor_covariate(
+            covars_candidate_float_tensor, _ = pretty2tensor_covariate(
                 x_pandas=covars,
                 covar_details=covar_details,
                 covar_mapped_names=covar_mapped_names,
