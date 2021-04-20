@@ -192,7 +192,7 @@ def plot_convergence(self):
     """
 
     # calculates the relative error
-    y = copy.deepcopy(self.train_Y)
+    y = copy.deepcopy(self.best_response_value)
     y_diff = y[1:] - y[:-1]
     y_rel = y_diff / y[1:]
 

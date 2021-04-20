@@ -84,6 +84,7 @@ def test_plot_convergence(custom_models_simple_training_data_4elements):
     class TmpClass:
         def __init__(self):
             self.train_Y = train_Y
+            self.best_response_value = train_Y
 
         from creative_project._plot import plot_convergence
 
