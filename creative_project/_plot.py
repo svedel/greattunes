@@ -224,7 +224,7 @@ def plot_best_objective(self):
 
     # build the plot
     fx, ax = plt.subplots(1, 1, figsize=(6, 4))
-    ax.plot(list(range(self.train_Y.shape[0])), self.train_Y.numpy(), "-b.")
+    ax.plot(list(range(self.train_Y.shape[0])), self.best_response_value.numpy(), "-b.")
     ax.set_xlabel("Iteration $n$")
     ax.set_ylabel("Best objective $y^{max}_n$ found up to iteration $n$")
 
