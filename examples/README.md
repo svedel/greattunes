@@ -32,6 +32,8 @@ File: `Example 2 - Iterative optimization of function, which can be sampled.ipyn
 
 In this example, a variant of the multivariate [Easom function](https://www.sfu.ca/~ssurjano/easom.html) is maximized using both the closed-loop approach of the `.auto`-method as well as the iterative approach of `.ask` and `.tell` methods. Similar to [Example 2](#Example-2:-Iterative-optimization-of-a-function,-which-can-be-sampled), the response function need not be explicitly defined for the iterative `.ask`-`.tell` methods to work, as long as the function can be sampled, the framework can be applied.
 
+Towards the end, one of the two covariates ($x_1$) is changed to being an integer only, and it is demonstrated how the framework is used to solve under these different circumstances than for continuous variables only.
+
 File: `Example 3 - Maximum of a multivariate function.ipynb`
 
 ### Example 4: Optimize a noisy, multivariate system
