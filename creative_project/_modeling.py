@@ -79,15 +79,14 @@ def _set_GP_model(self, **kwargs):
                     model_dict.update(pretrained_dict)
 
                     # Load parameters without standard shape checking.
-                    #model_obj.load_strict_shapes(False)
+                    # model_obj.load_strict_shapes(False)
 
                     # load the new state dict
                     model_obj.load_state_dict(pretrained_dict)
 
-
     # fit the underlying model
-    fit_gpytorch_model(ll)
-    #model_obj = _custom_model_fitter(model_obj, ll, self.train_X, epochs=50, lr=0.1)
+    # fit_gpytorch_model(ll)
+    model_obj = _custom_model_fitter(model_obj, ll, self.train_X, epochs=50, lr=0.1)
 
     # return model + likelihood
     self.model["model"] = model_obj
@@ -96,23 +95,24 @@ def _set_GP_model(self, **kwargs):
 
     return "Successfully trained GP model"
 
-# def _custom_model_fitter(model_obj, ll, train_X, **kwargs):
-#     """
-#     custom model fitting routine using stochastic gradient descend
-#     :param self:
-#     :param train_X:
-#     :param ll:
-#     :return:
-#     """
-#
-#     model_obj.train()
-#
-#     optimizer = SGD([{'params': model_obj.parameters()}], lr=kwargs.get("lr"))
-#     for epoch in range(kwargs.get("epochs")):
-#         optimizer.zero_grad()
-#         output = model_obj(train_X)
-#         loss = -ll(output, model_obj.train_targets)
-#         loss.backward()
-#         optimizer.step()
-#
-#     return model_obj
+
+def _custom_model_fitter(model_obj, ll, train_X, **kwargs):
+    """
+    custom model fitting routine using stochastic gradient descend
+    :param self:
+    :param train_X:
+    :param ll:
+    :return:
+    """
+
+    model_obj.train()
+
+    optimizer = SGD([{"params": model_obj.parameters()}], lr=kwargs.get("lr"))
+    for epoch in range(kwargs.get("epochs")):
+        optimizer.zero_grad()
+        output = model_obj(train_X)
+        loss = -ll(output, model_obj.train_targets)
+        loss.backward()
+        optimizer.step()
+
+    return model_obj
