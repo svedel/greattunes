@@ -30,7 +30,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ hashFiles('setup.py') }}-${{ hashFiles('dev_requirements.txt') }}-${{ hashFiles('requirements.txt') }}
+          key: ${{ hashFiles('setup.py') }}-${{ hashFiles('requirements-dev.txt') }}-${{ hashFiles('requirements.txt') }}
 
       - name: Install dependencies
         run: |
@@ -39,7 +39,7 @@ jobs:
           #pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
           pip install --upgrade setuptools wheel
           pip install --upgrade -r requirements.txt
-          pip install --upgrade -r dev_requirements.txt
+          pip install --upgrade -r requirements-dev.txt
           pip install flake8 pytest
       - name: linting
         run: |
