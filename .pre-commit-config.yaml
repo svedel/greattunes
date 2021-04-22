@@ -16,7 +16,7 @@ repos:
   - id: isort
     name: isort
     language: system
-    entry: bin/sh -c "isort creative_project/**/*.py --check-only"
+    entry: isort creative_project/**/*.py --check-only
     types: [python]
 
   - id: pytest
