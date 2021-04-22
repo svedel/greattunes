@@ -524,7 +524,7 @@ A number of different functions exist, with some typical ones provided in Peter 
 [Tutorial on Bayesian Optimization](https://arxiv.org/pdf/1807.02811.pdf). They typically balance exploration and 
 exploitation in different ways.
 
-## References
+### References
 A list of Bayesian optimization references for later use
 * [Wikipedia entry on Bayesian optimization](https://en.wikipedia.org/wiki/Bayesian_optimization)
 * [borealis.ai](https://www.borealisai.com/en/blog/tutorial-8-bayesian-optimization/)

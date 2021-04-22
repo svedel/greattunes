@@ -77,7 +77,7 @@ and perform style corrections if needed
 
 ### Pre-commit hooks
 Code checks are run before each commit via pre-commit git hooks. These include linting (`flake8`), code checks 
-(`black`), import style checks (`isort`) and unit tests (all tests in `tests/unit').
+(`black`), import style checks (`isort`) and unit tests (all tests in `tests/unit`).
 
 To execute pre-commit hooks, the package `pre-commit` has been added to the development requirements [`requirements-dev.txt`](requirements-dev.txt).
 This runs all hooks configured in [`.pre-commit-config.yaml`](.pre-commit-config.yaml). Beware that for any changes to 
