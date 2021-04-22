@@ -9,10 +9,10 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 
 ## Features
 
+* Can optimize across **continuous**, **integer** and **categorical** covariate variables.
 * Optimization of either *known* or *unknown* functions. The allows for optimization of e.g. real-world experiments 
   without specifically requiring a model of the system be defined a priori.
-* Focus on ease of use: only few lines of code required for full Bayesian optimization.
-* Simple interface.
+* Simple interface with focus on ease of use: only few lines of code required for full Bayesian optimization.
 * Erroneous observations of either covariates or response can be overridden during optimization. 
 * Well-documented code with detailed end-to-end examples of use, see [examples](#examples).
 * Optimization can start from scratch or repurpose existing data.
@@ -23,6 +23,10 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 * **Multivariate covariates, univariate system response:** It is assumed that input covariates (the independent 
   variables) can be either multivariate or univariate, while the system response (the dependent variable) is only 
   univariate.
+* **Optimizing across continuous, integer and categorical covariates:** Problems can depend on any of these types of 
+  variables, in any combination. Special attention is given to implementation of integer and categorical variables
+  which are handled via the method of Garrido-Merchán and Hernandéz-Lobato (E.C. Garrido-Merchán and D. Hernandéz-Lobato: Dealing with categorical and integer-valued variables in Bayesian
+Optimization with Gaussian processes, Neurocomputing, see [References](##References)).
 * **System-generated or manual input:** Observations of covariates and responses during optimization can be provided 
   both programmatically or manually via prompt input.
 * **Optimizes known and unknown response functions:** Both cases where the response function can be formulated 
@@ -156,15 +160,28 @@ been to use the `.ask`-`.tell` methods instead of `.auto`.
 
 ### Key attributes
 
-The following key attributes are stored for each optimization as part of the instantiated class 
+#### User-facing attributes
+The following key attributes are stored for each optimization as part of the instantiated class. These primary
+data structures for users are stored in `pandas` dataframes in pretty format.
 
 | Attribute | Comments |
 | --------- | -------- |
-| `train_X` | All *observed* covariates with dimensions `num_observations` X `num_covariates`. |
+| `x_data` | All *observed* covariates with dimensions, one row per observation. If no names have been added to the covariates they will take the naems "covar0", "covar1", ... . Dimensions `num_observations` X `num_covariates`. |
+| `y_data` | All *observed* responses corresponding to the covariate points (rows) in `x_data`. Dimensions `num_observations` X 1. |
+| `best_response` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. |
+| `covars_best_response` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response` generated the same row in `best_response`. Dimensions `num_observations` X `num_covariates`. |
+
+#### Backend attributes
+In the backend the framework makes use of different data structures based on the `tensor` structure from `torch` which 
+also handles one-hot encoding of categorical variables. The key backend attributes are listed in the table below.
+
+| Attribute | Comments |
+| --------- | -------- |
+| `train_X` | All *observed* covariates with dimensions `num_observations` X `num_covariates`. Backend equivalent to `x_data`. |
 | `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions `num_observations` X `num_covariates`. |
-| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` X 1. |
-| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. |
-| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. |    
+| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` X 1. Backend equivalent to `y_data`. |
+| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. Backend equivalent to `best_response`.|
+| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. Backend equivalent to `covars_best_response`. |    
 
 ### Initialization options
 
@@ -462,6 +479,10 @@ cc.tell(covars=observed_results, response=observed_response_second)
 A number of examples showing how to use the framework in `jupyter` notebooks is available in the [examples](examples) 
 folder. This includes both closed-loop and iterative usages, as well as a few real-world examples (latter to come!)
 
+## References
+
+* [E.C. Garrido-Merchán and D. Hernandéz-Lobato: Dealing with categorical and integer-valued variables in Bayesian
+Optimization with Gaussian processes, Neurocomputing vol. 380, 7 March 2020, pp. 20-35](https://www.sciencedirect.com/science/article/abs/pii/S0925231219315619), [ArXiv preprint](https://arxiv.org/pdf/1805.03463.pdf)
 
 ## Contributing
 
@@ -472,6 +493,8 @@ This library is built using the following
 * `GPyTorch`
 * `BOTorch`
 * `numpy`
+* `pandas`
+* `matplotlib`
 
 ### Access to backlog etc
 
