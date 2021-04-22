@@ -1,0 +1,26 @@
+repos:
+- repo: local
+  hooks:
+  - id: flake8
+    name: flake8
+    language: system
+    entry: flake8 creative_project --count --select=E9,F63,F7,F82 --show-source --statistics
+    types: [python]
+
+  - id: black
+    name: black
+    language: system
+    entry: black creative_project/ --check
+    types: [python]
+
+  - id: isort
+    name: isort
+    language: system
+    entry: isort creative_project/**/*.py --check-only
+    types: [python]
+
+  - id: pytest
+    name: pytest
+    language: system
+    entry: python -m pytest tests/unit
+    types: [python]

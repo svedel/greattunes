@@ -9,10 +9,10 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 
 ## Features
 
+* Can optimize across **continuous**, **integer** and **categorical** covariate variables.
 * Optimization of either *known* or *unknown* functions. The allows for optimization of e.g. real-world experiments 
   without specifically requiring a model of the system be defined a priori.
-* Focus on ease of use: only few lines of code required for full Bayesian optimization.
-* Simple interface.
+* Simple interface with focus on ease of use: only few lines of code required for full Bayesian optimization.
 * Erroneous observations of either covariates or response can be overridden during optimization. 
 * Well-documented code with detailed end-to-end examples of use, see [examples](#examples).
 * Optimization can start from scratch or repurpose existing data.
@@ -23,6 +23,9 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 * **Multivariate covariates, univariate system response:** It is assumed that input covariates (the independent 
   variables) can be either multivariate or univariate, while the system response (the dependent variable) is only 
   univariate.
+* **Optimizing across continuous, integer and categorical covariates:** Problems can depend on any of these types of 
+  variables, in any combination. Special attention is given to implementation of integer and categorical variables
+  which are handled via the method of Garrido-Merchán and Hernandéz-Lobato (E.C. Garrido-Merchán and D. Hernandéz-Lobato, Neurocomputing, see [References](#references)).
 * **System-generated or manual input:** Observations of covariates and responses during optimization can be provided 
   both programmatically or manually via prompt input.
 * **Optimizes known and unknown response functions:** Both cases where the response function can be formulated 
@@ -156,15 +159,28 @@ been to use the `.ask`-`.tell` methods instead of `.auto`.
 
 ### Key attributes
 
-The following key attributes are stored for each optimization as part of the instantiated class 
+#### User-facing attributes
+The following key attributes are stored for each optimization as part of the instantiated class. These primary
+data structures for users are stored in `pandas` dataframes in pretty format.
 
 | Attribute | Comments |
 | --------- | -------- |
-| `train_X` | All *observed* covariates with dimensions `num_observations` X `num_covariates`. |
+| `x_data` | All *observed* covariates with dimensions, one row per observation. If no names have been added to the covariates they will take the naems "covar0", "covar1", ... . Dimensions `num_observations` X `num_covariates`. |
+| `y_data` | All *observed* responses corresponding to the covariate points (rows) in `x_data`. Dimensions `num_observations` X 1. |
+| `best_response` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. |
+| `covars_best_response` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response` generated the same row in `best_response`. Dimensions `num_observations` X `num_covariates`. |
+
+#### Backend attributes
+In the backend the framework makes use of different data structures based on the `tensor` structure from `torch` which 
+also handles one-hot encoding of categorical variables. The key backend attributes are listed in the table below.
+
+| Attribute | Comments |
+| --------- | -------- |
+| `train_X` | All *observed* covariates with dimensions `num_observations` X `num_covariates`. Backend equivalent to `x_data`. |
 | `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions `num_observations` X `num_covariates`. |
-| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` X 1. |
-| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. |
-| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. |    
+| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` X 1. Backend equivalent to `y_data`. |
+| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. Backend equivalent to `best_response`.|
+| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. Backend equivalent to `covars_best_response`. |    
 
 ### Initialization options
 
@@ -462,80 +478,10 @@ cc.tell(covars=observed_results, response=observed_response_second)
 A number of examples showing how to use the framework in `jupyter` notebooks is available in the [examples](examples) 
 folder. This includes both closed-loop and iterative usages, as well as a few real-world examples (latter to come!)
 
+## References
 
-## Contributing
-
-### Tech stack
-
-This library is built using the following
-* `torch`
-* `GPyTorch`
-* `BOTorch`
-* `numpy`
-
-### Access to backlog etc
-
-To be detailed later
-
-### Testing strategy
-
-Regular unit and integration testing is performed during each run of the CI pipeline.
-
-In addition, a set of sample problems are also executed. The purpose of these special integration tests is to verify
-that the optimization performance of the framework remains consistent. These sample problems is a series of pre-defined
-applications of the framework with known results.
-
-#### Test tooling
-
-The `pytest` framework is used for this library, with all tests residing in 
-[`creative_project\tests`](tests). To execute all tests, run the following from the terminal from the 
-project root folder (`creative_project`)
-```python
-~/creative_project$ python -m pytest tests/
-```
-
-The tests are available in 
-* Unit tests: [`creative_project\tests\unit`](tests/unit)
-* Integration tests: [`creative_project\tests\integration`](tests/integration)
-* Sample problems: [`creative_project\tests\sample_problems`](tests/sample_problems)
-
-All fixtures are collected in `tests\conftest.py` and config is specified in `tests\pytest.ini`.
-
-#### Tests during CI
-All tests are run by CI pipeline when committing to any branch. In addition, linting, style format and library import
-style checks are also executed.
-
-`sample_problems` tests are allowed to fail for regular commits but must pass for merge commits.
-
-#### Tests during development
-During development, unit and integration tests are typically sufficient to check ongoing developments. These tests can
-be executed by the command
-```python
-~/creative_project$ python -m pytest tests/unit tests/integration
-```
-Before committing it is good practise to also run sample problems, which can be done by either `python -m pytest tests/`
-(running all tests including sample problems), or `python -m pytest tests/sample_problems`.
-
-#### Additional code checks 
-In addition, linting, code style checking and sorting of imports is also executed by the CI pipeline. The library is
-currently using `flake8` for linting, `black` for code format checking and `isort` to manage library import style.
-
-The following commands, executed in the terminal from the project root folder (`creative_project`), will run the checks 
-and perform style corrections if needed
-```python
-# === linting ===
-~/creative_project$ flake8 creative_project/
-
-# === code style ===
-~/creative_project$ black creative_project --check # checks for fixes needed
-~/creative_project$ black creative_project --diff # shows suggested edits
-~/creative_project$ black creative_project # makes the edits (only command needed to update the code)
-
-# === sort imports ===
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --check-only" # checks for sorting opportunities
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --diff" # shows changes that could be done
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py" # makes the changes (only command needed to update the code)
-```
+* [E.C. Garrido-Merchán and D. Hernandéz-Lobato: Dealing with categorical and integer-valued variables in Bayesian
+Optimization with Gaussian processes, Neurocomputing vol. 380, 7 March 2020, pp. 20-35](https://www.sciencedirect.com/science/article/abs/pii/S0925231219315619), [ArXiv preprint](https://arxiv.org/pdf/1805.03463.pdf)
 
 ## A primer on Bayesian optimization
 

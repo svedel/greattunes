@@ -14,6 +14,8 @@ Version for this release: 0.0.4
 * Named covariates
 * Pretty data format for covariates (`x_data`) and response (`y_data`) which keeps track of observations in their
 natural data types (`float` for doubles, `int` for integers and `str` for categorical variables).
+  
+* [development tooling] Pre-commit hooks to run static code checks before code commit.
 
 ### Changed
 In `_best_response.current_best`: switched to storing in pretty user-facing format (`pandas` df), updated output 
