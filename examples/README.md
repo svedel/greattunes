@@ -13,6 +13,7 @@ end-to-end frameworks, including "all the glue stuff".
   4. [Optimize a noisy, multivariate system](#Example-4:-Optimize-a-noisy,-multivariate-system)
 * Advanced examples
   5. [Stop optimization early when convergence seems to be reached based on relative improvement in best response](#Example-5:-Stop-optimization-early-when-convergence-seems-to-be-reached-based-on-relative-improvement-in-best-response)
+  6. [Functions with integer covariates](#Example-6:-Functions-with-integer-covariates)
   
 
 ## Details
@@ -49,3 +50,9 @@ In this example illustrate how to use `rel_tol` and `rel_tol_steps`-parameters i
 The example discusses best practise for using these functionalities to obtain good convergence.
 
 File: `Example 5 - Optimization stopping criteria based on relative improvements.ipynb`
+
+### Example 6: Functions with integer covariates
+
+In this example it is shown how to define integer covariates and illustrates how the framework handles cases of mixed covariate data types (some continuous, some integer) better than pure integer covariates. 
+
+File: `Example 6 - Functions with integer covariates.ipynb`
