@@ -5,15 +5,15 @@ The examples in this folder all illustrate ways to leverage the framework in act
 end-to-end frameworks, including "all the glue stuff". 
 
 ### Basic examples
-* Univariate systems
-  1. [Closed-loop optimization of _known_ function](#Example-1:-Closed-loop-optimization-of-_known_-function)
-  2. [Iterative optimization of a function, which can be sampled](#Example-2:-Iterative-optimization-of-a-function,-which-can-be-sampled)
-* Multivariate systems
-  3. [Maximize a multivariate function using either closed-loop or iterative approach](#Example-3:-Maximize-a-multivariate-function-using-either-closed-loop-or-iterative-approach)
-  4. [Optimize a noisy, multivariate system](#Example-4:-Optimize-a-noisy,-multivariate-system)
-* Advanced examples
-  5. [Stop optimization early when convergence seems to be reached based on relative improvement in best response](#Example-5:-Stop-optimization-early-when-convergence-seems-to-be-reached-based-on-relative-improvement-in-best-response)
-  6. [Functions with integer covariates](#Example-6:-Functions-with-integer-covariates)
+#### Univariate systems
+1. [Closed-loop optimization of _known_ function](#Example-1:-Closed-loop-optimization-of-_known_-function)
+2. [Iterative optimization of a function, which can be sampled](#Example-2:-Iterative-optimization-of-a-function,-which-can-be-sampled)
+#### Multivariate systems
+3. [Maximize a multivariate function using either closed-loop or iterative approach](#Example-3:-Maximize-a-multivariate-function-using-either-closed-loop-or-iterative-approach)
+4. [Optimize a noisy, multivariate system](#Example-4:-Optimize-a-noisy,-multivariate-system)
+#### Advanced examples
+5. [Stop optimization early when convergence seems to be reached based on relative improvement in best response](#Example-5:-Stop-optimization-early-when-convergence-seems-to-be-reached-based-on-relative-improvement-in-best-response)
+6. [Functions with integer covariates](#Example-6:-Functions-with-integer-covariates)
   
 
 ## Details
