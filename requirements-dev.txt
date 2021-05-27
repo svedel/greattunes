@@ -1,7 +1,6 @@
 black==19.10b0
 flake8==3.7.9
 isort==4.3.21
-pre-commit==2.12.1
 pytest==5.3.5
 pytest-cov==2.8.1
-pytz==2021.1
+pytz==2021.1prec

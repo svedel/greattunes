@@ -76,19 +76,9 @@ and perform style corrections if needed
 ```
 
 ### Pre-commit hooks
-Code checks are run before each commit via pre-commit git hooks. These include linting (`flake8`), code checks 
-(`black`), import style checks (`isort`) and unit tests (all tests in `tests/unit`).
+This package has been developed using `PyCharm` which does not have good support for `pre-commit` and consequently these 
+features have not been used.
 
-To execute pre-commit hooks, the package `pre-commit` has been added to the development requirements [`requirements-dev.txt`](requirements-dev.txt).
-This runs all hooks configured in [`.pre-commit-config.yaml`](.pre-commit-config.yaml). Beware that for any changes to 
-take effect, the following command must be run
-```commandline
-(<virtual_env>) >>> pre-commit install
-```
-where `(<virtual_env>)` indicates that the virtual environment is initiated.
-
-The hooks don't show graphically when committing through PyCharm, but do show when committing from the command line.
-
-For more details on using pre-commit hooks check ["Getting started with Python pre-commit hooks"](https://towardsdatascience.com/getting-started-with-python-pre-commit-hooks-28be2b2d09d5), 
-["Automating Python workflows with pre-commit hooks"](https://towardsdatascience.com/automating-python-workflows-with-pre-commit-hooks-e5ef8e8d50bb) 
-and the official page for the `pre-commit` package [https://pre-commit.com/](https://pre-commit.com/).
+For more on pre-commit hooks check out this introduction 
+[Getting started with Python Pre-commit hooks](https://towardsdatascience.com/getting-started-with-python-pre-commit-hooks-28be2b2d09d5) 
+and the `python` project [pre-commit](https://pre-commit.com/#intro).
