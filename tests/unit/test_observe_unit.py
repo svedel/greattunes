@@ -63,7 +63,7 @@ def test_observe_get_and_verify_response_input_fail_unit(tmp_observe_class, meth
     kwarg_response = None
 
     with pytest.raises(Exception) as e:
-        assert output == cls._get_and_verify_response_input(response=kwarg_response)
+        assert cls._get_and_verify_response_input(response=kwarg_response)
     assert str(e.value) == "creative_project._observe._get_and_verify_response_input: class attribute " \
                            "self.sampling['method'] has non-permissable value " + str(method) + ", must be in " \
                            "['iterative', 'functions']."
