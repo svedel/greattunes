@@ -14,6 +14,7 @@ end-to-end frameworks, including "all the glue stuff".
 #### Advanced examples
 5. [Stop optimization early when convergence seems to be reached based on relative improvement in best response](#Example-5:-Stop-optimization-early-when-convergence-seems-to-be-reached-based-on-relative-improvement-in-best-response)
 6. [Functions with integer covariates](#Example-6:-Functions-with-integer-covariates)
+7. [Make the best brownie](#Example-7:-Make-the-best-brownie)
   
 
 ## Details
@@ -56,3 +57,9 @@ File: `Example 5 - Optimization stopping criteria based on relative improvements
 In this example it is shown how to define integer covariates and illustrates how the framework handles cases of mixed covariate data types (some continuous, some integer) better than pure integer covariates. 
 
 File: `Example 6 - Functions with integer covariates.ipynb`
+
+### Example 7: Make the best brownie
+
+This example illustrates how to combine covariates of all the different data types (continuous, integer, categorical) to solve a complex and somewhat relevant real-life problem: finding the best brownie recipe!
+
+File: `Example 7 - Make the best brownie.ipynb`
