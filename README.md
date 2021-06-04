@@ -9,7 +9,7 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 
 ## Features
 
-* Can optimize across **continuous**, **integer** and **categorical** covariate variables.
+* Handles **continuous**, **integer** and **categorical** covariate.
 * Optimization of either *known* or *unknown* functions. The allows for optimization of e.g. real-world experiments 
   without specifically requiring a model of the system be defined a priori.
 * Simple interface with focus on ease of use: only few lines of code required for full Bayesian optimization.
@@ -159,7 +159,7 @@ been to use the `.ask`-`.tell` methods instead of `.auto`.
 
 ### Key attributes
 
-#### User-facing attributes
+#### User-facing attributes: easily-accessible covariates and response
 The following key attributes are stored for each optimization as part of the instantiated class. These primary
 data structures for users are stored in `pandas` dataframes in pretty format.
 
@@ -182,7 +182,38 @@ also handles one-hot encoding of categorical variables. The key backend attribut
 | `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. Backend equivalent to `best_response`.|
 | `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. Backend equivalent to `covars_best_response`. |    
 
-### Initialization options
+### Covariates: the free parameters which are adjusted by the framework during optimization
+The user must indicate which covariates the framework can adjust in order to optimize (maximize/minimize) the
+response. This is a mandatory part of class initialization and set via `covars` input variable; without any knowledge 
+of the covariates, the framework cannot proceed to optimization.
+
+#### Supported types: Handling continuous, integer and categorical covariates
+The following three types of covariates are supported.
+* **Continuous**: Variables which can take any numerical value, i.e. can take values which include decimals. The data 
+  type of a continuous variable will be among `float` types. Typical examples of continuous covariates will be weights 
+  in a model and time thresholds (imagine a case where total runtime was a parameter). 
+* **Integer**: Variables which can only take integer values; the data types of these variables will be among `int` types.
+  Special consideration must be taken during optimization because these variables only can update in discrete steps, 
+  resulting in step changes of the response. Examples of integer covariates include number of layers in a neural network
+  and number of eggs in a recipe.
+* **Categorical**: Variables that can take different discrete values, which, contrary to integers do not even have any
+  internal relation in terms of size. An example is a variable which can take the values {`green`,`blue`,`red`} where
+  there clearly is no direct numerical relationship between the potential values; in contrast, a numerical relationship
+  does exist for integer variables (e.g. 5 is bigger than 2). In addition to the color example above, another example of 
+  a categorical variable can be one which determines the make of a car (e.g. take values `volvo`, `lincoln`, `fiat` etc)
+
+The framework follows the method of Garrido-Merchán and Hernandéz-Lobato (see [References](#References)) to integrate 
+the different types of covariates and bring them to a form that still is consistent with using continuous Gaussian 
+processes to drive the optimization. Briefly, the method relies on adding a transformation of variables in the 
+correlation (kernel) function of the Gaussian processes with the following properties: integer covariates are rounded to
+nearest integer and categorical variables are one-hot encoded and only the one with highest numerical value is carried
+forward in each round by adjusting the value of its associated one-hot encoded variable to 1 and setting all other
+one-hot encoded variables to 0.
+
+
+
+#### Two ways to set covariates within framework --- working with named covariates
+
 
 #### Multivariate covariates
 
@@ -204,6 +235,8 @@ would be
 ```python
 train_X = torch.tensor([[1, 5.2, 4]], dtype=torch.double)
 ```
+
+### Initialization options
 
 #### Starting with historical data
 
