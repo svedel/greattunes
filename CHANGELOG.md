@@ -10,21 +10,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Version for this release: 0.0.4
 
 ### Added
-* Functionality to use integer and categorical variables
+* Functionality to use integer and categorical covariates as input to the function under optimization, using the method
+  of Garrido-Merchán and Hernandéz-Lobato ([journal link](https://www.sciencedirect.com/science/article/abs/pii/S0925231219315619), 
+  [ArXiv preprint](https://arxiv.org/pdf/1805.03463.pdf)). This significantly extends the applicability of the 
+  framework.
 * Named covariates
 * Pretty data format for covariates (`x_data`) and response (`y_data`) which keeps track of observations in their
-natural data types (`float` for doubles, `int` for integers and `str` for categorical variables).
+natural data types (`float` for doubles, `int` for integers and `str` for categorical variables). These are in `pandas`
+  format
   
-* [development tooling] Pre-commit hooks to run static code checks before code commit.
+* Two new end-to-end [examples](#Examples) to illustrate a simple use case of integer covariates (Example 6) and a more elaborate combining continuous, integer and categorical (Example 7).
+  
 
 ### Changed
-In `_best_response.current_best`: switched to storing in pretty user-facing format (`pandas` df), updated output 
+* Extended how system determines covariates enabled via a wider range of options for the parameter `covars` provided 
+  during class initialization. ADD MORE HERE TO DESCRIBE BRIEFLY HOW NOT JUST LIST OF TUPLES ANYMORE 
+* In `_best_response.current_best`: switched to storing in pretty user-facing format (`pandas` df), updated output 
 slightly
+* Extended `creative_project.transformed_kernel_models.transformation.GP_kernel_transformation` to support high-rank
+tensors. This allows using `botorch`'s `optimize_acqf` method to determine best next covariate datapoint from 
+  acquisition function.
 
 ### Deprecated
+None
 
 ### Removed
-If using `ask`-`tell`-approach: reporting observations via `covars` and `response` entries to `tell`-method cannot be
+In `ask`-`tell`-approach: reporting observations via `covars` and `response` entries to `tell`-method cannot be
 done via the backend data format (`torch` tensor of same format as `train_X` and `train_Y`). Instead, use the same 
 user-facing format (in `pandas` df) to report all entries, including integer and categorical variables in their natural
 data types (`int` and `str`).
