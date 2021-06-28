@@ -185,7 +185,15 @@ also handles one-hot encoding of categorical variables. The key backend attribut
 ### Covariates: the free parameters which are adjusted by the framework during optimization
 The user must indicate which covariates the framework can adjust in order to optimize (maximize/minimize) the
 response. This is a mandatory part of class initialization and set via `covars` input variable; without any knowledge 
-of the covariates, the framework cannot proceed to optimization.
+of the covariates, the framework cannot proceed to optimization. Here's an example for a problem with two covariates 
+```python
+covars = [(0.5, 0, 1), (2,1,4)]  # each tuple defines one covariate; the numbers are (initial guess, min, max)
+
+# initialize the class
+cls = CreativeProject(covars=covars, model="SingleTaskGP", acq_func="EI")
+``` 
+This is also illustrated for a single-variable situation in [Step 1: Define the problem](#Step-1:-Define-the-problem) 
+above.
 
 #### Supported types: Handling continuous, integer and categorical covariates
 The following three types of covariates are supported.
@@ -203,17 +211,44 @@ The following three types of covariates are supported.
   a categorical variable can be one which determines the make of a car (e.g. take values `volvo`, `lincoln`, `fiat` etc)
 
 The framework follows the method of Garrido-Merchán and Hernandéz-Lobato (see [References](#References)) to integrate 
-the different types of covariates and bring them to a form that still is consistent with using continuous Gaussian 
+the different types of covariates and bring them to a form that is consistent with using continuous Gaussian 
 processes to drive the optimization. Briefly, the method relies on adding a transformation of variables in the 
 correlation (kernel) function of the Gaussian processes with the following properties: integer covariates are rounded to
 nearest integer and categorical variables are one-hot encoded and only the one with highest numerical value is carried
 forward in each round by adjusting the value of its associated one-hot encoded variable to 1 and setting all other
 one-hot encoded variables to 0.
 
+#### Two approaches to defining covariates in framework: working with named covariates and setting data types
+Two ways are offered to provide covariate details to the framework: the simple way which assigns names to covariates 
+and infers their data types from the provided data in `covars` (used so far), and an elaborate way which allows for 
+naming covariates and gives more control to specify data types. In either case, the information is given to the
+framework via the `covars` input variable.
 
+##### Simple approach: faster, but no control over covariate names and data types 
+Each covariate is defined by a tuple, and the order of the tuples defines the order of the covariates. The same order
+must be used later if covariates are manually reported via the `.tell`-method.  
 
-#### Two ways to set covariates within framework --- working with named covariates
+| Data type | How report | Example | Comments |
+| --------- | ---------- | ------- | -------- |
+| Integer   | (`<initial_guess>`,`<parameter_minimum>`, `<parameter_maximum>`) | `(2, 0, 5)` | All tuple entries must be of data type `int` for covariate to be taken as integer |
+| Continuous | (`<initial_guess>`,`<parameter_minimum>`, `<parameter_maximum>`) | `(2.0, -1.2, 2.5)` | Only one tuple entry has to be a `float` for the covariate to be set to continuous |
+| Categorical | (`<initial_guess>`,`<option_1>`, `<option_2>`, ...) | `(volvo, fiat, aston martin, ford, toyota)` | Covariate is taken as categorical if any entry has data type `str`. There must be at least one other option than `<initial_guess>`, but otherwise no limit to the number of entries. | 
 
+Here's an example of how to use the simple approach to define the `covars`-variable to communicate covariates of 
+different data types. This `covars` could be used to initialize a class instatiation
+
+```python
+covars = [
+            (1, 0, 2),  # will be taken as INTEGER (type: int)
+            (1.0, 0.0, 2.0),  # will be taken as CONTINUOUS (type: float)
+            (1, 0, 2.0),  # will be taken as CONTINUOUS (type: float)
+            ("red", "green", "blue", "yellow"),  # will be taken as CATEGORICAL (type: str)
+            ("volvo", "chevrolet", "ford"),  # will be taken as CATEGORICAL (type: str)
+            ("sunny", "cloudy"),  # will be taken as CATEGORICAL (type: str)
+        ]
+```
+
+##### Elaborate approach: more effort, but allows for specifying covariate names and data types
 
 #### Multivariate covariates
 
