@@ -183,14 +183,14 @@ also handles one-hot encoding of categorical variables. The key backend attribut
 | `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. Backend equivalent to `covars_best_response`. |    
 
 ### Covariates: the free parameters which are adjusted by the framework during optimization
-The user must indicate which covariates the framework can adjust in order to optimize (maximize/minimize) the
+The user must detail which covariates the framework can adjust in order to optimize (maximize/minimize) the
 response. This is a mandatory part of class initialization and set via `covars` input variable; without any knowledge 
 of the covariates, the framework cannot proceed to optimization. Here's an example for a problem with two covariates 
 ```python
-covars = [(0.5, 0, 1), (2,1,4)]  # each tuple defines one covariate; the numbers are (initial guess, min, max)
+covars = [(0.5, 0, 1), (2,1,4)]  # each tuple defines one covariate; the tuple entries are (initial guess, min, max)
 
 # initialize the class
-cls = CreativeProject(covars=covars, model="SingleTaskGP", acq_func="EI")
+cls = CreativeProject(covars=covars, ...)
 ``` 
 This is also illustrated for a single-variable situation in [Step 1: Define the problem](#Step-1:-Define-the-problem) 
 above.
@@ -226,7 +226,11 @@ framework via the `covars` input variable.
 
 ##### Simple approach: faster, but no control over covariate names and data types 
 Each covariate is defined by a tuple, and the order of the tuples defines the order of the covariates. The same order
-must be used later if covariates are manually reported via the `.tell`-method.  
+must be used later if covariates are manually reported via the `.tell`-method.
+
+###### Covariate data types
+Covariate data type is critical because it impacts how to handle the covariate during the optimization. In this simple
+approach, data types are inferred from the provided data in `covars` as indicated by the table below.
 
 | Data type | How report | Example | Comments |
 | --------- | ---------- | ------- | -------- |
@@ -235,8 +239,7 @@ must be used later if covariates are manually reported via the `.tell`-method.
 | Categorical | (`<initial_guess>`,`<option_1>`, `<option_2>`, ...) | `(volvo, fiat, aston martin, ford, toyota)` | Covariate is taken as categorical if any entry has data type `str`. There must be at least one other option than `<initial_guess>`, but otherwise no limit to the number of entries. | 
 
 Here's an example of how to use the simple approach to define the `covars`-variable to communicate covariates of 
-different data types. This `covars` could be used to initialize a class instatiation
-
+different data types. This `covars` could be used to initialize a class instantiation
 ```python
 covars = [
             (1, 0, 2),  # will be taken as INTEGER (type: int)
@@ -248,7 +251,13 @@ covars = [
         ]
 ```
 
-##### Elaborate approach: more effort, but allows for specifying covariate names and data types
+###### Covariate names 
+Covariates are assigned names behind the scenes of the type `covar1`, `covar2` etc. with numbers added in the order in 
+which the variable is processed from the `covars` list of tuples during class initialization (beware that this order may
+not be preserved). Names are visible as the column names in the `x_data` attribute. 
+
+##### Elaborate approach: more effort, but allows for specifying names and data types of covariates
+
 
 #### Multivariate covariates
 
