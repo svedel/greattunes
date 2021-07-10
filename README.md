@@ -13,7 +13,7 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 * Optimization of either *known* or *unknown* functions. The allows for optimization of e.g. real-world experiments 
   without specifically requiring a model of the system be defined a priori.
 * Simple interface with focus on ease of use: only few lines of code required for full Bayesian optimization.
-* Erroneous observations of either covariates or response can be overridden during optimization. 
+* Erroneous observations of either covariates or response can be overwritten during optimization. 
 * Well-documented code with detailed end-to-end examples of use, see [examples](#examples).
 * Optimization can start from scratch or repurpose existing data.
 
@@ -254,13 +254,66 @@ covars = [
 ###### Covariate names 
 Covariates are assigned names behind the scenes of the type `covar1`, `covar2` etc. with numbers added in the order in 
 which the variable is processed from the `covars` list of tuples during class initialization (beware that this order may
-not be preserved). Names are visible as the column names in the `x_data` attribute. 
+not be preserved). Covariate names are visible as the column names in the `x_data` attribute. 
 
-##### Elaborate approach: more effort, but allows for specifying names and data types of covariates
+##### Elaborate approach: allows for specifying names and data types of covariates
+This approach requires a bit more details to be provided, but also offers much more flexibility.
 
+In this approach, all covariates are defined in a dictionary which is fed via the `covars` parameter, and each covariate is defined by their own dictionary 
+nested within the outer dictionary specifying all covariates. An example, which will be elaborated further in the
+following, is given below for 3 covariates to make this concrete
+```python
+covars = {
+            'variable1':  # type: integer
+                {
+                    'guess': 1,
+                    'min': 0,
+                    'max': 2,
+                    'type': int,
+                },
+            'variable2':  # type: continuous (float)
+                {
+                    'guess': 12.2,
+                    'min': -3.4,
+                    'max': 30.8,
+                    'type': float,
+                },
+            'variable3':  # type: categorical (str)
+                {
+                    'guess': 'red',
+                    'options': {'red', 'blue', 'green'},
+                    'type': str,
+                }
+        }
+```
+
+Each nested dictionary gives the details of an individual covariate, and the name of these nested dictionaries are used
+to name the covariate. 
+
+**Covariate names**: Anything that's permissable as a `python` string is a valid covariate name. These names are used
+throughout the framework (will be inherited into `x_data`).
+
+**Specifying data type**: The variable `type` indicates the type of the covariate. The framework uses the following types
+* `int`: integer covariate
+* `float`: continuous covariate
+* `str`: categorical covariate
+Beware that the data type (and not a string) is used to define the type (i.e. use e.g. `str` not `'str'` to indicate a 
+  categorical variable).
+
+**Required information for each covariate**: Requirements vary with the covariate data type. The following is required 
+for each type of covariate
+* Integer (`'type': int`): Required fields are `guess`, `min` and `max` (all single entries of type: `int`), as well as 
+  `type` (must be `int` to specify categorical).
+* Continuous (`'type': float`): Required fields are `guess`, `min` and `max` (all single entries of types `int` or 
+  `float`), as well as `type` (must be `float` to specify categorical).
+* Categorical (`'type': str`): Required fields are `guess` (a single entry, type: `str`), `options` (dictionary of `str`, one 
+  for each option the covariate can take. Must also include the element in `guess`) and `type` (must be `str` to specify
+  categorical).
+
+The example above shows 3 covariates but the framework can handle any number of covariates. Simply adjust the number of
+nested dictionaries to meet the need (and use appropriate naming and covariate specification for your application).
 
 #### Multivariate covariates
-
 Multivariate covariates are set via the (mandatory) `covars` parameter during class initialization. Each covariate is 
 given as a 3-tuple of parameters (`<initial_guess>`,`<parameter_minimum>`, `<parameter_maximum>`) (the order matters!), with `covars` being a
 list of these tuples. As an example, for a cases with 3 covariates, the `covars` parameter would be
