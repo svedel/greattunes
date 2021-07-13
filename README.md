@@ -2,7 +2,7 @@
 
 ![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
 
-Easy-to-use Bayesian optimization library made available for either closed-loop or user-driven (manual) optimization of either 
+**Easy-to-use Bayesian optimization library** made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
 A short primer on Bayesian optimization is provided in [this section](#a-primer-on-bayesian-optimization).  
@@ -602,6 +602,9 @@ observed_response_second = observed_response + 1
 cc.tell(covars=observed_results, response=observed_response_second)
 ```
 
+## Contributing
+We are happy if you would like to invest time in this project! Details are given in [CONTRIBUTING.md](CONTRIBUTING.md) 
+on how to get started.
 
 ## Examples 
 
