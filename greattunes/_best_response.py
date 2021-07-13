@@ -1,6 +1,6 @@
 import pandas as pd
 import torch
-from creative_project.data_format_mappings import (
+from greattunes.data_format_mappings import (
     tensor2pretty_covariate,
     tensor2pretty_response,
 )
@@ -38,7 +38,7 @@ def _update_max_response_value(self):
         max_X, max_Y = self._find_max_response_value(self.train_X, self.train_Y)
     except Exception:
         raise Exception(
-            "creative_project._best_response._update_max_response_value.py: Missing or unable to process "
+            "greattunes._best_response._update_max_response_value.py: Missing or unable to process "
             "one of following attributes: self.train_X, self.train_Y"
         )
 
@@ -139,7 +139,7 @@ def _update_proposed_data(self, candidate):
 
     # data type validation on "candidate"
     assert isinstance(candidate, torch.DoubleTensor), (
-        "creative_project._best_response._update_proposed_data: provided variable is not 'candidate' of type "
+        "greattunes._best_response._update_proposed_data: provided variable is not 'candidate' of type "
         "torch.DoubleTensor (type of 'candidate' is " + str(type(candidate)) + ")"
     )
 
@@ -147,7 +147,7 @@ def _update_proposed_data(self, candidate):
     if self.proposed_X is not None:
         assert (
             candidate.size()[1] == self.proposed_X.size()[1]
-        ), "creative_project._best_response._update_proposed_data: wrong number of covariates provided in " "'candidate'. Expected " + str(
+        ), "greattunes._best_response._update_proposed_data: wrong number of covariates provided in " "'candidate'. Expected " + str(
             self.proposed_X.size()[1]
         ) + ", but got " + str(
             candidate.size()[1]

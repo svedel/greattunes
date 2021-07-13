@@ -1,8 +1,8 @@
 import pytest
 import torch
 from botorch.acquisition import ExpectedImprovement
-from creative_project._acq_func import AcqFunction
-import creative_project._acq_func
+from greattunes._acq_func import AcqFunction
+import greattunes._acq_func
 
 
 def test_AcqFunction__initialize_acq_func_functional(custom_models_simple_training_data_4elements, monkeypatch):

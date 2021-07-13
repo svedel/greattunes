@@ -1,6 +1,6 @@
 import torch
 import pytest
-from creative_project import CreativeProject
+from greattunes import CreativeProject
 
 
 @pytest.mark.parametrize(

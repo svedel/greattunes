@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 import torch
-import creative_project.utils
-from creative_project.data_format_mappings import tensor2pretty_covariate
+import greattunes.utils
+from greattunes.data_format_mappings import tensor2pretty_covariate
 
 @pytest.mark.parametrize("method, tmp_val",
                          [
@@ -12,8 +12,8 @@ from creative_project.data_format_mappings import tensor2pretty_covariate
 def test_observe_get_and_verify_response_input_unit(tmp_observe_class, method, tmp_val, monkeypatch):
     """
     test that _get_and_verify_response_input works for self.sampling["method"] = "iteratuve" or "functions". Leverage
-    monkeypatching and create false class to mock that creative_project._observe will be called inside
-    CreativeProject class in creative_project.__init__. Rely on manual input for "iterative" option
+    monkeypatching and create false class to mock that greattunes._observe will be called inside
+    CreativeProject class in greattunes.__init__. Rely on manual input for "iterative" option
     """
 
     # # define class
@@ -64,7 +64,7 @@ def test_observe_get_and_verify_response_input_fail_unit(tmp_observe_class, meth
 
     with pytest.raises(Exception) as e:
         assert cls._get_and_verify_response_input(response=kwarg_response)
-    assert str(e.value) == "creative_project._observe._get_and_verify_response_input: class attribute " \
+    assert str(e.value) == "greattunes._observe._get_and_verify_response_input: class attribute " \
                            "self.sampling['method'] has non-permissable value " + str(method) + ", must be in " \
                            "['iterative', 'functions']."
 
@@ -80,7 +80,7 @@ def test_get_and_verify_response_input_kwarg_input_works(tmp_observe_class, kwar
     """
     test that _get_and_verify_response_input works for self.sampling["method"] = "iterative" with programmatically
     provided input. Leverage monkeypatching for utils.__get_covars_from_kwargs and create false class to mock that
-    creative_project._observe will be called inside CreativeProject class in creative_project.__init__
+    greattunes._observe will be called inside CreativeProject class in greattunes.__init__
     """
 
     # set device for torch
@@ -154,10 +154,10 @@ def test_observe_get_response_function_input_unit(tmp_observe_class, training_da
     "response, kwarg_response, error_msg",
     [
         [torch.tensor([[2]], dtype=torch.double), ['a'], "too many dimensions 'str'"],
-        [torch.tensor([[2]], dtype=torch.double), [1, 2], "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        [torch.tensor([[2]], dtype=torch.double), [1, 2], "greattunes._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
         [torch.tensor([[2]], dtype=torch.double), [1, 'a'], "must be real number, not str"],
-        [torch.tensor([[2, 3]], dtype=torch.double), None, "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
-        [torch.tensor([[2]], dtype=torch.double), torch.tensor([[1, 2]], dtype=torch.double), "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (1, 2)."],
+        [torch.tensor([[2, 3]], dtype=torch.double), None, "greattunes._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        [torch.tensor([[2]], dtype=torch.double), torch.tensor([[1, 2]], dtype=torch.double), "greattunes.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (1, 2)."],
     ]
 )
 def test_get_and_verify_response_input_fails_wrong_input(tmp_observe_class, response, kwarg_response, error_msg,
@@ -270,8 +270,8 @@ def test_observe_print_candidate_to_prompt_works_unit(tmp_observe_class, candida
 @pytest.mark.parametrize(
     "candidate, error_msg",
     [
-        [torch.tensor([], dtype=torch.double), "kre8_core.creative_project._observe._print_candidate_to_prompt: provided input 'candidate' is empty. Expecting torch tensor of size 1 X num_covariates"],
-        [None, "kre8_core.creative_project._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect datatype. Expecting to be of type torch.Tensor"]
+        [torch.tensor([], dtype=torch.double), "kre8_core.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is empty. Expecting torch tensor of size 1 X num_covariates"],
+        [None, "kre8_core.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect datatype. Expecting to be of type torch.Tensor"]
     ]
 )
 def test_observe_print_candidate_to_prompt_fails_unit(tmp_observe_class, candidate, error_msg):
@@ -338,7 +338,7 @@ def test_read_covars_manual_input(tmp_observe_class,
     else:
         with pytest.raises(AssertionError) as e:
             covars_candidate_float_tensor = cls._read_covars_manual_input(additional_text)
-        assert str(e.value) == "creative_project._observe._read_covars_manual_input: wrong datatype of parameter 'additional_text'. Was expecting 'str' but received " + str(type(additional_text))
+        assert str(e.value) == "greattunes._observe._read_covars_manual_input: wrong datatype of parameter 'additional_text'. Was expecting 'str' but received " + str(type(additional_text))
 
 
 
@@ -468,7 +468,7 @@ def test_get_and_verify_covars_input_fails(tmp_observe_class, proposed_X, monkey
     add_text = ""
     if cls.proposed_X is not None:
         add_text = " Was expecting something like '" + str(cls.proposed_X[-1]) + "', but got '" + str(covars_tensor) + "'"
-    error_msg = "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations." + add_text
+    error_msg = "greattunes._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations." + add_text
 
     # covariate kwargs is set to None so input-based method is used
     kwarg_covariates = None
@@ -483,9 +483,9 @@ def test_get_and_verify_covars_input_fails(tmp_observe_class, proposed_X, monkey
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [[1.1, 2.2, 200, -1.7], "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations."],
-        [torch.tensor([[1.1, 2.2, 200, -1.7]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations."],
-        [torch.tensor([1.1, 2.2, 200, -1.7], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size (4)."],  # this one fails in utils.__get_covars_from_kwargs because of wrong size of input tensor
+        [[1.1, 2.2, 200, -1.7], "greattunes._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations."],
+        [torch.tensor([[1.1, 2.2, 200, -1.7]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "greattunes._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations."],
+        [torch.tensor([1.1, 2.2, 200, -1.7], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "greattunes.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size (4)."],  # this one fails in utils.__get_covars_from_kwargs because of wrong size of input tensor
     ]
 
 )

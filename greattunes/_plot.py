@@ -14,7 +14,7 @@ def _covars_ref_plot_1d(self):
     # check that only 1d data accepted
     if self.covar_bounds.shape[1] > 1:
         raise Exception(
-            "kre8_core.creative_project._plot._covars_ref_plot_1d: only valid for 1d data (single "
+            "kre8_core.greattunes._plot._covars_ref_plot_1d: only valid for 1d data (single "
             "covariate), but provided data has "
             + str(self.covar_bounds.shape[1])
             + " covariates."
@@ -218,7 +218,7 @@ def plot_best_objective(self):
 
     if self.train_Y is None:
         raise Exception(
-            "kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y "
+            "kre8_core.greattunes._plot.plot_best_objective: No objective data: self.train_Y "
             "is None"
         )
 

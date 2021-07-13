@@ -45,7 +45,7 @@ class Validators:
                 # the case where the number of rows (observations) are not the same for train_X and train_Y
                 else:
                     raise Exception(
-                        "creative_project._validators.Validators.__validate_training_data: The number of"
+                        "greattunes._validators.Validators.__validate_training_data: The number of"
                         " rows (observations) in provided 'train_X' ("
                         + str(train_X.size()[0])
                         + ") is"
@@ -59,7 +59,7 @@ class Validators:
     def __validate_num_covars(self, covars_array):
         """
         validate that entries in "covars_array" is equal to number of covars provided to "covars" during
-        class instance initialization of CreativeProject (from creative_project.__init__.py)
+        class instance initialization of CreativeProject (from greattunes.__init__.py)
         :param covars_array (torch.tensor, pandas dataframe, numpy array; shape needs to be
         num_observations X num_covariates)
         :param
@@ -90,19 +90,19 @@ class Validators:
 
         if covars is None:
             raise ValueError(
-                "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"
+                "kre8_core.greattunes._validators.Validator.__validate_covars: covars is None"
             )
 
         if not isinstance(covars, list):
             raise TypeError(
-                "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list "
+                "kre8_core.greattunes._validators.Validator.__validate_covars: covars is not list "
                 "of tuples (not list)"
             )
 
         for entry in covars:
             if not isinstance(entry, tuple):
                 raise TypeError(
-                    "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not "
+                    "kre8_core.greattunes._validators.Validator.__validate_covars: entry in covars list is not "
                     "tuple"
                 )
 
@@ -110,7 +110,7 @@ class Validators:
             for el in entry:
                 if not isinstance(el, (float, int, str)):
                     raise TypeError(
-                        "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element "
+                        "kre8_core.greattunes._validators.Validator.__validate_covars: tuple element "
                         + str(el)
                         + " in covars list is neither of type float, int or str"
                     )
@@ -123,10 +123,10 @@ class Validators:
     def __validate_num_entries_covar_tuples(covars, covars_tuple_datatypes):
         """
         ensures that the correct number of entries are present in the tuples of covars. covars_tuple_datatypes contains
-        the tuple datatypes as determined by creative_project._initializers.__determine_tuple_datatype
+        the tuple datatypes as determined by greattunes._initializers.__determine_tuple_datatype
         :param covars (list of tuples): object, only accepted if covars is list of tuples of types (int, float, str)
         :param covars_tuple_datatypes (list of types): types assigned to each tuple, e.g. by
-        creative_project._initializers.__determine_tuple_datatype
+        greattunes._initializers.__determine_tuple_datatype
         :return valid (bool)
         """
 
@@ -135,7 +135,7 @@ class Validators:
 
         # ensure the same number of entries
         assert len(covars) == len(covars_tuple_datatypes), (
-            "creative_project._validators.__validate_num_entries_covar_tuples: dimension mismatch between the number of tuples in 'covars' and the number of datatype decisions in 'covars_tuple_datatypes'. 'covars' has length "
+            "greattunes._validators.__validate_num_entries_covar_tuples: dimension mismatch between the number of tuples in 'covars' and the number of datatype decisions in 'covars_tuple_datatypes'. 'covars' has length "
             + str(len(covars))
             + " while 'covars_tuple_datatype' has length "
             + str(len(covars_tuple_datatypes))
@@ -146,12 +146,12 @@ class Validators:
         for i in range(len(covars)):
             if covars_tuple_datatypes[i] in {int, float}:
                 assert len(covars[i]) == 3, (
-                    "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry "
+                    "greattunes._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry "
                     + str(covars[i])
                 )
             elif covars_tuple_datatypes[i] in {str}:
                 assert len(covars[i]) > 0, (
-                    "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types str (categorical variables) must have at least 1 entry. This is not the case for the entry "
+                    "greattunes._validators.__validate_num_entries_covar_tuples: tuple entries of types str (categorical variables) must have at least 1 entry. This is not the case for the entry "
                     + str(covars[i])
                 )
 
@@ -165,7 +165,7 @@ class Validators:
         """
         ensures that 'covars' (a dict of dicts determining the covariates for an optimization) have the right data
         types and the right content inside those data types. See doctring for
-        creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts for full description of correct
+        greattunes._initializers.Initializers.__initialize_covars_dict_of_dicts for full description of correct
         format for covars
 
         for categorical variables also checks that the initial guess 'guess' is part of all potential outcomes for that
@@ -177,7 +177,7 @@ class Validators:
         be among {int, float, str}); for categorical variables (use type 'str' to identify these), the required
         elements in the dict are 'guess', 'options' and 'type', where the middle one is a set of all possible values of
         the categorical variable and 'type' is the data type and must be among int, float and str. See doctring for
-        creative_project._initializers.Initializers.__initialize_covars_dict_of_dicts for full description of correct
+        greattunes._initializers.Initializers.__initialize_covars_dict_of_dicts for full description of correct
         format for covars
         :return valid (bool):
         :return covars_out (dict of dicts): input covars with any updates to categorical variables
@@ -190,7 +190,7 @@ class Validators:
         list_content_types = [type(i) for i in list(covars.values())]
         if not set(list_content_types) == {dict}:
             raise Exception(
-                "creative_project._validators.Validators.__validate_covars_dict_of_dicts: 'covars' provided as "
+                "greattunes._validators.Validators.__validate_covars_dict_of_dicts: 'covars' provided as "
                 "part of class initialization must be either a list of tuples or a dict of dicts. Current provided is "
                 "a dict containing data types " + str(set(list_content_types)) + "."
             )
@@ -200,7 +200,7 @@ class Validators:
             # makes sure 'guess' is provided
             if "guess" not in covars[key].keys():
                 raise Exception(
-                    "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'guess' "
+                    "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'guess' "
                     "missing for covariate '"
                     + str(key)
                     + "' (covars['"
@@ -213,7 +213,7 @@ class Validators:
             # makes sure data type is provided
             if "type" not in covars[key].keys():
                 raise Exception(
-                    "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'type' missing "
+                    "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'type' missing "
                     "for covariate '"
                     + str(key)
                     + "' (covars['"
@@ -227,7 +227,7 @@ class Validators:
                 # warning if types beyond int, float, str are provided
                 if covars[key]["type"] not in {int, float, str}:
                     warnings.warn(
-                        "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key "
+                        "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key "
                         + str(key)
                         + " will be ignored because its data type '"
                         + str(covars[key]["type"])
@@ -239,7 +239,7 @@ class Validators:
                 if covars[key]["type"] in {int, float}:
                     if "min" not in covars[key].keys():
                         raise Exception(
-                            "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' "
+                            "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'min' "
                             "missing for covariate '"
                             + str(key)
                             + "' (covars['"
@@ -250,7 +250,7 @@ class Validators:
                         )
                     if "max" not in covars[key].keys():
                         raise Exception(
-                            "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'max' "
+                            "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'max' "
                             "missing for covariate '"
                             + str(key)
                             + "' (covars['"
@@ -264,7 +264,7 @@ class Validators:
                     # checks whether "options" (set of categorical options) is present
                     if "options" not in covars[key].keys():
                         raise Exception(
-                            "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key "
+                            "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key "
                             "'options' missing for covariate '"
                             + str(key)
                             + "' (covars['"

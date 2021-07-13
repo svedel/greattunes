@@ -1,6 +1,6 @@
 import pytest
 import torch
-from creative_project.transformed_kernel_models.transformation import GP_kernel_transform
+from greattunes.transformed_kernel_models.transformation import GP_kernel_transform
 
 @pytest.mark.parametrize(
     "x_data, x_result",

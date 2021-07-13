@@ -2,7 +2,7 @@ from botorch.fit import fit_gpytorch_model
 from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
 import pytest
-from creative_project.custom_models.simple_matern_model import SimpleCustomMaternGP
+from greattunes.custom_models.simple_matern_model import SimpleCustomMaternGP
 
 def test_SimpleCustomMaternGP_definitions(custom_models_simple_training_data,
                                           custom_models_simple_training_data_4elements_covar_details):

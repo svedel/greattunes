@@ -1,5 +1,5 @@
-from creative_project._initializers import Initializers
-from creative_project._best_response import _find_max_response_value
+from greattunes._initializers import Initializers
+from greattunes._best_response import _find_max_response_value
 import pandas as pd
 import pytest
 import torch
@@ -19,7 +19,7 @@ def test_Initializers__initialize_from_covars(covars_initialization_data, datase
     cls = Initializers()
 
     # define new class attributes from torch required for method to run (method assumes these defined under
-    # main class in creative_project.__init__.py)
+    # main class in greattunes.__init__.py)
     cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cls.dtype = torch.double
 
@@ -86,7 +86,7 @@ def test__initialize_from_covars_dict_of_dicts_works(covars, total_num_covars, c
     cls = Initializers()
 
     # define new class attributes from torch required for method to run (method assumes these defined under
-    # main class in creative_project.__init__.py)
+    # main class in greattunes.__init__.py)
     cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cls.dtype = torch.double
 
@@ -145,7 +145,7 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
     # create test version of Initializers to endow it with the property from _find_max_response_value, which is
     # otherwise defined as a static method in ._best_response
     #class TmpClass(Initializers):
-    #    from creative_project._best_response import _find_max_response_value
+    #    from greattunes._best_response import _find_max_response_value
     #cls = TmpClass()
     cls = tmp_Initializers_with_find_max_response_value_class
 
@@ -366,9 +366,9 @@ def test__initialize_covars_list_of_tuples_integration_works(covars, total_num_c
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [[(1, 0, 2, 3)], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry (1, 0, 2, 3)"], # test correct number of entries (_validators.__validate_num_entries_covar_tuples)
-        [[(1, 0, 2), ()], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry ()"], # test correct number of entries (_validators.__validate_num_entries_covar_tuples)
-        [[(1.1, 0.2, 3.4), (1, True, 2)], "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided <class 'bool'>"], # test correct data types (_validators.__validate_covars)
+        [[(1, 0, 2, 3)], "greattunes._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry (1, 0, 2, 3)"], # test correct number of entries (_validators.__validate_num_entries_covar_tuples)
+        [[(1, 0, 2), ()], "greattunes._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry ()"], # test correct number of entries (_validators.__validate_num_entries_covar_tuples)
+        [[(1.1, 0.2, 3.4), (1, True, 2)], "greattunes._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided <class 'bool'>"], # test correct data types (_validators.__validate_covars)
     ]
 )
 def test__initialize_covars_list_of_tuples_integration_fails(covars, error_msg):
@@ -429,12 +429,12 @@ def test__initialize_covars_dict_of_dicts_integration_works(covars, total_num_co
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [{'var0': {'guess': 1, 'min': 0, 'max': 2}, 'var1': (1, 0, 3)}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: 'covars' provided as part of class initialization must be either a list of tuples or a dict of dicts. Current provided is a dict containing data types {<class 'dict'>, <class 'tuple'>}."],  # incorrect data type in 'covars'
-        [{'var0': {'guess': 1, 'min': 0, 'max': 2}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'type' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'max': 2})."], # should fail for not having element "type"
-        [{'var0': {'guess': 1, 'max': 2, 'type': int}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min'
-        [{'var0': {'guess': 1, 'min': 0, 'type': int}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'max' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'type': <class 'int'>})."], # should fail for missing 'max'
-        [{'var0': {'guess': 1, 'max': 2, 'type': int}, 'var1': {'guess': 'red', 'options':{'red', 'green'}, 'type': str}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min' even though more variables provided
-        [{'var0': {'guess': 'red', 'type': str}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'options' missing for covariate 'var0' (covars['var0']={'guess': 'red', 'type': <class 'str'>})."],  # missing 'guess"
+        [{'var0': {'guess': 1, 'min': 0, 'max': 2}, 'var1': (1, 0, 3)}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: 'covars' provided as part of class initialization must be either a list of tuples or a dict of dicts. Current provided is a dict containing data types {<class 'dict'>, <class 'tuple'>}."],  # incorrect data type in 'covars'
+        [{'var0': {'guess': 1, 'min': 0, 'max': 2}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'type' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'max': 2})."], # should fail for not having element "type"
+        [{'var0': {'guess': 1, 'max': 2, 'type': int}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min'
+        [{'var0': {'guess': 1, 'min': 0, 'type': int}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'max' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'type': <class 'int'>})."], # should fail for missing 'max'
+        [{'var0': {'guess': 1, 'max': 2, 'type': int}, 'var1': {'guess': 'red', 'options':{'red', 'green'}, 'type': str}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min' even though more variables provided
+        [{'var0': {'guess': 'red', 'type': str}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'options' missing for covariate 'var0' (covars['var0']={'guess': 'red', 'type': <class 'str'>})."],  # missing 'guess"
     ]
 )
 def test__initialize_covars_dict_of_dicts_integration_fails(covars, error_msg):

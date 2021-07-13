@@ -4,8 +4,8 @@ import pytest
 import random
 import torch
 from gpytorch.mlls import ExactMarginalLogLikelihood
-from creative_project._initializers import Initializers
-from creative_project._validators import Validators
+from greattunes._initializers import Initializers
+from greattunes._validators import Validators
 
 ### Parsing of keywords: allow for specialized tests for different python versions
 def pytest_addoption(parser):
@@ -98,7 +98,7 @@ def training_data_covar_complex(covars_initialization_data):
     """
     defines simple training data that corresponds to covar_complex (covars_initialization_data[1]), where covar_complex
     is the right format for initialization of the full user-facing class CreativeProject
-    (creative_project.CreativeProject)
+    (greattunes.CreativeProject)
     """
 
     covars = covars_initialization_data[1]
@@ -174,7 +174,7 @@ def ref_model_and_multivariate_training_data(training_data_covar_complex):
 @pytest.fixture(scope="module")
 def tmp_observe_class():
     """
-    temporary class to allow testing of methods from creative_project._observe
+    temporary class to allow testing of methods from greattunes._observe
     """
 
     # define class
@@ -197,7 +197,7 @@ def tmp_observe_class():
 @pytest.fixture(scope="module")
 def tmp_modeling_class():
     """
-    temporary class to allow testing of methods from creative_project._modeling
+    temporary class to allow testing of methods from greattunes._modeling
     """
 
     class TmpClass:

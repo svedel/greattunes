@@ -1,6 +1,6 @@
 import torch
 import pytest
-from creative_project._modeling import _set_GP_model
+from greattunes._modeling import _set_GP_model
 
 
 @pytest.mark.parametrize("nu", [1.5, None, 2])
@@ -26,6 +26,6 @@ def test_modeling__set_GP_model_fail_unit(training_data_covar_complex, tmp_model
     # run the method
     with pytest.raises(Exception) as e:
         output_text = cls._set_GP_model(nu=nu)
-    assert str(e.value) == "creative_project._modeling._set_GP_model: unknown 'model_type' " \
+    assert str(e.value) == "greattunes._modeling._set_GP_model: unknown 'model_type' " \
                            "(" + cls.model["model_type"] + ") provided. Must be in following list " \
                                                             "['Custom', 'SingleTaskGP']"

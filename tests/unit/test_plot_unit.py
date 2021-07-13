@@ -69,7 +69,7 @@ def test_plot_covars_ref_plot_1d_fails(covars_initialization_data):
 
     with pytest.raises(Exception) as e:
         Xnew, x_min_plot, x_max_plot = cls._covars_ref_plot_1d()
-    assert str(e.value) == "kre8_core.creative_project._plot._covars_ref_plot_1d: only valid for 1d data (single covariate), but provided data has 3 covariates."
+    assert str(e.value) == "kre8_core.greattunes._plot._covars_ref_plot_1d: only valid for 1d data (single covariate), but provided data has 3 covariates."
 
 
 def test_plot_convergence(custom_models_simple_training_data_4elements):
@@ -196,7 +196,7 @@ def test_plot_best_objective_fails():
     # see that it fails
     with pytest.raises(Exception) as e:
         fx, ax = cls.plot_best_objective()
-    assert str(e.value) == "kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y is None"
+    assert str(e.value) == "kre8_core.greattunes._plot.plot_best_objective: No objective data: self.train_Y is None"
 
 
 # test that plot content (what's displayed) works

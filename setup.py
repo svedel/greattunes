@@ -62,7 +62,7 @@ requirements = req_remove(requirements, "torchvision==0.7.0+cpu")
 # ' @ https://download.pytorch.org/whl/torch_stable.html ')
 
 setuptools.setup(
-    name="creative_project",
+    name="greattunes",
     version=__version__,
     author="Søren Vedel",
     description="Toolset for easy execution of Bayesian optimization for either step-by-step or closed-loop needs.",
@@ -81,8 +81,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     packages=setuptools.find_packages(
-        include=["creative_project", "creative_project.*"]
+        include=["greattunes", "greattunes.*"]
     ),
-    package_data={"kre8_core": ["requirements.txt"]},
+    package_data={"greattunes": ["requirements.txt"]},
     python_requires=">=3.7",
 )

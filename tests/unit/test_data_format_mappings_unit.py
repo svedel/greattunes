@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-from creative_project.data_format_mappings import pretty2tensor_covariate, tensor2pretty_covariate, \
+from greattunes.data_format_mappings import pretty2tensor_covariate, tensor2pretty_covariate, \
     pretty2tensor_response, tensor2pretty_response
 
 

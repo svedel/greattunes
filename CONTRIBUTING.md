@@ -70,9 +70,9 @@ and perform style corrections if needed
 ~/creative_project$ black creative_project # makes the edits (only command needed to update the code)
 
 # === sort imports ===
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --check-only" # checks for sorting opportunities
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --diff" # shows changes that could be done
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py" # makes the changes (only command needed to update the code)
+~/creative_project$ /bin/sh -c "isort greattunes/**/*.py --check-only" # checks for sorting opportunities
+~/creative_project$ /bin/sh -c "isort greattunes/**/*.py --diff" # shows changes that could be done
+~/creative_project$ /bin/sh -c "isort greattunes/**/*.py" # makes the changes (only command needed to update the code)
 ```
 
 ### Pre-commit hooks

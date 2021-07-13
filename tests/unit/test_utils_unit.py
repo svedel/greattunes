@@ -1,6 +1,6 @@
 import pytest
 import torch
-from creative_project.utils import __get_covars_from_kwargs, DataSamplers
+from greattunes.utils import __get_covars_from_kwargs, DataSamplers
 
 
 @pytest.mark.parametrize(
@@ -35,7 +35,7 @@ def test__get_covars_from_kwargs_works(covars):
     [
         [[1.0, 2.0, 'a'], "must be real number, not str"],
         [['b'], "too many dimensions 'str'" ],
-        [torch.tensor([1.56, 12.8], dtype=torch.double), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size (2)."],
+        [torch.tensor([1.56, 12.8], dtype=torch.double), "greattunes.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size (2)."],
     ]
 )
 def test__get_covars_from_kwargs_fails(covars, error_msg):

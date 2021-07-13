@@ -1,8 +1,8 @@
 import pytest
 import botorch
 import torch
-from creative_project._acq_func import AcqFunction
-from creative_project.utils import DataSamplers
+from greattunes._acq_func import AcqFunction
+from greattunes.utils import DataSamplers
 
 def test_acq_func_set_acq_func_fails(custom_models_simple_training_data_4elements):
     """
@@ -26,7 +26,7 @@ def test_acq_func_set_acq_func_fails(custom_models_simple_training_data_4element
 
     with pytest.raises(Exception) as e:
         assert cls.set_acq_func()
-    assert str(e.value) == "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no surrogate model set " \
+    assert str(e.value) == "kre8_core.greattunes._acq_func.AcqFunction.set_acq_func: no surrogate model set " \
                            "(self.model['model'] is None)"
 
     # set attributes needed for test: train_Y to not None, model to "something" (something that doesn't trigger exception)
@@ -35,7 +35,7 @@ def test_acq_func_set_acq_func_fails(custom_models_simple_training_data_4element
 
     with pytest.raises(Exception) as e:
         assert cls.set_acq_func()
-    assert str(e.value) == "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no training data provided " \
+    assert str(e.value) == "kre8_core.greattunes._acq_func.AcqFunction.set_acq_func: no training data provided " \
                            "(self.train_Y is None)"
 
     # set attributes needed for test: train_Y to not None, model to None. Model exception should fire first
@@ -44,7 +44,7 @@ def test_acq_func_set_acq_func_fails(custom_models_simple_training_data_4element
 
     with pytest.raises(Exception) as e:
         assert cls.set_acq_func()
-    assert str(e.value) == "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no surrogate model set " \
+    assert str(e.value) == "kre8_core.greattunes._acq_func.AcqFunction.set_acq_func: no surrogate model set " \
                            "(self.model['model'] is None)"
 
 def test_acq_func_set_acq_func_fails_wrong_acqfunc_name(ref_model_and_training_data):
@@ -77,7 +77,7 @@ def test_acq_func_set_acq_func_fails_wrong_acqfunc_name(ref_model_and_training_d
 
     with pytest.raises(Exception) as e:
         assert cls.set_acq_func()
-    assert str(e.value) == "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: unsupported acquisition " \
+    assert str(e.value) == "kre8_core.greattunes._acq_func.AcqFunction.set_acq_func: unsupported acquisition " \
                            "function name provided. '" + cls.acq_func["type"] + "' not in list of supported " \
                            "acquisition functions [EI]."
 

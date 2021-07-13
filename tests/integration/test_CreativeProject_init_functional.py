@@ -1,19 +1,19 @@
 import pandas as pd
 import pytest
 import torch
-from creative_project import CreativeProject
+from greattunes import CreativeProject
 
 
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [None, "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'NoneType'> but must be of types {'list', 'dict'}."],
+        [None, "greattunes._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'NoneType'> but must be of types {'list', 'dict'}."],
         # checks no covars data provided
         [(1, 2, 3),
-         "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'tuple'> but must be of types {'list', 'dict'}."],
+         "greattunes._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'tuple'> but must be of types {'list', 'dict'}."],
         # checks fail if covars not a list of tuples
         [[1, 2, 3],
-         "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple"],
+         "kre8_core.greattunes._validators.Validator.__validate_covars: entry in covars list is not tuple"],
         # checks that covars is a list of tuples
     ])
 def test_CreativeProject__init__covars_notrainingdata_fails_functional(covars, error_msg):

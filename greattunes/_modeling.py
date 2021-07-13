@@ -1,8 +1,8 @@
 from botorch.fit import fit_gpytorch_model
 from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
-from creative_project.custom_models.simple_matern_model import SimpleCustomMaternGP
-from creative_project.transformed_kernel_models.GPregression import (
+from greattunes.custom_models.simple_matern_model import SimpleCustomMaternGP
+from greattunes.transformed_kernel_models.GPregression import (
     SingleTaskGP_transformed,
 )
 
@@ -55,7 +55,7 @@ def _set_GP_model(self, **kwargs):
         ll = ExactMarginalLogLikelihood(lh, model_obj)
     else:
         raise Exception(
-            "creative_project._modeling._set_GP_model: unknown 'model_type' ("
+            "greattunes._modeling._set_GP_model: unknown 'model_type' ("
             + self.model["model_type"]
             + ") provided. Must be in following list ['Custom', 'SingleTaskGP']"
         )

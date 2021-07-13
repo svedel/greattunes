@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import torch
-from creative_project.data_format_mappings import (
+from greattunes.data_format_mappings import (
     pretty2tensor_covariate,
     pretty2tensor_response,
 )
@@ -26,7 +26,7 @@ def __get_covars_from_kwargs(covars, **kwargs):
     # verify covars datatype
     if not isinstance(covars, (list, torch.DoubleTensor, pd.DataFrame)):
         raise Exception(
-            "creative_project.utils.__get_covars_from_kwargs: datatype of provided 'covars' is not allowed."
+            "greattunes.utils.__get_covars_from_kwargs: datatype of provided 'covars' is not allowed."
             "Only accept types 'list' and 'torch.DoubleTensor', got "
             + str(type(covars))
         )
@@ -67,7 +67,7 @@ def __get_covars_from_kwargs(covars, **kwargs):
             covars_candidate_float_tensor = covars
         else:
             raise Exception(
-                "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'."
+                "greattunes.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'."
                 " Was expecting torch tensor of size (1,<num_covariates>) but received one of size ("
                 + ", ".join([str(ent) for ent in covars_size_list])
                 + ")."
@@ -89,7 +89,7 @@ def __get_response_from_kwargs(response, **kwargs):
     # verify response datatype
     if not isinstance(response, (list, torch.DoubleTensor, pd.DataFrame)):
         raise Exception(
-            "creative_project.utils.__get_response_from_kwargs: datatype of provided 'response' is not allowed."
+            "greattunes.utils.__get_response_from_kwargs: datatype of provided 'response' is not allowed."
             "Only accept types 'list' and 'torch.DoubleTensor', got "
             + str(type(response))
         )
@@ -128,7 +128,7 @@ def __get_response_from_kwargs(response, **kwargs):
             response_candidate_float_tensor = response
         else:
             raise Exception(
-                "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'."
+                "greattunes.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'."
                 " Was expecting torch tensor of size (1,1) but received one of size ("
                 + ", ".join([str(ent) for ent in resp_size_list])
                 + ")."

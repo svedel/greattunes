@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import torch
-from creative_project.data_format_mappings import pretty2tensor_covariate, tensor2pretty_covariate
+from greattunes.data_format_mappings import pretty2tensor_covariate, tensor2pretty_covariate
 
 @pytest.mark.parametrize(
     "x_pandas",

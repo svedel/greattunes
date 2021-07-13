@@ -53,7 +53,7 @@ def test_update_max_response_value_fail_functional(tmp_best_response_class):
     # test that it initializes storage of best results when none present
     with pytest.raises(Exception) as e:
         cls._update_max_response_value()
-    assert str(e.value) == "creative_project._best_response._update_max_response_value.py: Missing or unable to process " \
+    assert str(e.value) == "greattunes._best_response._update_max_response_value.py: Missing or unable to process " \
                            "one of following attributes: self.train_X, self.train_Y"
 
 
