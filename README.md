@@ -1,4 +1,4 @@
-# Creative project: user-friendly Bayesian optimization library 
+![alt text](figs/greattunes.png)
 
 ![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
 
