@@ -24,7 +24,7 @@ def test_AcqFunction__initialize_acq_func_functional(custom_models_simple_traini
         self.it_ran = True
         return True
     monkeypatch.setattr(
-        creative_project._acq_func.AcqFunction, "set_acq_func", mock_set_acq_func
+        greattunes._acq_func.AcqFunction, "set_acq_func", mock_set_acq_func
     )
 
     # test that it passes with attribute train_Y being not None (should return True)

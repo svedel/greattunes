@@ -213,14 +213,14 @@ def _print_candidate_to_prompt(self, candidate):
     # verify datatype of candidate
     if not isinstance(candidate, torch.Tensor):
         raise Exception(
-            "kre8_core.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect "
+            "greattunes.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect "
             "datatype. Expecting to be of type torch.Tensor"
         )
 
     # verify that candidate not an empty list
     if not candidate.size()[0] > 0:
         raise Exception(
-            "kre8_core.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is empty. "
+            "greattunes.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is empty. "
             "Expecting torch tensor of size 1 X num_covariates"
         )
 

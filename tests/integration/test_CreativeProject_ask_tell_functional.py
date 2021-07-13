@@ -62,8 +62,8 @@ def test_CreativeProject_ask_integration_test_works(covars, model_type, train_X,
 @pytest.mark.parametrize(
     "covars, model_type, train_X, train_Y, covars_proposed_iter, covars_sampled_iter, response_sampled_iter, error_msg",
     [
-        [[(1, 0.5, 1.5)], "SingleTaskGP", None, torch.tensor([[0.8]], dtype=torch.double), 0, 0, 0, "kre8_core.greattunes._acq_func.AcqFunction.set_acq_func: no surrogate model set (self.model['model'] is None)"],  # the case where no COVARIATE data is available
-        [[(1, 0.5, 1.5)], "SingleTaskGP", None, torch.tensor([[0.8], [22]], dtype=torch.double), 0, 0, 0, "kre8_core.greattunes._acq_func.AcqFunction.set_acq_func: no surrogate model set (self.model['model'] is None)"],  # the case where no COVARIATE data is available, multiple observations
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, torch.tensor([[0.8]], dtype=torch.double), 0, 0, 0, "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: no surrogate model set (self.model['model'] is None)"],  # the case where no COVARIATE data is available
+        [[(1, 0.5, 1.5)], "SingleTaskGP", None, torch.tensor([[0.8], [22]], dtype=torch.double), 0, 0, 0, "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: no surrogate model set (self.model['model'] is None)"],  # the case where no COVARIATE data is available, multiple observations
     ]
 )
 def test_CreativeProject_ask_integration_test_fails(covars, model_type, train_X, train_Y, covars_proposed_iter,

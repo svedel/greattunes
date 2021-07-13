@@ -90,19 +90,19 @@ class Validators:
 
         if covars is None:
             raise ValueError(
-                "kre8_core.greattunes._validators.Validator.__validate_covars: covars is None"
+                "greattunes.greattunes._validators.Validator.__validate_covars: covars is None"
             )
 
         if not isinstance(covars, list):
             raise TypeError(
-                "kre8_core.greattunes._validators.Validator.__validate_covars: covars is not list "
+                "greattunes.greattunes._validators.Validator.__validate_covars: covars is not list "
                 "of tuples (not list)"
             )
 
         for entry in covars:
             if not isinstance(entry, tuple):
                 raise TypeError(
-                    "kre8_core.greattunes._validators.Validator.__validate_covars: entry in covars list is not "
+                    "greattunes.greattunes._validators.Validator.__validate_covars: entry in covars list is not "
                     "tuple"
                 )
 
@@ -110,7 +110,7 @@ class Validators:
             for el in entry:
                 if not isinstance(el, (float, int, str)):
                     raise TypeError(
-                        "kre8_core.greattunes._validators.Validator.__validate_covars: tuple element "
+                        "greattunes.greattunes._validators.Validator.__validate_covars: tuple element "
                         + str(el)
                         + " in covars list is neither of type float, int or str"
                     )

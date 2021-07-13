@@ -96,7 +96,7 @@ def test_get_and_verify_response_input_kwarg_input_works(tmp_observe_class, kwar
             return torch.tensor([kwarg_response], dtype=torch.double, device=device)
         else:
             return kwarg_response
-    monkeypatch.setattr(creative_project.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
+    monkeypatch.setattr(greattunes.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
 
     # run test
     output = cls._get_and_verify_response_input(response=kwarg_response)
@@ -181,7 +181,7 @@ def test_get_and_verify_response_input_fails_wrong_input(tmp_observe_class, resp
             return torch.tensor([kwarg_response], dtype=torch.double, device=mydevice)
         else:
             return kwarg_response
-    monkeypatch.setattr(creative_project.utils, "__get_response_from_kwargs", mock__get_response_from_kwargs)
+    monkeypatch.setattr(greattunes.utils, "__get_response_from_kwargs", mock__get_response_from_kwargs)
 
     # monkeypatch _read_response_manual_input
     def mock_read_response_manual_input(additional_text):
@@ -270,8 +270,8 @@ def test_observe_print_candidate_to_prompt_works_unit(tmp_observe_class, candida
 @pytest.mark.parametrize(
     "candidate, error_msg",
     [
-        [torch.tensor([], dtype=torch.double), "kre8_core.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is empty. Expecting torch tensor of size 1 X num_covariates"],
-        [None, "kre8_core.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect datatype. Expecting to be of type torch.Tensor"]
+        [torch.tensor([], dtype=torch.double), "greattunes.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is empty. Expecting torch tensor of size 1 X num_covariates"],
+        [None, "greattunes.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect datatype. Expecting to be of type torch.Tensor"]
     ]
 )
 def test_observe_print_candidate_to_prompt_fails_unit(tmp_observe_class, candidate, error_msg):
@@ -411,7 +411,7 @@ def test_get_and_verify_covars_programmatic_works(tmp_observe_class,
             return torch.tensor([covars], dtype=torch.double, device=device)
         else:
             return covars
-    monkeypatch.setattr(creative_project.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
+    monkeypatch.setattr(greattunes.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
 
     # monkeypatch "_Validators__validate_num_covars"
     def mock_Validators__validate_num_covars(x):
@@ -512,7 +512,7 @@ def test_get_and_verify_covars_programmatic_fails(tmp_observe_class,
             return torch.tensor([covars], dtype=torch.double, device=device)
         else:
             return covars
-    monkeypatch.setattr(creative_project.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
+    monkeypatch.setattr(greattunes.utils, "__get_covars_from_kwargs", mock__get_covars_from_kwargs)
 
     # monkeypatch "_Validators__validate_num_covars"
     def mock_Validators__validate_num_covars(x):
