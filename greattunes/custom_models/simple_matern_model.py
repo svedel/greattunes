@@ -5,9 +5,7 @@ from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.means import ConstantMean
 from gpytorch.models import ExactGP
 
-from greattunes.transformed_kernel_models.transformation import (
-    GP_kernel_transform,
-)
+from greattunes.transformed_kernel_models.transformation import GP_kernel_transform
 
 
 class SimpleCustomMaternGP(ExactGP, GPyTorchModel):

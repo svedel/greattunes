@@ -2,9 +2,7 @@ from botorch.fit import fit_gpytorch_model
 from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from greattunes.custom_models.simple_matern_model import SimpleCustomMaternGP
-from greattunes.transformed_kernel_models.GPregression import (
-    SingleTaskGP_transformed,
-)
+from greattunes.transformed_kernel_models.GPregression import SingleTaskGP_transformed
 
 
 def _set_GP_model(self, **kwargs):
