@@ -11,7 +11,7 @@ https://pytorch.org/get-started/locally/
 
 import setuptools
 
-from creative_project._version import __version__
+from greattunes._version import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
