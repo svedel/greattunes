@@ -1,6 +1,7 @@
 import pytest
 import torch
 from botorch.acquisition import ExpectedImprovement
+import numpy as np
 
 
 # test that plot content (what's displayed) works
@@ -11,6 +12,7 @@ from botorch.acquisition import ExpectedImprovement
                          ]
                          )
 def test_plot_1d_latest_one_window_integration_works(covars_for_custom_models_simple_training_data_4elements,
+                                                     covar_details_covars_for_custom_models_simple_training_data_4elements,
                                                      ref_model_and_training_data, sample_method, use_resp_func,
                                                      num_lines_ax1):
     """
@@ -20,19 +22,23 @@ def test_plot_1d_latest_one_window_integration_works(covars_for_custom_models_si
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # set response func
-    resp_func = None
-    if use_resp_func:
-        def resp_func(x):
-            return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
-
     # input from fixture
     covars = covars_for_custom_models_simple_training_data_4elements
+    covar_details = covar_details_covars_for_custom_models_simple_training_data_4elements[0]
     train_X = ref_model_and_training_data[0]
     train_Y = ref_model_and_training_data[1]
     model_obj = ref_model_and_training_data[2]
     lh = ref_model_and_training_data[3]
     ll = ref_model_and_training_data[4]
+
+    # set response func
+    resp_func = None
+    colname = list(covar_details.keys())[0]
+    if use_resp_func:
+        def resp_func(x):
+            #return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+            z = x[colname].iloc[-1]
+            return -(6 * z - 2) ** 2 * np.sin(12 * z - 4)
 
     # picking out covars
     guesses = [[g[0] for g in covars]]
@@ -58,6 +64,7 @@ def test_plot_1d_latest_one_window_integration_works(covars_for_custom_models_si
                 "method": sample_method, # "functions"
                 "response_func": resp_func
             }
+            self.covar_details = covar_details
 
         from creative_project._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
 

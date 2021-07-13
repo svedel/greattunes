@@ -134,7 +134,10 @@ def _get_response_function_input(self):
     Assumes response is univariate.
     :input
         - self.train_X: latest proposed covariates
-        - self.sampling["response_func"]: the response function (applied to last row in self.train_X)
+        - self.sampling["response_func"]: the response function (applied to last row in self.train_X). The function must
+        accept a pandas data frame as input (in the format of the pretty data 'x_data' for the class) and must return a
+        single element as response; acceptable formats for return are: int, float, any numpy float, any numpy int, list,
+        numpy array, pandas dataframe (with response column named "Response").
     :return response_candidate_float_tensor (torch tensor): a 1x1 torch tensor with response to last datapoint
     """
 
@@ -151,9 +154,26 @@ def _get_response_function_input(self):
     resp = self.sampling["response_func"](covars_pretty)
 
     # cast response as tensor
-    response_candidate_float_tensor = torch.tensor(
-        [[resp]], device=self.device, dtype=self.dtype
-    )
+    if isinstance(resp, (int, float, np.floating, np.integer)):
+        response_candidate_float_tensor = torch.tensor(
+            [[resp]], device=self.device, dtype=self.dtype
+        )
+    # for types list, numpy array take the last element
+    elif type(resp) in {list, np.ndarray}:
+        response_candidate_float_tensor = torch.tensor(
+            [resp[-1]], device=self.device, dtype=self.dtype
+        ).reshape(1, 1)
+    # for pandas take the last element from column "Response"
+    elif type(resp) == pd.DataFrame:
+        response_candidate_float_tensor = torch.tensor(
+            [[resp["Response"].iloc[-1]]], device=self.device, dtype=self.dtype
+        )
+    else:
+        raise Exception(
+            "creative_project._observe._get_response_function_input: response function provided does not"
+            " return acceptable output types ('int','float','list','numpy.ndarray','pandas.DataFrame'), "
+            " but returned " + str(type(resp))
+        )
 
     return response_candidate_float_tensor
 
@@ -219,7 +239,7 @@ def _print_candidate_to_prompt(self, candidate):
     # create string
     input_request = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(
         index=False
-    )
+    ).replace("\n", "\n\t")
 
     return input_request
 

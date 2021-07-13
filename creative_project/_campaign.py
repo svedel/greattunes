@@ -76,7 +76,7 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
         # update counter
         it += 1
 
-        print("ITERATION " + str(it) + ": Identify new covariate datapoint...", end=" ")
+        print("ITERATION " + str(it) + ":\n\tIdentify new covariate datapoint...")
 
         # initialize acquisition function (if first time data present, otherwise don't do anything)
         self._AcqFunction__initialize_acq_func()
@@ -111,7 +111,7 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
         self.model["covars_proposed_iter"] += 1
         self.model["covars_sampled_iter"] += 1
 
-        print("Get response for new datapoint...", end=" ")
+        print("\tGet response for new datapoint...")
 
         # get response and store
         response = self._get_and_verify_response_input()
@@ -137,9 +137,9 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
         # self.nu is None except for case where self.model["model_type"] = "Custom", however is not called for any
         # other case
         model_retrain_success_str = self._set_GP_model(nu=self.nu)
-        print(model_retrain_success_str + "...", end=" ")
+        print("\t" + model_retrain_success_str + "...")
 
-        print("Finish iteration...")
+        print("\tFinish iteration...")
 
         # update best response value and associated covariates
         self._update_max_response_value()

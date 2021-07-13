@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import copy
 import gpytorch
 import torch
+import pandas as pd
 
 
 def _covars_ref_plot_1d(self):
@@ -43,13 +44,16 @@ def predictive_results(self, pred_X):
     # set model to produce predictive results
     model_local = copy.deepcopy(self.model["model"])  # self.model["model"]
     model_local.eval()
-    likelihood_local = copy.deepcopy(
-        self.model["likelihood"]
-    )  # self.model["likelihood"]
-    likelihood_local.eval()
+    model_local.likelihood.eval()
+    # likelihood_local = copy.deepcopy(
+    #     self.model["likelihood"]
+    # )  # self.model["likelihood"]
+    # likelihood_local.eval()
 
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
-        observed_pred = likelihood_local(model_local(pred_X))
+        observed_pred = model_local.likelihood(
+            model_local(pred_X)
+        )  # likelihood_local(model_local(pred_X))
 
     # Get upper and lower confidence bounds, mean
     lower_bound, upper_bound = observed_pred.confidence_region()
@@ -107,7 +111,14 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
         and self.sampling["response_func"] is not None
     ):
         include_resp = True
-        actual_resp = self.sampling["response_func"](Xnew)
+        # Xnew_df = tensor2pretty_covariate(train_X_sample=Xnew, covar_details=self.covar_details)
+        # actual_resp = self.sampling["response_func"](Xnew)
+        # actual_resp = self.sampling["response_func"](Xnew_df)
+        colname = list(self.covar_details.keys())[0]
+        actual_resp = [
+            self.sampling["response_func"](pd.DataFrame({colname: [x.item()]}))
+            for x in Xnew
+        ]
 
     # acquisition function
     acq_func = self.acq_func["object"](Xnew.unsqueeze(-1).unsqueeze(-1)).detach()
@@ -131,7 +142,7 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
 
     # Add actual response (if known)
     if include_resp:
-        ax1.plot(Xnew.numpy(), actual_resp.numpy(), "--k", label="Actual Response")
+        ax1.plot(Xnew.numpy(), actual_resp, "--k", label="Actual Response")
 
     # Shade between the lower and upper confidence bounds
     ax1.fill_between(
@@ -181,7 +192,7 @@ def plot_convergence(self):
     """
 
     # calculates the relative error
-    y = copy.deepcopy(self.train_Y)
+    y = copy.deepcopy(self.best_response_value)
     y_diff = y[1:] - y[:-1]
     y_rel = y_diff / y[1:]
 
@@ -213,7 +224,7 @@ def plot_best_objective(self):
 
     # build the plot
     fx, ax = plt.subplots(1, 1, figsize=(6, 4))
-    ax.plot(list(range(self.train_Y.shape[0])), self.train_Y.numpy(), "-b.")
+    ax.plot(list(range(self.train_Y.shape[0])), self.best_response_value.numpy(), "-b.")
     ax.set_xlabel("Iteration $n$")
     ax.set_ylabel("Best objective $y^{max}_n$ found up to iteration $n$")
 

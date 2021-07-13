@@ -1,19 +1,19 @@
-# Creative project: user-friendly Bayesian optimization library 
+![alt text](figs/greattunes.png)
 
 ![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
 
-Easy-to-use Bayesian optimization library made available for either closed-loop or user-driven (manual) optimization of either 
+**Easy-to-use Bayesian optimization library** made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
 
 A short primer on Bayesian optimization is provided in [this section](#a-primer-on-bayesian-optimization).  
 
 ## Features
 
+* Handles **continuous**, **integer** and **categorical** covariate.
 * Optimization of either *known* or *unknown* functions. The allows for optimization of e.g. real-world experiments 
   without specifically requiring a model of the system be defined a priori.
-* Focus on ease of use: only few lines of code required for full Bayesian optimization.
-* Simple interface.
-* Erroneous observations of either covariates or response can be overridden during optimization. 
+* Simple interface with focus on ease of use: only few lines of code required for full Bayesian optimization.
+* Erroneous observations of either covariates or response can be overwritten during optimization. 
 * Well-documented code with detailed end-to-end examples of use, see [examples](#examples).
 * Optimization can start from scratch or repurpose existing data.
 
@@ -23,6 +23,9 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 * **Multivariate covariates, univariate system response:** It is assumed that input covariates (the independent 
   variables) can be either multivariate or univariate, while the system response (the dependent variable) is only 
   univariate.
+* **Optimizing across continuous, integer and categorical covariates:** Problems can depend on any of these types of 
+  variables, in any combination. Special attention is given to implementation of integer and categorical variables
+  which are handled via the method of Garrido-Merchán and Hernandéz-Lobato (E.C. Garrido-Merchán and D. Hernandéz-Lobato, Neurocomputing, see [References](#references)).
 * **System-generated or manual input:** Observations of covariates and responses during optimization can be provided 
   both programmatically or manually via prompt input.
 * **Optimizes known and unknown response functions:** Both cases where the response function can be formulated 
@@ -156,20 +159,161 @@ been to use the `.ask`-`.tell` methods instead of `.auto`.
 
 ### Key attributes
 
-The following key attributes are stored for each optimization as part of the instantiated class 
+#### User-facing attributes: easily-accessible covariates and response
+The following key attributes are stored for each optimization as part of the instantiated class. These primary
+data structures for users are stored in `pandas` dataframes in pretty format.
 
 | Attribute | Comments |
 | --------- | -------- |
-| `train_X` | All *observed* covariates with dimensions `num_observations` X `num_covariates`. |
-| `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions `num_observations` X `num_covariates`. |
-| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` X 1. |
-| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. |
-| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. |    
+| `x_data` | All *observed* covariates with dimensions, one row per observation. If no names have been added to the covariates they will take the naems "covar0", "covar1", ... . Dimensions `num_observations` X `num_covariates`. |
+| `y_data` | All *observed* responses corresponding to the covariate points (rows) in `x_data`. Dimensions `num_observations` X 1. |
+| `best_response` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. |
+| `covars_best_response` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response` generated the same row in `best_response`. Dimensions `num_observations` X `num_covariates`. |
 
-### Initialization options
+#### Backend attributes
+In the backend the framework makes use of different data structures based on the `tensor` structure from `torch` which 
+also handles one-hot encoding of categorical variables. The key backend attributes are listed in the table below.
+
+| Attribute | Comments |
+| --------- | -------- |
+| `train_X` | All *observed* covariates with dimensions `num_observations` X `num_covariates`. Backend equivalent to `x_data`. |
+| `proposed_X` | All *proposed* covariate datapoints to investigate, with dimensions `num_observations` X `num_covariates`. |
+| `train_Y` | All *observed* responses corresponding to the covariate points in `train_X`. Dimensions `num_observations` X 1. Backend equivalent to `y_data`. |
+| `best_response_value` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. Backend equivalent to `best_response`.|
+| `covars_best_response_value` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response_value` generated the same row in `best_response_value`. Dimensions `num_observations` X `num_covariates`. Backend equivalent to `covars_best_response`. |    
+
+### Covariates: the free parameters which are adjusted by the framework during optimization
+The user must detail which covariates the framework can adjust in order to optimize (maximize/minimize) the
+response. This is a mandatory part of class initialization and set via `covars` input variable; without any knowledge 
+of the covariates, the framework cannot proceed to optimization. Here's an example for a problem with two covariates 
+```python
+covars = [(0.5, 0, 1), (2,1,4)]  # each tuple defines one covariate; the tuple entries are (initial guess, min, max)
+
+# initialize the class
+cls = CreativeProject(covars=covars, ...)
+``` 
+This is also illustrated for a single-variable situation in [Step 1: Define the problem](#Step-1:-Define-the-problem) 
+above.
+
+#### Supported types: Handling continuous, integer and categorical covariates
+The following three types of covariates are supported.
+* **Continuous**: Variables which can take any numerical value, i.e. can take values which include decimals. The data 
+  type of a continuous variable will be among `float` types. Typical examples of continuous covariates will be weights 
+  in a model and time thresholds (imagine a case where total runtime was a parameter). 
+* **Integer**: Variables which can only take integer values; the data types of these variables will be among `int` types.
+  Special consideration must be taken during optimization because these variables only can update in discrete steps, 
+  resulting in step changes of the response. Examples of integer covariates include number of layers in a neural network
+  and number of eggs in a recipe.
+* **Categorical**: Variables that can take different discrete values, which, contrary to integers do not even have any
+  internal relation in terms of size. An example is a variable which can take the values {`green`,`blue`,`red`} where
+  there clearly is no direct numerical relationship between the potential values; in contrast, a numerical relationship
+  does exist for integer variables (e.g. 5 is bigger than 2). In addition to the color example above, another example of 
+  a categorical variable can be one which determines the make of a car (e.g. take values `volvo`, `lincoln`, `fiat` etc)
+
+The framework follows the method of Garrido-Merchán and Hernandéz-Lobato (see [References](#References)) to integrate 
+the different types of covariates and bring them to a form that is consistent with using continuous Gaussian 
+processes to drive the optimization. Briefly, the method relies on adding a transformation of variables in the 
+correlation (kernel) function of the Gaussian processes with the following properties: integer covariates are rounded to
+nearest integer and categorical variables are one-hot encoded and only the one with highest numerical value is carried
+forward in each round by adjusting the value of its associated one-hot encoded variable to 1 and setting all other
+one-hot encoded variables to 0.
+
+#### Two approaches to defining covariates in framework: working with named covariates and setting data types
+Two ways are offered to provide covariate details to the framework: the simple way which assigns names to covariates 
+and infers their data types from the provided data in `covars` (used so far), and an elaborate way which allows for 
+naming covariates and gives more control to specify data types. In either case, the information is given to the
+framework via the `covars` input variable.
+
+##### Simple approach: faster, but no control over covariate names and data types 
+Each covariate is defined by a tuple, and the order of the tuples defines the order of the covariates. The same order
+must be used later if covariates are manually reported via the `.tell`-method.
+
+###### Covariate data types
+Covariate data type is critical because it impacts how to handle the covariate during the optimization. In this simple
+approach, data types are inferred from the provided data in `covars` as indicated by the table below.
+
+| Data type | How report | Example | Comments |
+| --------- | ---------- | ------- | -------- |
+| Integer   | (`<initial_guess>`,`<parameter_minimum>`, `<parameter_maximum>`) | `(2, 0, 5)` | All tuple entries must be of data type `int` for covariate to be taken as integer |
+| Continuous | (`<initial_guess>`,`<parameter_minimum>`, `<parameter_maximum>`) | `(2.0, -1.2, 2.5)` | Only one tuple entry has to be a `float` for the covariate to be set to continuous |
+| Categorical | (`<initial_guess>`,`<option_1>`, `<option_2>`, ...) | `(volvo, fiat, aston martin, ford, toyota)` | Covariate is taken as categorical if any entry has data type `str`. There must be at least one other option than `<initial_guess>`, but otherwise no limit to the number of entries. | 
+
+Here's an example of how to use the simple approach to define the `covars`-variable to communicate covariates of 
+different data types. This `covars` could be used to initialize a class instantiation
+```python
+covars = [
+            (1, 0, 2),  # will be taken as INTEGER (type: int)
+            (1.0, 0.0, 2.0),  # will be taken as CONTINUOUS (type: float)
+            (1, 0, 2.0),  # will be taken as CONTINUOUS (type: float)
+            ("red", "green", "blue", "yellow"),  # will be taken as CATEGORICAL (type: str)
+            ("volvo", "chevrolet", "ford"),  # will be taken as CATEGORICAL (type: str)
+            ("sunny", "cloudy"),  # will be taken as CATEGORICAL (type: str)
+        ]
+```
+
+###### Covariate names 
+Covariates are assigned names behind the scenes of the type `covar1`, `covar2` etc. with numbers added in the order in 
+which the variable is processed from the `covars` list of tuples during class initialization (beware that this order may
+not be preserved). Covariate names are visible as the column names in the `x_data` attribute. 
+
+##### Elaborate approach: allows for specifying names and data types of covariates
+This approach requires a bit more details to be provided, but also offers much more flexibility.
+
+In this approach, all covariates are defined in a dictionary which is fed via the `covars` parameter, and each covariate is defined by their own dictionary 
+nested within the outer dictionary specifying all covariates. An example, which will be elaborated further in the
+following, is given below for 3 covariates to make this concrete
+```python
+covars = {
+            'variable1':  # type: integer
+                {
+                    'guess': 1,
+                    'min': 0,
+                    'max': 2,
+                    'type': int,
+                },
+            'variable2':  # type: continuous (float)
+                {
+                    'guess': 12.2,
+                    'min': -3.4,
+                    'max': 30.8,
+                    'type': float,
+                },
+            'variable3':  # type: categorical (str)
+                {
+                    'guess': 'red',
+                    'options': {'red', 'blue', 'green'},
+                    'type': str,
+                }
+        }
+```
+
+Each nested dictionary gives the details of an individual covariate, and the name of these nested dictionaries are used
+to name the covariate. 
+
+**Covariate names**: Anything that's permissable as a `python` string is a valid covariate name. These names are used
+throughout the framework (will be inherited into `x_data`).
+
+**Specifying data type**: The variable `type` indicates the type of the covariate. The framework uses the following types
+* `int`: integer covariate
+* `float`: continuous covariate
+* `str`: categorical covariate
+Beware that the data type (and not a string) is used to define the type (i.e. use e.g. `str` not `'str'` to indicate a 
+  categorical variable).
+
+**Required information for each covariate**: Requirements vary with the covariate data type. The following is required 
+for each type of covariate
+* Integer (`'type': int`): Required fields are `guess`, `min` and `max` (all single entries of type: `int`), as well as 
+  `type` (must be `int` to specify categorical).
+* Continuous (`'type': float`): Required fields are `guess`, `min` and `max` (all single entries of types `int` or 
+  `float`), as well as `type` (must be `float` to specify categorical).
+* Categorical (`'type': str`): Required fields are `guess` (a single entry, type: `str`), `options` (dictionary of `str`, one 
+  for each option the covariate can take. Must also include the element in `guess`) and `type` (must be `str` to specify
+  categorical).
+
+The example above shows 3 covariates but the framework can handle any number of covariates. Simply adjust the number of
+nested dictionaries to meet the need (and use appropriate naming and covariate specification for your application).
 
 #### Multivariate covariates
-
 Multivariate covariates are set via the (mandatory) `covars` parameter during class initialization. Each covariate is 
 given as a 3-tuple of parameters (`<initial_guess>`,`<parameter_minimum>`, `<parameter_maximum>`) (the order matters!), with `covars` being a
 list of these tuples. As an example, for a cases with 3 covariates, the `covars` parameter would be
@@ -188,6 +332,8 @@ would be
 ```python
 train_X = torch.tensor([[1, 5.2, 4]], dtype=torch.double)
 ```
+
+### Initialization options
 
 #### Starting with historical data
 
@@ -456,86 +602,19 @@ observed_response_second = observed_response + 1
 cc.tell(covars=observed_results, response=observed_response_second)
 ```
 
+## Contributing
+We are happy if you would like to invest time in this project! Details are given in [CONTRIBUTING.md](CONTRIBUTING.md) 
+on how to get started.
 
 ## Examples 
 
 A number of examples showing how to use the framework in `jupyter` notebooks is available in the [examples](examples) 
 folder. This includes both closed-loop and iterative usages, as well as a few real-world examples (latter to come!)
 
+## References
 
-## Contributing
-
-### Tech stack
-
-This library is built using the following
-* `torch`
-* `GPyTorch`
-* `BOTorch`
-* `numpy`
-
-### Access to backlog etc
-
-To be detailed later
-
-### Testing strategy
-
-Regular unit and integration testing is performed during each run of the CI pipeline.
-
-In addition, a set of sample problems are also executed. The purpose of these special integration tests is to verify
-that the optimization performance of the framework remains consistent. These sample problems is a series of pre-defined
-applications of the framework with known results.
-
-#### Test tooling
-
-The `pytest` framework is used for this library, with all tests residing in 
-[`creative_project\tests`](tests). To execute all tests, run the following from the terminal from the 
-project root folder (`creative_project`)
-```python
-~/creative_project$ python -m pytest tests/
-```
-
-The tests are available in 
-* Unit tests: [`creative_project\tests\unit`](tests/unit)
-* Integration tests: [`creative_project\tests\integration`](tests/integration)
-* Sample problems: [`creative_project\tests\sample_problems`](tests/sample_problems)
-
-All fixtures are collected in `tests\conftest.py` and config is specified in `tests\pytest.ini`.
-
-#### Tests during CI
-All tests are run by CI pipeline when committing to any branch. In addition, linting, style format and library import
-style checks are also executed.
-
-`sample_problems` tests are allowed to fail for regular commits but must pass for merge commits.
-
-#### Tests during development
-During development, unit and integration tests are typically sufficient to check ongoing developments. These tests can
-be executed by the command
-```python
-~/creative_project$ python -m pytest tests/unit tests/integration
-```
-Before committing it is good practise to also run sample problems, which can be done by either `python -m pytest tests/`
-(running all tests including sample problems), or `python -m pytest tests/sample_problems`.
-
-#### Additional code checks 
-In addition, linting, code style checking and sorting of imports is also executed by the CI pipeline. The library is
-currently using `flake8` for linting, `black` for code format checking and `isort` to manage library import style.
-
-The following commands, executed in the terminal from the project root folder (`creative_project`), will run the checks 
-and perform style corrections if needed
-```python
-# === linting ===
-~/creative_project$ flake8 creative_project/
-
-# === code style ===
-~/creative_project$ black creative_project --check # checks for fixes needed
-~/creative_project$ black creative_project --diff # shows suggested edits
-~/creative_project$ black creative_project # makes the edits (only command needed to update the code)
-
-# === sort imports ===
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --check-only" # checks for sorting opportunities
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py --diff" # shows changes that could be done
-~/creative_project$ /bin/sh -c "isort creative_project/**/*.py" # makes the changes (only command needed to update the code)
-```
+* [E.C. Garrido-Merchán and D. Hernandéz-Lobato: Dealing with categorical and integer-valued variables in Bayesian
+Optimization with Gaussian processes, Neurocomputing vol. 380, 7 March 2020, pp. 20-35](https://www.sciencedirect.com/science/article/abs/pii/S0925231219315619), [ArXiv preprint](https://arxiv.org/pdf/1805.03463.pdf)
 
 ## A primer on Bayesian optimization
 
@@ -578,7 +657,7 @@ A number of different functions exist, with some typical ones provided in Peter 
 [Tutorial on Bayesian Optimization](https://arxiv.org/pdf/1807.02811.pdf). They typically balance exploration and 
 exploitation in different ways.
 
-## References
+### References
 A list of Bayesian optimization references for later use
 * [Wikipedia entry on Bayesian optimization](https://en.wikipedia.org/wiki/Bayesian_optimization)
 * [borealis.ai](https://www.borealisai.com/en/blog/tutorial-8-bayesian-optimization/)

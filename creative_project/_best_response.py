@@ -94,7 +94,6 @@ def current_best(self):
 
     # corresponding covariates X (list of float)
     # convert to pretty format before printing to prompt
-    max_X_list = self.covars_best_response_value[-1].tolist()
     max_X_df = tensor2pretty_covariate(
         train_X_sample=self.covars_best_response_value[-1].reshape(
             1, self.total_num_covars
@@ -110,7 +109,8 @@ def current_best(self):
         + "{:.5e}".format(max_Y)
     )
     print(
-        "Corresponding covariate values resulting in max_Y:\n\t" + max_X_df.to_string()
+        "Corresponding covariate values resulting in max_Y:\n\t"
+        + max_X_df.to_string(index=False).replace("\n", "\n\t")
     )
 
     # set attributes

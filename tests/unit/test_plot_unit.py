@@ -5,29 +5,9 @@ from botorch.acquisition import ExpectedImprovement
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 from matplotlib.testing.decorators import image_comparison
+import pandas as pd
+import numpy as np
 
-
-# @image_comparison(baseline_images=["plot_convergence"], remove_text=True, extensions=['png'])
-# def test_plot_plot_convergence(custom_models_simple_training_data_4elements):
-#     """
-#     does test of convergence plot, leveraging test
-#     """
-#
-#     # train Y data
-#     train_Y = custom_models_simple_training_data_4elements[1]
-#
-#     # define test class
-#     class TmpClass:
-#         def __init__(self):
-#             self.train_Y = train_Y
-#
-#         from creative_project._plot import plot_convergence
-#
-#     # initiate class
-#     cls = TmpClass()
-#
-#     # create plot
-#     cls.plot_convergence()
 
 def test_plot_covars_ref_plot_1d(covars_for_custom_models_simple_training_data_4elements):
     """
@@ -104,6 +84,7 @@ def test_plot_convergence(custom_models_simple_training_data_4elements):
     class TmpClass:
         def __init__(self):
             self.train_Y = train_Y
+            self.best_response_value = train_Y
 
         from creative_project._plot import plot_convergence
 
@@ -182,6 +163,7 @@ def test_plot_best_objective(custom_models_simple_training_data_4elements):
     class TmpClass:
         def __init__(self):
             self.train_Y = train_Y
+            self.best_response_value = train_Y
 
         from creative_project._plot import plot_best_objective
 
@@ -224,18 +206,14 @@ def test_plot_best_objective_fails():
                              ["functions", True, 3]
                          ]
                          )
-def test_plot_1d_latest_one_window_works(ref_model_and_training_data, sample_method, use_resp_func, num_lines_ax1,
+def test_plot_1d_latest_one_window_works(ref_model_and_training_data,
+                                         covar_details_covars_for_custom_models_simple_training_data_4elements,
+                                         sample_method, use_resp_func, num_lines_ax1,
                                          monkeypatch):
     """
     test that plot_1d_latest works and displays the right data on the axes. Test with and without response function
     plotted. Monkeypatching embedded function calls in plot_1d_latest
     """
-
-    # set response func
-    resp_func = None
-    if use_resp_func:
-        def resp_func(x):
-            return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
 
     # input from fixture
     train_X = ref_model_and_training_data[0]
@@ -243,6 +221,16 @@ def test_plot_1d_latest_one_window_works(ref_model_and_training_data, sample_met
     model_obj = ref_model_and_training_data[2]
     lh = ref_model_and_training_data[3]
     ll = ref_model_and_training_data[4]
+    covar_details = covar_details_covars_for_custom_models_simple_training_data_4elements[0]
+
+    # set response func XXX
+    resp_func = None
+    colname = list(covar_details.keys())[0]
+    if use_resp_func:
+        def resp_func(x):
+            z = x[colname].iloc[-1]
+            return -(6 * z - 2) ** 2 * np.sin(12 * z - 4)
+            #return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
 
     # define test class
     class TmpClass:
@@ -261,6 +249,7 @@ def test_plot_1d_latest_one_window_works(ref_model_and_training_data, sample_met
                 "method": sample_method, # "functions"
                 "response_func": resp_func
             }
+            self.covar_details = covar_details
 
         from creative_project._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
 

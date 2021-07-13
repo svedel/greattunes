@@ -63,7 +63,7 @@ def test_observe_get_and_verify_response_input_fail_unit(tmp_observe_class, meth
     kwarg_response = None
 
     with pytest.raises(Exception) as e:
-        assert output == cls._get_and_verify_response_input(response=kwarg_response)
+        assert cls._get_and_verify_response_input(response=kwarg_response)
     assert str(e.value) == "creative_project._observe._get_and_verify_response_input: class attribute " \
                            "self.sampling['method'] has non-permissable value " + str(method) + ", must be in " \
                            "['iterative', 'functions']."
@@ -261,7 +261,7 @@ def test_observe_print_candidate_to_prompt_works_unit(tmp_observe_class, candida
     new_cand_names = [i + " (" + str(covar_details[i]["type"]) + ")" for i in list(cand_pretty.columns)]
     cand_pretty.columns = new_cand_names
 
-    outtext = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(index=False)
+    outtext = "\tNEW datapoint to sample:\n\t" + cand_pretty.to_string(index=False).replace("\n", "\n\t")
 
     # assert
     assert input_request == outtext

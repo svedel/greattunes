@@ -25,29 +25,59 @@ def GP_kernel_transform(x, GP_kernel_mapping_covar_identification):
         applied
     """
 
-    x_output = x
+    x_output = x.clone()
 
     for mapped_covar in GP_kernel_mapping_covar_identification:
 
         # case where variable is of type int (integer)
         if mapped_covar["type"] == int:
-            x_output[:, mapped_covar["column"]] = torch.round(
-                x[:, mapped_covar["column"]]
+            x_output[..., mapped_covar["column"]] = torch.round(
+                x[..., mapped_covar["column"]]
             )
 
         # case where variable is of type str (categorical)
         elif mapped_covar["type"] == str:
 
             # identify column of max value
-            _, max_index = torch.topk(x[:, mapped_covar["column"]], 1)
+            _, max_index = torch.topk(
+                x[..., mapped_covar["column"]], 1, dim=-1
+            )  # apply row-wise (at dim -2)
 
             # set all but column of max value to 0, max value column to 1
-            # first set all entries in one-hot variables to 0
-            # then run through max one-hot variable in each row to set to 1 (also handles cases of >1 observations)
-            x_output[:, mapped_covar["column"]] = 0.0
-            for row_id in range(max_index.size()[0]):
-                x_output[
-                    row_id, mapped_covar["column"][max_index[row_id, 0].item()]
-                ] = 1.0
+            # first determine indices for which entries to mark as largest entries in colums identified by
+            # mapped_covar["column"]
+            if len(max_index.size()) == 2:  # input data x is a rank 2 tensor
+                # row indices
+                d1_indices = torch.tensor([range(max_index.size()[-2])])
+                # column indices
+                d2_indices = max_index.flatten()
+                indices = (d1_indices, d2_indices)
+            elif len(max_index.size()) == 3:  # input data x is a rank 3 tensor
+                # indices in 3rd dimension
+                d1_indices = torch.tensor(
+                    [[i] * max_index.size()[-2] for i in range(max_index.size()[-3])]
+                ).flatten()
+                # row indices
+                d2_indices = torch.tensor(
+                    [range(max_index.size()[-2])] * max_index.size()[-3]
+                ).flatten()
+                # column indices
+                d3_indices = max_index.flatten()
+                indices = (d1_indices, d2_indices, d3_indices)
+            else:
+                raise Exception(
+                    "create_project.transformed_kernel_models.transformation.GP_kernel_transform: provided "
+                    "input data 'x' is a tensor of rank 4; currently on tensors of ranks 2 and 3 are"
+                    "supported."
+                )
+
+            # set max val entries to 1, ignore duplicates
+            tmp = torch.zeros(
+                [dsize for dsize in x.size()[:-1]] + [len(mapped_covar["column"])],
+                dtype=torch.double,
+            )
+            x_output[..., mapped_covar["column"]] = tmp.index_put(
+                indices=indices, values=torch.tensor([1.0], dtype=torch.double)
+            )
 
     return x_output
