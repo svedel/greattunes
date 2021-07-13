@@ -85,4 +85,5 @@ setuptools.setup(
     ),
     package_data={"greattunes": ["requirements.txt"]},
     python_requires=">=3.7",
+    url="https://github.com/svedel/greattunes",
 )
