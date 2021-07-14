@@ -71,7 +71,7 @@ jobs:
         run: |
           python -m pytest tests/sample_problems
         continue-on-error: true
-      - name: build package
-        run: python3 setup.py bdist_wheel
+      #- name: build package
+      #  run: python3 setup.py bdist_wheel
 
 
