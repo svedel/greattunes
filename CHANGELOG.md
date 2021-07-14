@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] - 
 
-Version for this release: 0.0.4
+Version for this release: 0.0.5
+
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+
+## [0.0.4] - July 14, 2021
 
 ### Added
 * Functionality to use integer and categorical covariates as input to the function under optimization, using the method
@@ -43,6 +51,7 @@ user-facing format (in `pandas` df) to report all entries, including integer and
 data types (`int` and `str`).
 
 ### Fixed
+None
 
 ## [0.0.3] - February 25, 2021
 
