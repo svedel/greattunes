@@ -71,9 +71,6 @@ setuptools.setup(
     # dependency_links=["https://download.pytorch.org/whl/torch_stable.html"],
     install_requires=requirements,
     classifiers=[
-        "Framework :: Torch",
-        "Framework :: BOTorch",
-        "Framework :: GPyTorch",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Intended Audience :: Developers",
