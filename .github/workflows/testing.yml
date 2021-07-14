@@ -1,6 +1,6 @@
-# CI/CD pipeline
+# Pipeline for testing, code format and style checks
 
-name: CI CD workflow
+name: Tests, code format and style checks
 
 on:
   push:
