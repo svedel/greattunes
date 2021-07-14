@@ -9,7 +9,7 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 
 ## Features
 
-* Handles **continuous**, **integer** and **categorical** covariate.
+* Handles **continuous**, **integer** and **categorical** covariates.
 * Optimization of either *known* or *unknown* functions. The allows for optimization of e.g. real-world experiments 
   without specifically requiring a model of the system be defined a priori.
 * Simple interface with focus on ease of use: only few lines of code required for full Bayesian optimization.
