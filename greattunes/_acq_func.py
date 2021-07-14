@@ -2,7 +2,7 @@ import torch
 from botorch.acquisition import ExpectedImprovement
 from botorch.optim import optimize_acqf
 
-from creative_project.utils import DataSamplers
+from greattunes.utils import DataSamplers
 
 
 class AcqFunction:
@@ -19,19 +19,19 @@ class AcqFunction:
 
         if self.model["model"] is None:
             raise Exception(
-                "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no surrogate model set "
+                "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: no surrogate model set "
                 "(self.model['model'] is None)"
             )
         if self.train_Y is None:
             raise Exception(
-                "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: no training data provided "
+                "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: no training data provided "
                 "(self.train_Y is None)"
             )
 
         LIST_ACQ_FUNCS = ["EI"]
         if not self.acq_func["type"] in LIST_ACQ_FUNCS:
             raise Exception(
-                "kre8_core.creative_project._acq_func.AcqFunction.set_acq_func: unsupported acquisition function "
+                "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: unsupported acquisition function "
                 "name provided. '"
                 + self.acq_func["type"]
                 + "' not in list of supported acquisition functions ["

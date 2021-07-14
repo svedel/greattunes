@@ -28,7 +28,7 @@ def test_plot_covars_ref_plot_1d(covars_for_custom_models_simple_training_data_4
         def __init__(self):
             self.covar_bounds = covar_bounds
 
-        from creative_project._plot import _covars_ref_plot_1d
+        from greattunes._plot import _covars_ref_plot_1d
 
     # initiate class
     cls = TmpClass()
@@ -62,14 +62,14 @@ def test_plot_covars_ref_plot_1d_fails(covars_initialization_data):
         def __init__(self):
             self.covar_bounds = covar_bounds
 
-        from creative_project._plot import _covars_ref_plot_1d
+        from greattunes._plot import _covars_ref_plot_1d
 
     # initiate class
     cls = TmpClass()
 
     with pytest.raises(Exception) as e:
         Xnew, x_min_plot, x_max_plot = cls._covars_ref_plot_1d()
-    assert str(e.value) == "kre8_core.creative_project._plot._covars_ref_plot_1d: only valid for 1d data (single covariate), but provided data has 3 covariates."
+    assert str(e.value) == "greattunes.greattunes._plot._covars_ref_plot_1d: only valid for 1d data (single covariate), but provided data has 3 covariates."
 
 
 def test_plot_convergence(custom_models_simple_training_data_4elements):
@@ -86,7 +86,7 @@ def test_plot_convergence(custom_models_simple_training_data_4elements):
             self.train_Y = train_Y
             self.best_response_value = train_Y
 
-        from creative_project._plot import plot_convergence
+        from greattunes._plot import plot_convergence
 
     # initiate class
     cls = TmpClass()
@@ -125,7 +125,7 @@ def test_predictive_results_unit(ref_model_and_training_data):
                 "loglikelihood": ll,
             }
 
-        from creative_project._plot import predictive_results
+        from greattunes._plot import predictive_results
 
     # initialize class
     cls = TmpClass()
@@ -165,7 +165,7 @@ def test_plot_best_objective(custom_models_simple_training_data_4elements):
             self.train_Y = train_Y
             self.best_response_value = train_Y
 
-        from creative_project._plot import plot_best_objective
+        from greattunes._plot import plot_best_objective
 
     # initiate class
     cls = TmpClass()
@@ -188,7 +188,7 @@ def test_plot_best_objective_fails():
         def __init__(self):
             self.train_Y = None
 
-        from creative_project._plot import plot_best_objective
+        from greattunes._plot import plot_best_objective
 
     # initiate class
     cls = TmpClass()
@@ -196,7 +196,7 @@ def test_plot_best_objective_fails():
     # see that it fails
     with pytest.raises(Exception) as e:
         fx, ax = cls.plot_best_objective()
-    assert str(e.value) == "kre8_core.creative_project._plot.plot_best_objective: No objective data: self.train_Y is None"
+    assert str(e.value) == "greattunes.greattunes._plot.plot_best_objective: No objective data: self.train_Y is None"
 
 
 # test that plot content (what's displayed) works
@@ -251,7 +251,7 @@ def test_plot_1d_latest_one_window_works(ref_model_and_training_data,
             }
             self.covar_details = covar_details
 
-        from creative_project._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
+        from greattunes._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
 
     # initialize class
     cls = TmpClass()
@@ -362,7 +362,7 @@ def test_plot_1d_latest_multiple_windows_works(ref_model_and_training_data, monk
                 "response_func": None
             }
 
-        from creative_project._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
+        from greattunes._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
 
     # initialize class
     cls = TmpClass()

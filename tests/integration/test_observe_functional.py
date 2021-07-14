@@ -32,7 +32,7 @@ def test_observe_get_and_verify_response_input_manual_functional(tmp_observe_cla
 @pytest.mark.parametrize(
     "input_data, error_msg",
     [
-        [[3.1, -12.2], "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        [[3.1, -12.2], "greattunes._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
         ]
 )
 def test_observe_get_and_verify_response_input_manual_functional_fails(tmp_observe_class, input_data, error_msg, monkeypatch):
@@ -173,7 +173,7 @@ def test_get_and_verify_covars_input_with_dependencies_fails(tmp_observe_class, 
     monkeypatch.setattr("builtins.input", mock_input)
 
     # expected error message
-    error_msg = "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like '" + str(cls.proposed_X[-1]) + "', but got '" + str(covars_tensor) + "'"
+    error_msg = "greattunes._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like '" + str(cls.proposed_X[-1]) + "', but got '" + str(covars_tensor) + "'"
 
     # run the method, expect it to fail
     with pytest.raises(Exception) as e:
@@ -251,7 +251,7 @@ def test_covars_datapoint_observation_int_works(tmp_observe_class,
     "covariate_str, error_msg",
     [
         #["", "could not convert string to float: ''"],
-        ["", "creative_project._observe._read_covars_manual_input: incorrect number of covariates (1) provided, was expecting 4"],
+        ["", "greattunes._observe._read_covars_manual_input: incorrect number of covariates (1) provided, was expecting 4"],
         ["1, a, 2, 3", "could not convert string to float: ' a'"],
         [" , a, 2, 3", "could not convert string to float: ''"]
     ]
@@ -308,8 +308,8 @@ def test_covars_datapoint_observation_int_fails(tmp_observe_class,
 @pytest.mark.parametrize(
     "kwarg_covariates, error_msg",
     [
-        [[1.1, 2.2, -1.7], "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  1.1000,   2.2000, 200.0000,  -1.7000], dtype=torch.float64)', but got 'tensor([[ 1.1000,  2.2000, -1.7000]], dtype=torch.float64)'"],
-        [torch.tensor([1.1, 2.2, 200, -1.7], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "creative_project.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size (4)."]
+        [[1.1, 2.2, -1.7], "greattunes._observe._get_and_verify_covars_input: unable to get acceptable covariate input in 3 iterations. Was expecting something like 'tensor([  1.1000,   2.2000, 200.0000,  -1.7000], dtype=torch.float64)', but got 'tensor([[ 1.1000,  2.2000, -1.7000]], dtype=torch.float64)'"],
+        [torch.tensor([1.1, 2.2, 200, -1.7], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")), "greattunes.utils.__get_covars_from_kwargs: dimension mismatch in provided 'covars'. Was expecting torch tensor of size (1,<num_covariates>) but received one of size (4)."]
     ]
 )
 def test_get_covars_datapoint_kwargs_data_int_fails(tmp_observe_class,
@@ -412,9 +412,9 @@ def test_response_datapoint_observation_works(tmp_observe_class, train_Y, y_data
         ["", None, "could not convert string to float: ''"],
         ["a", None, "could not convert string to float: 'a'"],
         [" , a", None, "could not convert string to float: ''"],
-        ["1", [1, 2], "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
+        ["1", [1, 2], "greattunes._observe._get_and_verify_response_input: incorrect number of variables provided. Was expecting input of size (1,1) but received torch.Size([1, 2])"],
         ["1", ['a'], "too many dimensions 'str'"],
-        ["1", torch.tensor([[1, 2]], dtype=torch.double), "creative_project.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (1, 2)."]
+        ["1", torch.tensor([[1, 2]], dtype=torch.double), "greattunes.utils.__get_response_from_kwargs: dimension mismatch in provided 'response'. Was expecting torch tensor of size (1,1) but received one of size (1, 2)."]
     ]
 )
 def test_response_datapoint_observation_fails(tmp_observe_class, response_str, kwarg_response, error_msg, monkeypatch, pythontestvers):

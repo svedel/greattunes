@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 import torch
-from creative_project._validators import Validators
-from creative_project._initializers import Initializers
+from greattunes._validators import Validators
+from greattunes._initializers import Initializers
 
 
 @pytest.mark.parametrize("dataset_id",[0, 1])
@@ -17,15 +17,10 @@ def test_Validators__validate_num_covars(covars_initialization_data, dataset_id)
     covars_array = torch.reshape(covars_array, (covars_array.shape[1],covars_array.shape[0]))
     covars_array_wrong = torch.cat((covars_array, torch.tensor([[22.0]], dtype=torch.double)), dim=1)
 
-    #print("covars_array")
-    #print(covars_array)
-    #print("covars_wrong")
-    #print(covars_array_wrong)
-
     # instatiate Validators class
     cls = Validators()
 
-    # Leverage functionality from creative_project._initializers.Initializers.__initialize_from_covars for setting
+    # Leverage functionality from greattunes._initializers.Initializers.__initialize_from_covars for setting
     # correct data for test of __validate_num_covars
     init_cls = Initializers()
     init_cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -70,16 +65,16 @@ def test_unit_Validators__validate_training_data(custom_models_simple_training_d
     new_train_Y = torch.cat((train_Y, torch.tensor([[22.0]], dtype=torch.double)))
     with pytest.raises(Exception) as e:
         cls._Validators__validate_training_data(train_X=train_X, train_Y=new_train_Y)
-    assert str(e.value) == "creative_project._validators.Validators.__validate_training_data: The number of rows (observations) in provided 'train_X' (4) is not the same as for `train_Y` (5) as it should be."
+    assert str(e.value) == "greattunes._validators.Validators.__validate_training_data: The number of rows (observations) in provided 'train_X' (4) is not the same as for `train_Y` (5) as it should be."
 
 
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [None, "kre8_core.creative_project._validators.Validator.__validate_covars: covars is None"],  # checks no covars data provided
-        [(1, 2, 3), "kre8_core.creative_project._validators.Validator.__validate_covars: covars is not list of tuples (not list)"],  # checks fail if covars not a list of tuples
-        [[1, 2, 3], "kre8_core.creative_project._validators.Validator.__validate_covars: entry in covars list is not tuple"],  # checks that covars is a list of tuples
-        [[({"hej"}, 2, 3)], "kre8_core.creative_project._validators.Validator.__validate_covars: tuple element {'hej'} in covars list is neither of type float, int or str"]  # test that all elements in tuples are of type int or float
+        [None, "greattunes.greattunes._validators.Validator.__validate_covars: covars is None"],  # checks no covars data provided
+        [(1, 2, 3), "greattunes.greattunes._validators.Validator.__validate_covars: covars is not list of tuples (not list)"],  # checks fail if covars not a list of tuples
+        [[1, 2, 3], "greattunes.greattunes._validators.Validator.__validate_covars: entry in covars list is not tuple"],  # checks that covars is a list of tuples
+        [[({"hej"}, 2, 3)], "greattunes.greattunes._validators.Validator.__validate_covars: tuple element {'hej'} in covars list is neither of type float, int or str"]  # test that all elements in tuples are of type int or float
     ])
 def test_Validators__validate_covars_exceptions(covars, error_msg):
     """
@@ -212,11 +207,11 @@ def test__validate_num_entries_covar_tuples_works(covars, covars_tuple_datatypes
 @pytest.mark.parametrize(
     "covars, covars_tuple_datatypes, error_msg",
     [
-        [[(1, 0, 3)], [int, int], "creative_project._validators.__validate_num_entries_covar_tuples: dimension mismatch between the number of tuples in 'covars' and the number of datatype decisions in 'covars_tuple_datatypes'. 'covars' has length 1 while 'covars_tuple_datatype' has length 2"],  # covars and covar_tuple_datatypes have different length (number of entries)
-        [[()], [str], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types str (categorical variables) must have at least 1 entry. This is not the case for the entry " + str(())],  # empty tuple (set type to str to trigger str error  message)
-        [[(2,1,3,0)], [int], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((2,1,3,0))],  # int with more than 3 entries (will be the same for float)
-        [[(1.1, 0.2)], [float], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((1.1, 0.2))],  # float with less than 3 entries (will be the same for int)
-        [[(1, 0, 3), (2.2, 1.1, 3.3), (2.2, 1.1)], [int, float, float], "creative_project._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((2.2, 1.1))],  # float with more than 3 entries in list of multiple otherwise acceptible tuples
+        [[(1, 0, 3)], [int, int], "greattunes._validators.__validate_num_entries_covar_tuples: dimension mismatch between the number of tuples in 'covars' and the number of datatype decisions in 'covars_tuple_datatypes'. 'covars' has length 1 while 'covars_tuple_datatype' has length 2"],  # covars and covar_tuple_datatypes have different length (number of entries)
+        [[()], [str], "greattunes._validators.__validate_num_entries_covar_tuples: tuple entries of types str (categorical variables) must have at least 1 entry. This is not the case for the entry " + str(())],  # empty tuple (set type to str to trigger str error  message)
+        [[(2,1,3,0)], [int], "greattunes._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((2,1,3,0))],  # int with more than 3 entries (will be the same for float)
+        [[(1.1, 0.2)], [float], "greattunes._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((1.1, 0.2))],  # float with less than 3 entries (will be the same for int)
+        [[(1, 0, 3), (2.2, 1.1, 3.3), (2.2, 1.1)], [int, float, float], "greattunes._validators.__validate_num_entries_covar_tuples: tuple entries of types (int, float) must have 3 entries. This is not the case for the entry " + str((2.2, 1.1))],  # float with more than 3 entries in list of multiple otherwise acceptible tuples
     ]
 )
 def test__validate_num_entries_covar_tuples_fails(covars, covars_tuple_datatypes, error_msg):
@@ -238,11 +233,11 @@ def test__validate_num_entries_covar_tuples_fails(covars, covars_tuple_datatypes
 @pytest.mark.parametrize(
     "covars, error_msg",
     [
-        [{'var0': {'guess': 1, 'min': 0, 'max': 2}, 'var1': (1, 0, 3)}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: 'covars' provided as part of class initialization must be either a list of tuples or a dict of dicts. Current provided is a dict containing data types {<class 'dict'>, <class 'tuple'>}."],  # incorrect data type in 'covars'
-        [{'var0': {'guess': 1, 'min': 0, 'max': 2}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'type' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'max': 2})."], # should fail for not having element "type"
-        [{'var0': {'guess': 1, 'max': 2, 'type': int}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min'
-        [{'var0': {'guess': 1, 'min': 0, 'type': int}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'max' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'type': <class 'int'>})."], # should fail for missing 'max'
-        [{'var0': {'guess': 1, 'max': 2, 'type': int}, 'var1': {'guess': 'red', 'options':{'red', 'green'}, 'type': str}}, "creative_project._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min' even though more variables provided
+        [{'var0': {'guess': 1, 'min': 0, 'max': 2}, 'var1': (1, 0, 3)}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: 'covars' provided as part of class initialization must be either a list of tuples or a dict of dicts. Current provided is a dict containing data types {<class 'dict'>, <class 'tuple'>}."],  # incorrect data type in 'covars'
+        [{'var0': {'guess': 1, 'min': 0, 'max': 2}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'type' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'max': 2})."], # should fail for not having element "type"
+        [{'var0': {'guess': 1, 'max': 2, 'type': int}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min'
+        [{'var0': {'guess': 1, 'min': 0, 'type': int}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'max' missing for covariate 'var0' (covars['var0']={'guess': 1, 'min': 0, 'type': <class 'int'>})."], # should fail for missing 'max'
+        [{'var0': {'guess': 1, 'max': 2, 'type': int}, 'var1': {'guess': 'red', 'options':{'red', 'green'}, 'type': str}}, "greattunes._validators.Validators.__validate_covars_dict_of_dicts: key 'min' missing for covariate 'var0' (covars['var0']={'guess': 1, 'max': 2, 'type': <class 'int'>})."], # should fail for missing 'min' even though more variables provided
     ]
 )
 def test__validate_covars_dict_of_dicts_fails_unit(covars, error_msg):

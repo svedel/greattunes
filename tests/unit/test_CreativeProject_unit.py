@@ -1,6 +1,6 @@
 import pytest
 import torch
-from creative_project import CreativeProject
+from greattunes import CreativeProject
 
 
 @pytest.mark.parametrize("nu", [None, 2.5])

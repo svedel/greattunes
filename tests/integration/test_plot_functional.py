@@ -66,7 +66,7 @@ def test_plot_1d_latest_one_window_integration_works(covars_for_custom_models_si
             }
             self.covar_details = covar_details
 
-        from creative_project._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
+        from greattunes._plot import predictive_results, plot_1d_latest, _covars_ref_plot_1d
 
     # initialize class
     cls = TmpClass()

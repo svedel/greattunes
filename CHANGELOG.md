@@ -23,8 +23,10 @@ natural data types (`float` for doubles, `int` for integers and `str` for catego
   
 
 ### Changed
-* Extended how system determines covariates enabled via a wider range of options for the parameter `covars` provided 
-  during class initialization. ADD MORE HERE TO DESCRIBE BRIEFLY HOW NOT JUST LIST OF TUPLES ANYMORE 
+* Extended how the package determines covariates enabled via a wider range of options for the parameter `covars` provided 
+  during class initialization. There are now two methods, see [README.md](README.md/#Covariates:-the-free-parameters-which-are-adjusted-by-the-framework-during-optimization): 
+    1) A simple in which requires a list of tuples, with each tuple giving the guess, the minimum and the maximum of the covariate. Data types are inferred and covariate names are assigned.
+    2) An elaborate that allows more control over data type and covariate naming.
 * In `_best_response.current_best`: switched to storing in pretty user-facing format (`pandas` df), updated output 
 slightly
 * Extended `creative_project.transformed_kernel_models.transformation.GP_kernel_transformation` to support high-rank

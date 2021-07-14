@@ -80,7 +80,7 @@ def _get_and_verify_response_input(self, **kwargs):
     read and verify response. Assumes only a single input, and does not do any verification.
     :input:
         - self.sampling["method"]: determines how to get the response data (iteratively via input or function
-        evaluation). Default model self.sampling["method"] = 'iterative' is set in creative_project.__init__.py
+        evaluation). Default model self.sampling["method"] = 'iterative' is set in greattunes.__init__.py
     :kwargs:
         - response (list or torch tensor or None): kwarg input in _campaign.tell (None if not present in tell). This
         provides a programmatic way of providing the response data
@@ -111,7 +111,7 @@ def _get_and_verify_response_input(self, **kwargs):
 
     else:
         raise Exception(
-            "creative_project._observe._get_and_verify_response_input: class attribute "
+            "greattunes._observe._get_and_verify_response_input: class attribute "
             "self.sampling['method'] has non-permissable value "
             + str(self.sampling["method"])
             + ", must"
@@ -122,7 +122,7 @@ def _get_and_verify_response_input(self, **kwargs):
         return response_datapoint
     else:
         raise Exception(
-            "creative_project._observe._get_and_verify_response_input: incorrect number of variables provided. Was "
+            "greattunes._observe._get_and_verify_response_input: incorrect number of variables provided. Was "
             "expecting input of size (1,1) but received "
             + str(response_datapoint.size())
         )
@@ -170,7 +170,7 @@ def _get_response_function_input(self):
         )
     else:
         raise Exception(
-            "creative_project._observe._get_response_function_input: response function provided does not"
+            "greattunes._observe._get_response_function_input: response function provided does not"
             " return acceptable output types ('int','float','list','numpy.ndarray','pandas.DataFrame'), "
             " but returned " + str(type(resp))
         )
@@ -213,14 +213,14 @@ def _print_candidate_to_prompt(self, candidate):
     # verify datatype of candidate
     if not isinstance(candidate, torch.Tensor):
         raise Exception(
-            "kre8_core.creative_project._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect "
+            "greattunes.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is incorrect "
             "datatype. Expecting to be of type torch.Tensor"
         )
 
     # verify that candidate not an empty list
     if not candidate.size()[0] > 0:
         raise Exception(
-            "kre8_core.creative_project._observe._print_candidate_to_prompt: provided input 'candidate' is empty. "
+            "greattunes.greattunes._observe._print_candidate_to_prompt: provided input 'candidate' is empty. "
             "Expecting torch tensor of size 1 X num_covariates"
         )
 
@@ -356,7 +356,7 @@ def _get_and_verify_covars_input(self, covars):
                 + "'"
             )
         raise Exception(
-            "creative_project._observe._get_and_verify_covars_input: unable to get acceptable covariate input in "
+            "greattunes._observe._get_and_verify_covars_input: unable to get acceptable covariate input in "
             + str(MAX_ITER)
             + " iterations."
             + add_text
@@ -376,7 +376,7 @@ def _read_covars_manual_input(self, additional_text):
     """
 
     assert isinstance(additional_text, str), (
-        "creative_project._observe._read_covars_manual_input: wrong datatype of parameter 'additional_text'. "
+        "greattunes._observe._read_covars_manual_input: wrong datatype of parameter 'additional_text'. "
         "Was expecting 'str' but received " + str(type(additional_text))
     )
 
@@ -400,7 +400,7 @@ def _read_covars_manual_input(self, additional_text):
 
     if not len(covar_str) == len(self.covar_details):
         raise Exception(
-            "creative_project._observe._read_covars_manual_input: incorrect number of covariates ("
+            "greattunes._observe._read_covars_manual_input: incorrect number of covariates ("
             + str(len(covar_str))
             + ") provided, was expecting "
             + str(len(self.covar_details))
@@ -413,7 +413,7 @@ def _read_covars_manual_input(self, additional_text):
         entry_datatype = self.covar_details[key]["type"]
         if np.isnan(entry_datatype(covar_str[entry])):
             raise Exception(
-                "creative_project._observe._read_covars_manual_input: provided '"
+                "greattunes._observe._read_covars_manual_input: provided '"
                 + covar_str[entry]
                 + "' becomes 'nan' when converting to expected datatype "
                 + str(entry_datatype)

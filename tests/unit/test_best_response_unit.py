@@ -1,6 +1,6 @@
 import torch
 import pytest
-from creative_project._best_response import _find_max_response_value, _update_max_response_value
+from greattunes._best_response import _find_max_response_value, _update_max_response_value
 
 
 def test_find_max_response_value_unit(custom_models_simple_training_data_4elements,
@@ -13,7 +13,7 @@ def test_find_max_response_value_unit(custom_models_simple_training_data_4elemen
     train_X = custom_models_simple_training_data_4elements[0]
     train_Y = custom_models_simple_training_data_4elements[1]
 
-    # test class for all methods from creative_project._best_response --- only an infrastructure ease for
+    # test class for all methods from greattunes._best_response --- only an infrastructure ease for
     # _find_max_reponse_value since it's a static method
     cls = tmp_best_response_class
 
@@ -34,7 +34,7 @@ def test_find_max_response_value_multivariate(training_data_covar_complex, tmp_b
     train_X = training_data_covar_complex[1]
     train_Y = training_data_covar_complex[2]
 
-    # test class for all methods from creative_project._best_response --- only an infrastructure ease for
+    # test class for all methods from greattunes._best_response --- only an infrastructure ease for
     # _find_max_reponse_value since it's a static method
     cls = tmp_best_response_class
 
@@ -233,10 +233,10 @@ def test_update_proposed_data_works_firs_entry(tmp_best_response_class, candidat
 @pytest.mark.parametrize(
     "candidate, proposed_X, error_msg",
     [
-        [None, torch.tensor([[0.9], [1.1]], dtype=torch.double), "creative_project._best_response._update_proposed_data: provided variable is not 'candidate' of type torch.DoubleTensor (type of 'candidate' is " + str(type(None)) + ")"],
-        [[1.1], torch.tensor([[0.9], [1.1]], dtype=torch.double), "creative_project._best_response._update_proposed_data: provided variable is not 'candidate' of type torch.DoubleTensor (type of 'candidate' is " + str(type([1.1])) + ")"],
-        [torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[0.9], [1.1]], dtype=torch.double), "creative_project._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected 1, but got 2"],
-        [torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200], [1.1, 2.2, 4.3], [0, 1, 2]], dtype=torch.double), "creative_project._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected 3, but got 2"]
+        [None, torch.tensor([[0.9], [1.1]], dtype=torch.double), "greattunes._best_response._update_proposed_data: provided variable is not 'candidate' of type torch.DoubleTensor (type of 'candidate' is " + str(type(None)) + ")"],
+        [[1.1], torch.tensor([[0.9], [1.1]], dtype=torch.double), "greattunes._best_response._update_proposed_data: provided variable is not 'candidate' of type torch.DoubleTensor (type of 'candidate' is " + str(type([1.1])) + ")"],
+        [torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[0.9], [1.1]], dtype=torch.double), "greattunes._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected 1, but got 2"],
+        [torch.tensor([[1, 2]], dtype=torch.double), torch.tensor([[0.9, 1.1, 200], [1.1, 2.2, 4.3], [0, 1, 2]], dtype=torch.double), "greattunes._best_response._update_proposed_data: wrong number of covariates provided in 'candidate'. Expected 3, but got 2"]
     ]
 )
 def test_update_proposed_data_fails(tmp_best_response_class, candidate, proposed_X, error_msg):

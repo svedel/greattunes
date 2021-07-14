@@ -88,7 +88,7 @@ def tensor2pretty_covariate(train_X_sample, covar_details):
     # check that covar_details has been populated
     if len(covar_details) == 0:
         raise Exception(
-            "creative_project.data_format_mappings.tensor2pretty_covariate: class instance has not been properly "
+            "greattunes.data_format_mappings.tensor2pretty_covariate: class instance has not been properly "
             "initialized, 'covar_details' has not been initiated"
         )
 

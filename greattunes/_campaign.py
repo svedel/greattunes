@@ -2,7 +2,7 @@
 Methods for running campaigns. These are the key user-facing methods
 """
 import torch
-from creative_project.data_format_mappings import (
+from greattunes.data_format_mappings import (
     tensor2pretty_covariate,
     tensor2pretty_response,
 )
@@ -55,7 +55,7 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
     if rel_tol_steps is not None:
         if not rel_tol_steps > 0:
             raise Exception(
-                "creative_project._campaign.auto: 'rel_tol_steps' must be greater than 0 but "
+                "greattunes._campaign.auto: 'rel_tol_steps' must be greater than 0 but "
                 "received " + str(rel_tol_steps)
             )
         else:

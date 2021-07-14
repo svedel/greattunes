@@ -6,9 +6,9 @@ import warnings
 
 import torch
 
-from creative_project._validators import Validators
-from creative_project.utils import DataSamplers
-from creative_project.data_format_mappings import (
+from greattunes._validators import Validators
+from greattunes.utils import DataSamplers
+from greattunes.data_format_mappings import (
     tensor2pretty_covariate,
     pretty2tensor_covariate,
     tensor2pretty_response,
@@ -24,7 +24,7 @@ class Initializers(Validators):
     These methods are kept in a separate class to maintain that they be private in the main
     class (that class being defined in __init__.py).
 
-    For simplicity is developed as child of Validators class (from creative_project._validators), making all validator
+    For simplicity is developed as child of Validators class (from greattunes._validators), making all validator
     methods available inside Initializers
     """
 
@@ -129,7 +129,7 @@ class Initializers(Validators):
         # other data types, throws error
         else:
             raise Exception(
-                "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is"
+                "greattunes._initializers.Initializers.__initialize_from_covars: provided 'covars' is"
                 " of type "
                 + str(type(covars))
                 + " but must be of types {'list', 'dict'}."
@@ -195,7 +195,7 @@ class Initializers(Validators):
         for t in set(types):
             if t not in {int, float, str}:
                 raise Exception(
-                    "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates "
+                    "greattunes._initializers.Initialzer.__determine_tuple_datatype: individual covariates "
                     "provided via tuples can only be of types ('float', 'int', 'str') but was provided "
                     + str(t)
                 )
@@ -616,7 +616,7 @@ class Initializers(Validators):
             random_sampling_method not in SAMPLING_METHODS_LIST
         ):
             raise Exception(
-                "creative_project._initializers.Initializers.__initialize_random_start: The parameter "
+                "greattunes._initializers.Initializers.__initialize_random_start: The parameter "
                 "'random_sampling_method' is not among allowed values ('"
                 + "', '".join(SAMPLING_METHODS_LIST)
                 + "')."
@@ -714,7 +714,7 @@ class Initializers(Validators):
         # validate that the right attributes are present to proceed
         if not hasattr(self, "covar_details"):
             raise Exception(
-                "creative_project._initializers.Initializers.__initialize_pretty_data: attribute "
+                "greattunes._initializers.Initializers.__initialize_pretty_data: attribute "
                 "'covar_details' is missing so cannot initialize pretty data. Try running method "
                 "'_initializers.Initializers.__initialize_from_covars'."
             )

@@ -8,9 +8,9 @@ import pandas as pd
 import pytest
 import torch
 import warnings
-from creative_project._initializers import Initializers
-import creative_project._best_response
-from creative_project.utils import DataSamplers
+from greattunes._initializers import Initializers
+import greattunes._best_response
+from greattunes.utils import DataSamplers
 
 
 @pytest.mark.parametrize(
@@ -79,7 +79,7 @@ def test__initialize_from_covars_unit_fails():
     covars = ((1, 0, 2), (2.2, -1.2, 4.4), ('red', 'green', 'blue'))
 
     # assert
-    error_msg = "creative_project._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'tuple'> but must be of types {'list', 'dict'}."
+    error_msg = "greattunes._initializers.Initializers.__initialize_from_covars: provided 'covars' is of type <class 'tuple'> but must be of types {'list', 'dict'}."
     with pytest.raises(Exception) as e:
         _, _ = cls._Initializers__initialize_from_covars(covars=covars)
     assert str(e.value) == error_msg
@@ -110,7 +110,7 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
         return torch.tensor([[tmp_output]], dtype=torch.double), torch.tensor([[tmp_output]], dtype=torch.double)
     monkeypatch.syspath_prepend("..")
     monkeypatch.setattr(
-        #creative_project._best_response, "_find_max_response_value", mock_find_max_response_value
+        #greattunes._best_response, "_find_max_response_value", mock_find_max_response_value
         cls, "_find_max_response_value", mock_find_max_response_value
     )
 
@@ -319,7 +319,7 @@ def test_Initializers__initialize_random_start_fails(monkeypatch):
     with pytest.raises(Exception) as e:
         cls._Initializers__initialize_random_start(random_start=True, num_initial_random=2,
                                                    random_sampling_method="junk")  # acceptable values of 'random_sampling_method' given in SAMPLING_METHODS_LIST
-    assert str(e.value) == "creative_project._initializers.Initializers.__initialize_random_start: The parameter 'random_sampling_method' is not among allowed values ('" + "', '".join(SAMPLING_METHODS_LIST) + "')."
+    assert str(e.value) == "greattunes._initializers.Initializers.__initialize_random_start: The parameter 'random_sampling_method' is not among allowed values ('" + "', '".join(SAMPLING_METHODS_LIST) + "')."
 
 
 @pytest.mark.parametrize(
@@ -390,9 +390,9 @@ def test__determine_tuple_datatype_unit_works(x_tuple, tuple_datatype_result):
 @pytest.mark.parametrize(
     "x_tuple, error_msg",
     [
-        [(1, 0, True), "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type(True))],
-        [({}, 1.1, 3.3), "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type({}))],  # test float
-        [("str", 1, []), "creative_project._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type([]))],  # test float in case where only 1 float (should recast ints as float)
+        [(1, 0, True), "greattunes._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type(True))],
+        [({}, 1.1, 3.3), "greattunes._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type({}))],  # test float
+        [("str", 1, []), "greattunes._initializers.Initialzer.__determine_tuple_datatype: individual covariates provided via tuples can only be of types ('float', 'int', 'str') but was provided " + str(type([]))],  # test float in case where only 1 float (should recast ints as float)
     ]
 )
 def test__determine_tuple_datatype_unit_fails(x_tuple, error_msg):

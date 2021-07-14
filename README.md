@@ -9,7 +9,7 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 
 ## Features
 
-* Handles **continuous**, **integer** and **categorical** covariate.
+* Handles **continuous**, **integer** and **categorical** covariates.
 * Optimization of either *known* or *unknown* functions. The allows for optimization of e.g. real-world experiments 
   without specifically requiring a model of the system be defined a priori.
 * Simple interface with focus on ease of use: only few lines of code required for full Bayesian optimization.
@@ -455,7 +455,7 @@ class initialization
 | Model name | Parameters | Comments |
 | ---------- | ---------- | -------- |
 | `"SingleTaskGP"` | N/A | A single-task exact kernel for Gaussian process regression. Follow this link for [more details](https://botorch.org/api/models.html#module-botorch.models.gp_regression). |
-| `"Custom"` | `nu` | A custom Matérn kernel with parameter `nu` (a float). For more details on Matérn kernels see [wiki page](https://en.wikipedia.org/wiki/Mat%C3%A9rn_covariance_function), and see the source code for the model in [`creative_project\custom_models`](creative_project/custom_models). |
+| `"Custom"` | `nu` | A custom Matérn kernel with parameter `nu` (a float). For more details on Matérn kernels see [wiki page](https://en.wikipedia.org/wiki/Mat%C3%A9rn_covariance_function), and see the source code for the model in [`creative_project\custom_models`](greattunes/custom_models). |
 
 #### Acquisition functions
 

@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import torch
 import numpy as np
-from creative_project import CreativeProject
+from greattunes import CreativeProject
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
 import torch
 import pytest
 import numpy as np
-from creative_project import CreativeProject
+from greattunes import CreativeProject
 from scipy.stats import multivariate_normal
 
 
