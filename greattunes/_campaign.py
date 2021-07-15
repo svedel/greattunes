@@ -250,8 +250,9 @@ def tell(self, **kwargs):
     data. It is assumed that 'ask' has been run (assumes a request for new datapoint has been made.).
 
     :input kwargs:
-        - covars (torch tensor of size 1 X num_covars or list): provide observed covars data programmatically. If kwarg
+        - 'covar_obs' (torch tensor of size 1 X num_covars or list): provide observed covars data programmatically. If kwarg
         present, will use this approach over manual input
+        - 'response_obs'
 
     assumes:
         - model, likelihood exists
@@ -263,8 +264,8 @@ def tell(self, **kwargs):
     """
 
     # get kwargs (these variables will be None if kwarg not present)
-    covars = kwargs.get("covars")
-    response = kwargs.get("response")
+    covars = kwargs.get("covar_obs")
+    response = kwargs.get("response_obs")
 
     # sample covariates for the 'candidate' datapoint proposed by .ask-method
     # using manual input, updates train_X and sampling counter (self.model["covars_sampled_iter"])

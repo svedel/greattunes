@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased] - 
+## [unreleased] -
+
+Version for this release: 0.0.6
+
+## [0.0.5] - July 15, 2021
 
 Version for this release: 0.0.5
 
 ### Added
 ### Changed
+* Updated `.tell`: `kwargs` for providing covariate and response observations have been renamed. Should now be provided 
+via the less confusion `covar_obs` and `response_obs`
 ### Deprecated
 ### Removed
 ### Fixed

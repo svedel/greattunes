@@ -1,6 +1,9 @@
 ![alt text](figs/greattunes.png)
 
-![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
+#![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
+
+[![Tests, code format and style checks](https://github.com/svedel/greattunes/actions/workflows/testing.yml/badge.svg)](https://github.com/svedel/greattunes/actions/workflows/testing.yml)
+[![Publish python package greattunes to PyPI](https://github.com/svedel/greattunes/actions/workflows/prod.workflow.yml/badge.svg)](https://github.com/svedel/greattunes/actions/workflows/prod.workflow.yml)
 
 **Easy-to-use Bayesian optimization library** made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
