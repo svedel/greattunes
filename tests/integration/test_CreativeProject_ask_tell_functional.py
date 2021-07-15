@@ -449,7 +449,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_works(covars
     cc.ask()
 
     # run the tell method
-    cc.tell(covars=kwarg_covariates)
+    cc.tell(covar_obs=kwarg_covariates)
 
 
     ### check for tell (no reason to assert for ask)###
@@ -536,7 +536,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_works(cova
     cc.ask()
 
     # run the tell method
-    cc.tell(response=kwarg_response)
+    cc.tell(response_obs=kwarg_response)
 
 
     ### check for tell (no reason to assert for ask)###
@@ -609,7 +609,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_response_wor
     cc.ask()
 
     # run the tell method
-    cc.tell(covars=kwarg_covariates, response=kwarg_response)
+    cc.tell(covar_obs=kwarg_covariates, response_obs=kwarg_response)
 
 
     ### check for tell (no reason to assert for ask)###
@@ -692,7 +692,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_covars_fails(covars
 
     # run the tell method
     with pytest.raises(Exception) as e:
-        cc.tell(covars=kwarg_covariates)
+        cc.tell(covar_obs=kwarg_covariates)
     assert str(e.value) == error_msg
 
 
@@ -745,7 +745,7 @@ def test_CreativeProject_integration_ask_tell_one_loop_kwarg_response_fails(cova
 
     # run the tell method
     with pytest.raises(Exception) as e:
-        cc.tell(response=kwarg_response)
+        cc.tell(response_obs=kwarg_response)
     assert str(e.value) == error_msg
 
 
