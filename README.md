@@ -49,10 +49,22 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
 
 ## Installation
 
-### First install `torch` dependencies
+### Via `pip`
 
-**Installing `torch` dependencies is a requirement.** Unfortunately `torch`-libraries have to be installed outside 
-normal bulk `pip install -r requirements.txt`.
+The library is available on [https://pypi.org/](https://pypi.org/), so to install simply run
+```python
+pip install greattunes
+```
+
+### From source
+
+You can also download the library source code and install it from there.
+
+#### First install `torch` dependencies
+
+**Installing `torch` dependencies is not always a requirement.** Unfortunately, in some cases `torch`-libraries have to 
+be installed outside normal bulk `pip install -r requirements.txt`. **First try to install directly via steps 1-3 in
+[Install library](#Install-library) below, and only install `torch` libraries manually if direct installation fails.**
 
 To find the right installation command for `torch`, use [this link](https://pytorch.org/get-started/locally/)
 to determine the details and add as a separate command in the `github` actions yaml. As an example, the following is the 
@@ -73,21 +85,17 @@ pip install --upgrade setuptools wheel
 2. Clone this repo
 3. Do local installation
 ```python
-python -m pip install <path_to_repo>/kre8_core/
+python -m pip install https://github.com/svedel/greattunes/
 ```
 
-Step 3 will install by running `kre8_core/setup.py` locally and installing. This step can also be broken into two, 
+Step 3 will install by running `greattunes/setup.py` locally and installing. This step can also be broken into two, 
 which might improve debugging
 ```python
-python3 <path_to_repo>/kre8_core/ setup.py bdist_wheel
-python -m pip install <path_to_repo>/kre8_core/dist/creative_project-<version>-py3-none-any.whl
+python3 https://github.com/svedel/greattunes/ setup.py bdist_wheel
+python -m pip install https://github.com/svedel/greattunes/dist/greattunes-<version>-py3-none-any.whl
 ```
 where `<version>` is the latest version in normal `python` format of `MAJOR.MINOR[.MICRO]` 
 (check `/dist`-folder to see which one to pick).
-
-#### Uploading build to repo servers (e.g. `PyPI`)
-
-To be investigated. Here's [a link with help](https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python) on how to leverage `GitHub actions` for this purpose.
 
 ## Using the framework
 
