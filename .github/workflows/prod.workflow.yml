@@ -3,9 +3,11 @@
 name: Publish python package greattunes to PyPI
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types: [created]
+  #push:
+  #  branches:
+  #    - master
 
 jobs:
   build-n-publish:

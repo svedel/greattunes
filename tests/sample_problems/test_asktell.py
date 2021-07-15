@@ -39,7 +39,7 @@ def test_sample_problems_asktell_1d_maximization(max_iter, max_response, error_l
         response = f(covars)
 
         # report response
-        cc.tell(covars=covars, response=response)
+        cc.tell(covar_obs=covars, response_obs=response)
 
 
     # assert
@@ -96,7 +96,7 @@ def test_sample_problems_asktell_2d_maximization(max_iter, error_lim, x0_0, x1_0
         response = torch.tensor([[f2(cc2.proposed_X[-1]).item()]], dtype=torch.double)
 
         # report response
-        cc2.tell(covars=covars, response=response)
+        cc2.tell(covar_obs=covars, response_obs=response)
 
     # run current_best method
     cc2.current_best()
