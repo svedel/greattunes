@@ -11,6 +11,8 @@ Version for this release: 0.0.5
 
 ### Added
 ### Changed
+* Updated `.tell`: `kwargs` for providing covariate and response observations have been renamed. Should now be provided 
+via the less confusion `covar_obs` and `response_obs`
 ### Deprecated
 ### Removed
 ### Fixed
