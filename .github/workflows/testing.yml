@@ -72,7 +72,7 @@ jobs:
         run: |
           python -m pytest tests/sample_problems
         continue-on-error: true
-      - name: Install dependencies
+      - name: Install dependencies for running notebooks
         run: |
           pip install --upgrade jupyter
           pip install --upgrade nbconvert
