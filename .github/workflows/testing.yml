@@ -74,7 +74,8 @@ jobs:
         continue-on-error: true
       - name: Install dependencies
         run: |
-          pip install jupyter, nbconvert
+          pip install --upgrade jupyter
+          pip install --upgrade nbconvert
       - name: Run notebooks
         run: |
           # identify all notebooks in folder
