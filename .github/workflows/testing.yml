@@ -79,6 +79,7 @@ jobs:
       - name: Run notebooks
         run: |
           # identify all notebooks in folder
+          python
           import os
           homepath = os.getcwd()
           nbpath = os.path.join(homepath, "examples")
