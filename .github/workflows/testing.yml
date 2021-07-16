@@ -78,18 +78,19 @@ jobs:
           pip install --upgrade nbconvert
       - name: Run notebooks
         run: |
+          jupyter nbconvert --to notebook --execute examples/*.ipynb
           # identify all notebooks in folder
-          python
-          import os
-          homepath = os.getcwd()
-          nbpath = os.path.join(homepath, "examples")
-          notebooks = [f for f in os.listdir(nbpath) if "ipynb" in f]
+          #python
+          #import os
+          #homepath = os.getcwd()
+          #nbpath = os.path.join(homepath, "examples")
+          #notebooks = [f for f in os.listdir(nbpath) if "ipynb" in f]
           # run notebooks
-          for i in range(len(notebooks)):
-            nb = os.path.join(nbpath,notebooks[i])
-            fn = nb[:-5] + "py"
-            os.system(f"jupyter nbconvert --to script {nb}")  # convert to python script
-            os.system("python {fn}")
+          #for i in range(len(notebooks)):
+          #  nb = os.path.join(nbpath,notebooks[i])
+          #  fn = nb[:-5] + "py"
+          #  os.system(f"jupyter nbconvert --to script {nb}")  # convert to python script
+          #  os.system("python {fn}")
         continue-on-error: false
 
 
