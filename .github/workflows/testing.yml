@@ -79,7 +79,8 @@ jobs:
           pip install --upgrade ipython
       - name: Run notebooks
         #run: jupyter nbconvert --to notebook --execute examples/*.ipynb
-        run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
+        #run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
+        run: jupyter nbconvert --to notebook --execute Example\ 1\ -\ Closed-loop\ optimization\ of\ known\ function.ipynb
         continue-on-error: false
 
 
