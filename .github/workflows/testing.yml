@@ -77,6 +77,7 @@ jobs:
           pip install --upgrade jupyter
           pip install --upgrade nbconvert
           pip install --upgrade ipython
+          pip install --upgrade greattunes
       - name: Run notebooks
         #run: jupyter nbconvert --to notebook --execute examples/*.ipynb
         #run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
