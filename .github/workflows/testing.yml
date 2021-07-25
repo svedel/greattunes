@@ -76,6 +76,7 @@ jobs:
         run: |
           pip install --upgrade jupyter
           pip install --upgrade nbconvert
+          pip install --upgrade ipython
       - name: Run notebooks
         run: jupyter nbconvert --to notebook --execute examples/*.ipynb
         continue-on-error: false
