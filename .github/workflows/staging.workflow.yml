@@ -14,6 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@staging  # does this take the code from master of repo?
       - name: Set up Python 3.8
+        uses: actions/setup-python@v1
         with:
           python-version: 3.8
       - name: Install dependencies for running notebooks
