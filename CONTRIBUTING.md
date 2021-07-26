@@ -34,6 +34,7 @@ running.
 The following stack is used for testing, see [`requirements-dev.txt`](requirements-dev.txt) for details of versions etc:
 * **Unit, functional and integration tests**: `pytest` with settings kept in `tests/pytest.ini` and making use of `fixtures` 
   (collected in `conftest.py`)
+* **Code coverage**: `pytest-cov`
 * **Linting and code style checks**: `flake8` and `black` for static checks, with settings (also aligning the two tools) 
   in  `setup.cfg`
 * **Import style checks**: `isort` is used to ensure consistent library import style
