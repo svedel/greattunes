@@ -149,10 +149,10 @@ Here we will work with a known objective function to optimize
 # === Step 2: solve the problem ===
 
 # univariate function to optimize
-import torch
+import numpy as np
 
 def f(x):
-    return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+    return -(6 * x - 2) ** 2 * np.sin(12 * x - 4)
 ```
 Beware that the number of covariates (including their range) specified by `covars` under Step 1 must comply with the
 functional dependence of the objective function (`x` in the case above).
@@ -160,7 +160,7 @@ functional dependence of the objective function (`x` in the case above).
 We are now ready to solve the problem. We will run for `max_iter`=20 iterations.
 ```python
 # run the auto-method
-    cc.auto(response_samp_func=f, max_iter=max_iter)
+cls.auto(response_samp_func=f, max_iter=max_iter)
 ```
 
 Had we worked with an objective function `f` which could not be formulated explicitly, the right entrypoint would have
@@ -497,7 +497,7 @@ max_iter = 100
 rel_tol = 1e-10
 
 # run the auto-method
-cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol)
+cls.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol)
 ```
 
 In most cases the best results are found by requiring the `rel_tol` limit to be satisfied for multiple consecutive
@@ -515,7 +515,7 @@ rel_tol = 1e-10
 rel_tol_steps = 5
 
 # run the auto-method
-cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
+cls.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
 ```
 
 Best practises on using `rel_tol` and `rel_tol_steps` are provided in Example 5 in [examples](examples).
@@ -547,14 +547,14 @@ max_iter = 20
 for i in range(max_iter):
   
     # generate candidate
-    cc.ask()  # new candidate is last row in cc.proposed_X
+    cls.ask()  # new candidate is last row in cc.proposed_X
 
     # sample response (beware results must be formulated as torch tensors)
     observed_covars = <from measurement or from cc.proposed_X>
     observed_response = <from measurement or from specified objective function>
 
     # report response
-    cc.tell(covars=observed_covars, response=observed_response)
+    cls.tell(covars=observed_covars, response=observed_response)
 ```
 
 #### Providing input via prompt
@@ -568,10 +568,10 @@ max_iter = 20
 for i in range(max_iter):
   
     # generate candidate
-    cc.ask()  # new candidate is last row in cc.proposed_X
+    cls.ask()  # new candidate is last row in cc.proposed_X
 
     # report response
-    cc.tell()
+    cls.tell()
 ```
 
 In this case, the user will be prompted to provide input manually. There will be 3 attempts to provide covariates 
@@ -595,20 +595,20 @@ def f(x):
   ...
 
 # generate candidate
-cc.ask()  # new candidate is last row in cc.proposed_X
+cls.ask()  # new candidate is last row in cc.proposed_X
 
 # first result
 observed_results = torch.tensor([[it.item() for it in cc.proposed_X[-1]]], dtype=torch.double)
 observed_response = torch.tensor([[f(cc.proposed_X[-1]).item()]], dtype=torch.double)
 
 # report first response
-cc.tell(covars=observed_results, response=observed_response)
+cls.tell(covars=observed_results, response=observed_response)
 
 # second result
 observed_response_second = observed_response + 1
 
 # update response
-cc.tell(covars=observed_results, response=observed_response_second)
+cls.tell(covars=observed_results, response=observed_response_second)
 ```
 
 ## Contributing
