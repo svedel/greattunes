@@ -123,7 +123,7 @@ The critical things to define in this step are
 
 ```python
 # import library
-from creative_project import CreativeProject
+from creative_project import TuneSession
 
 # === Step 1: define the input ===
 
@@ -135,7 +135,7 @@ x_max = 1  # upper limit
 covars = [(x_start, x_min, x_max)]
 
 # initialize the class
-cls = CreativeProject(covars=covars, model="SingleTaskGP", acq_func="EI")
+cls = TuneSession(covars=covars, model="SingleTaskGP", acq_func="EI")
 ```
 
 #### Step 2: Solve the problem
@@ -199,7 +199,7 @@ of the covariates, the framework cannot proceed to optimization. Here's an examp
 covars = [(0.5, 0, 1), (2,1,4)]  # each tuple defines one covariate; the tuple entries are (initial guess, min, max)
 
 # initialize the class
-cls = CreativeProject(covars=covars, ...)
+cls = TuneSession(covars=covars, ...)
 ``` 
 This is also illustrated for a single-variable situation in [Step 1: Define the problem](#Step-1:-Define-the-problem) 
 above.
@@ -360,7 +360,7 @@ illustrated below for the following cases
 ```python
 # import
 import torch
-from creative_project import CreativeProject
+from creative_project import TuneSession
 
 ### ------ Case 1 - multiple observations (multivariate) ------ ###
 
@@ -372,7 +372,7 @@ X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
 Y = torch.tensor([[33],[37.8]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+cls = TuneSession(covars=covars,train_X=X, train_Y=Y)
 
 ### ------ Case 2 - single observation (univariate) ------ ###
 
@@ -384,7 +384,7 @@ X = torch.tensor([[1]], dtype=torch.double)
 Y = torch.tensor([[33]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+cls = TuneSession(covars=covars,train_X=X, train_Y=Y)
 
 ### ------ Case 3 - single observation (multivariate) ------ ###
 
@@ -396,7 +396,7 @@ X = torch.tensor([[1, 2, 3]], dtype=torch.double)
 Y = torch.tensor([[33]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+cls = TuneSession(covars=covars,train_X=X, train_Y=Y)
 ```
 
 #### Random initialization
@@ -412,7 +412,7 @@ historical data has been added or not (default is `random_start = True`).
 
 # import
 import torch
-from creative_project import CreativeProject
+from creative_project import TuneSession
 
 ### ------ Case 1 - No historical data ------ ###
 
@@ -424,7 +424,7 @@ X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
 Y = torch.tensor([[33],[37.8]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars, random_start=True)
+cls = TuneSession(covars=covars, random_start=True)
 
 ### ------ Case 2 - With historical data ------ ###
 
@@ -436,7 +436,7 @@ X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
 Y = torch.tensor([[33],[37.8]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars,train_X=X, train_Y=Y, random_start=True)
+cls = TuneSession(covars=covars,train_X=X, train_Y=Y, random_start=True)
 ```
 
 ##### Parameters for random start 
@@ -541,7 +541,7 @@ new data point to sample the system response and provide both this value and the
 be different from proposed values) back via `.tell`.
 
 ```python
-# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+# in below, "cc" is an instantiated version of TuneSession class (identical initialization as when using .auto method) 
 max_iter = 20
 
 for i in range(max_iter):
@@ -562,7 +562,7 @@ for i in range(max_iter):
 Observations of covariates and response can be provided manually to `.tell`. To do so, simply call `.tell` without any 
 arguments at each iteration (all book keeping will be handled on backend)
 ```python
-# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+# in below, "cc" is an instantiated version of TuneSession class (identical initialization as when using .auto method) 
 max_iter = 20
 
 for i in range(max_iter):
@@ -587,7 +587,7 @@ from an instrument.
 Observed covariates and observed responses are sometimes off. To override the latest datapoint for either, simply 
 provide it again in the same iteration. This will automatically override the latest reported value 
 ```python
-# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+# in below, "cc" is an instantiated version of TuneSession class (identical initialization as when using .auto method) 
 # further assumes that at least on full iteration has been taken
 
 # define a response

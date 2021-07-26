@@ -97,8 +97,8 @@ def covars_initialization_data():
 def training_data_covar_complex(covars_initialization_data):
     """
     defines simple training data that corresponds to covar_complex (covars_initialization_data[1]), where covar_complex
-    is the right format for initialization of the full user-facing class CreativeProject
-    (greattunes.CreativeProject)
+    is the right format for initialization of the full user-facing class TuneSession
+    (greattunes.TuneSession)
     """
 
     covars = covars_initialization_data[1]

@@ -75,7 +75,7 @@ Version number for this release: 0.0.3
     * `random_step_cadence`: the cadence of random sampling after initialization (default: 10)
 
 ### Changed
-In `CreativeProject` class initialization:
+In `TuneSession` class initialization:
 * If historical data is added via `train_X`, `train_Y`
   * `proposed_X` has been changed to be a zero tensor of the same size as `train_X`. This replaces an empty tensor for 
     `proposed_X`, which confusingly could take any values.
@@ -127,7 +127,7 @@ Version number for first release: 0.0.1
 ### Added
 * `setup.py` to wrap repo as a package.
 * `CHANGELOG.md` to keep track of changes going forward.
-* `__str__` and `__repr__` methods to core user-facing method `creative_project.CreativeProject` for improved 
+* `__str__` and `__repr__` methods to core user-facing method `creative_project.TuneSession` for improved 
 developer and user experience.
 
 ### Changed

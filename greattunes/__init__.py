@@ -5,11 +5,11 @@ from ._acq_func import AcqFunction
 from ._version import __version__
 
 
-class CreativeProject(Initializers, AcqFunction):
+class TuneSession(Initializers, AcqFunction):
     """
     user-facing functionality to balance exploration and exploitation for creative projects.
     Note: Initializers is a child of Validators class (from ._validators.py) so all validator methods are available to
-    CreativeProject
+    TuneSession
     """
 
     # Initialize class instance
@@ -147,7 +147,7 @@ class CreativeProject(Initializers, AcqFunction):
         if self.nu is not None:
             deep_str += f", nu={self.nu!r}"
 
-        return f"CreativeProject(" + deep_str + f")"
+        return f"TuneSession(" + deep_str + f")"
 
     def __str__(self):
         """
@@ -165,7 +165,7 @@ class CreativeProject(Initializers, AcqFunction):
         if self.nu is not None:
             deep_str += f", nu={self.nu}"
 
-        return f"CreativeProject(" + deep_str + f")"
+        return f"TuneSession(" + deep_str + f")"
 
     # import methods
     from ._campaign import auto, ask, tell

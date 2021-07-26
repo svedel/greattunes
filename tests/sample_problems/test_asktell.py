@@ -1,6 +1,6 @@
 import torch
 import pytest
-from greattunes import CreativeProject
+from greattunes import TuneSession
 
 
 @pytest.mark.parametrize(
@@ -26,7 +26,7 @@ def test_sample_problems_asktell_1d_maximization(max_iter, max_response, error_l
         return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input, model=model_type)
+    cc = TuneSession(covars=x_input, model=model_type)
 
     # run the solution
     for i in range(max_iter):
@@ -81,7 +81,7 @@ def test_sample_problems_asktell_2d_maximization(max_iter, error_lim, x0_0, x1_0
     covars2d = [(x0_0, -5, 5.0), (x1_0, -5, 5.0)]
 
     # initialize class instance
-    cc2 = CreativeProject(covars=covars2d)
+    cc2 = TuneSession(covars=covars2d)
 
     # run the auto-method
     #cc2.auto(response_samp_func=f2, max_iter=max_iter)

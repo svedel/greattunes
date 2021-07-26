@@ -23,7 +23,7 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
         max_iter = 50
 
         # initialize the class
-        cls = CreativeProject(covars=covars)
+        cls = TuneSession(covars=covars)
 
         # define the response function
         # x is a two-element vector, with one per covariate in 'covars'
@@ -158,7 +158,7 @@ def ask(self):
         covars = [(1, 0, 2), (12, 6, 14)]
 
         # initialize the class
-        cls = CreativeProject(covars=covars)
+        cls = TuneSession(covars=covars)
 
         # define the response function
         # x is a two-element vector, with one per covariate in 'covars'
@@ -231,7 +231,7 @@ def tell(self, **kwargs):
         covars = [(1, 0, 2), (12, 6, 14)]
 
         # initialize the class
-        cls = CreativeProject(covars=covars)
+        cls = TuneSession(covars=covars)
 
         # define the response function
         # x is a two-element vector, with one per covariate in 'covars'

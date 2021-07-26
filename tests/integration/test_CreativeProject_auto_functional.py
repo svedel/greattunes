@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import torch
 import numpy as np
-from greattunes import CreativeProject
+from greattunes import TuneSession
 
 
 @pytest.mark.parametrize(
@@ -28,7 +28,7 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input, model=model_type)
+    cc = TuneSession(covars=x_input, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -75,7 +75,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
         return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (-(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
 
     # initialize class instance
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = TuneSession(covars=covars, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -129,7 +129,7 @@ def test_CreativeProject_auto_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input)
+    cc = TuneSession(covars=x_input)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
@@ -189,7 +189,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input)
+    cc = TuneSession(covars=x_input)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
