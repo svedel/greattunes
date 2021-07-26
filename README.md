@@ -669,6 +669,7 @@ exploitation in different ways.
 ### References
 A list of Bayesian optimization references for later use
 * [Wikipedia entry on Bayesian optimization](https://en.wikipedia.org/wiki/Bayesian_optimization)
+* [`BoTorch` introduction to Bayesian optimization](https://botorch.org/docs/overview)
 * [borealis.ai](https://www.borealisai.com/en/blog/tutorial-8-bayesian-optimization/)
 * [bayesopt, SigOpt page](http://bayesopt.github.io/)
 * [Towards Data Science](https://towardsdatascience.com/quick-start-to-gaussian-process-regression-36d838810319)
