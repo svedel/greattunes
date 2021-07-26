@@ -123,7 +123,7 @@ The critical things to define in this step are
 
 ```python
 # import library
-from creative_project import TuneSession
+from greattunes import TuneSession
 
 # === Step 1: define the input ===
 
@@ -360,7 +360,7 @@ illustrated below for the following cases
 ```python
 # import
 import torch
-from creative_project import TuneSession
+from greattunes import TuneSession
 
 ### ------ Case 1 - multiple observations (multivariate) ------ ###
 
@@ -412,7 +412,7 @@ historical data has been added or not (default is `random_start = True`).
 
 # import
 import torch
-from creative_project import TuneSession
+from greattunes import TuneSession
 
 ### ------ Case 1 - No historical data ------ ###
 
@@ -464,7 +464,7 @@ class initialization
 | Model name | Parameters | Comments |
 | ---------- | ---------- | -------- |
 | `"SingleTaskGP"` | N/A | A single-task exact kernel for Gaussian process regression. Follow this link for [more details](https://botorch.org/api/models.html#module-botorch.models.gp_regression). |
-| `"Custom"` | `nu` | A custom Matérn kernel with parameter `nu` (a float). For more details on Matérn kernels see [wiki page](https://en.wikipedia.org/wiki/Mat%C3%A9rn_covariance_function), and see the source code for the model in [`creative_project\custom_models`](greattunes/custom_models). |
+| `"Custom"` | `nu` | A custom Matérn kernel with parameter `nu` (a float). For more details on Matérn kernels see [wiki page](https://en.wikipedia.org/wiki/Mat%C3%A9rn_covariance_function), and see the source code for the model in [`greattunes\custom_models`](greattunes/custom_models). |
 
 #### Acquisition functions
 
