@@ -78,7 +78,8 @@ jobs:
           pip install --upgrade jupyter
           pip install --upgrade nbconvert
           pip install --upgrade ipython
-          pip install --upgrade greattunes
+          #pip install --upgrade greattunes
+          pip install -e .
       - name: Run notebooks (pull request)
         if: github.event_names == 'pull_request'
         run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
