@@ -1,4 +1,4 @@
-![logo](https://raw.githubusercontent.com/svedel/greattunes/dev/extend_model_list/figs/greattunes.png)
+![greattunes](https://raw.githubusercontent.com/svedel/greattunes/dev/extend_model_list/figs/greattunes.png)
 
 [![Tests](https://github.com/svedel/greattunes/actions/workflows/testing.yml/badge.svg)](https://github.com/svedel/greattunes/actions/workflows/testing.yml)
 [![Automatic publish to PyPI](https://github.com/svedel/greattunes/actions/workflows/prod.workflow.yml/badge.svg)](https://github.com/svedel/greattunes/actions/workflows/prod.workflow.yml)
