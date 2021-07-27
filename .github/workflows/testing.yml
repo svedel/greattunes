@@ -78,7 +78,7 @@ jobs:
           pip install --upgrade jupyter
           pip install --upgrade nbconvert
           pip install --upgrade ipython
-          #pip install --upgrade greattunes
+          # install greattunes from checked-out code
           pip install -e .
       - name: Run notebooks (pull request)
         if: github.event_names == 'pull_request'

@@ -19,7 +19,8 @@ jobs:
           python-version: 3.8
       - name: Install dependencies for running notebooks
         run: |
-          pip install --upgrade jupyter nbconvert ipython greattunes
+          pip install --upgrade jupyter nbconvert ipython
+          pip install -e .  # install greattunes from checked-out code
       - name: Run notebooks
         run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
           #jupyter nbconvert --to notebook --execute examples/*.ipynb
