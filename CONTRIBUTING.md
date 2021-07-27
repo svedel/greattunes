@@ -14,7 +14,7 @@ This library is built using the following
 * `pandas`
 * `matplotlib`
 
-Versions used of each library are specified in [requirements.txt`](requirements.txt).
+Versions used of each library are specified in [`requirements.txt`](requirements.txt).
 
 ## Development and release cycles
 
@@ -55,16 +55,26 @@ release using a CD [workflow script](#.github/workflows/prod.workflow.yml).
 
 ## Testing strategy
 
+#### Code testing
 Regular unit, integration and functional testing is performed during each run of the CI pipeline. In addition, linting, 
 code format and import style guide as well as execution of all unit tests have been added.
 
-In addition, a set of sample problems are also executed. The purpose of these special integration tests is to verify
+Furthermore, a set of sample problems are also executed. The purpose of these special integration tests is to verify
 that the optimization performance of the framework remains consistent. These sample problems is a series of pre-defined
-applications of the framework with known results.
+applications of the framework with known results. These tests are allowed to fail for development work, but must pass
+before merging (see details in [test workflow file](#.github/workflows/testing.yml)).
 
 Finally, the set of end-to-end example problems in notebook format available under `/examples` is executed as part of
 CI pipeline. These notebooks will install the latest available version of the `greattunes` library from `PyPI` before 
 running.
+
+#### Environment and compatibility testing
+
+* **Compatibility**: Currently, tests are run for `Python` versions 3.7 and 3.8. There are some issues for 
+  `torch`-dependencies preventing adding 3.9 to the test suite.
+* **Environments**: Tests are being run in `Ubuntu` (specifically `ubuntu-latest` in `GitHub`). Adding macOS and Windows
+  environments to tests are captured as a backlog feature 
+  [#46: add `macOS` and `Windows` to test suite](https://github.com/svedel/greattunes/issues/46).
 
 ### Test tooling
 
