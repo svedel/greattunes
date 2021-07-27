@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Version for this release: 0.0.6
 
+### Added
+* CI/CD stuff:
+  * Added automatic execution of all examples notebooks as part of CI/CD flow.
+### Changed
+### Deprecated
+### Removed
+### Fixed
+* Added repo logo as a static link to `GitHub` so it shows also on `PyPI
+
 ## [0.0.5] - July 15, 2021
 
 Version for this release: 0.0.5
