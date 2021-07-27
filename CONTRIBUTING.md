@@ -14,7 +14,44 @@ This library is built using the following
 * `pandas`
 * `matplotlib`
 
-## Development and deployment cycles
+Versions used of each library are specified in [requirements.txt`](requirements.txt).
+
+## Development and release cycles
+
+### Branches and workflows
+
+#### Basics
+New work must pass all tests before it is merged to a release. Testing is done automatically at each push to `GitHub` 
+via a CI workflow ([workflow file](#.github/workflows/testing.yml)). Additionally, testing should also be run 
+locally before committing to remote to ensure that the code works. Details on testing strategy and tooling is provided 
+[further below](#testing-strategy).
+
+CI/CD workflow scripts are available in [`.github/workflows`](#.github/workflows). Access tokens for pushing to 
+`test-PyPI` and `PyPI` proper are stored as secrets in `GitHub`.
+
+#### Git workflow: Getting features ready for a release 
+
+##### Development
+Any development should be done on `development` branches and merged into the master development branch upon completion 
+(incl. all tests passing). Follow good practise and create a dev branch for each feature/bug.
+
+##### Staging
+When stuff is ready for a release, merge all relevant code changes from `development` into the `staging` branch. 
+As part of testing and verification, the latest version of the `greattunes` is built as part of the CI/CD and published 
+to `test-PyPI` ([link](https://test.pypi.org/project/greattunes/)). The CD-part is handled by the 
+[staging workflow](#.github/workflows/staging.workflow.yml). **Remember** to update the version number in 
+[`greattunes/_version.py`](#greattunes/_version.py) before merging into `staging` for two reasons: version numbers 
+should be consistent across `staging` and deployed versions to `PyPI` (deployed from `main`), and secondly, `test-PyPI`
+and `PyPI` proper does not accept more than one push with the same version number.
+
+### Release a new version 
+
+Merge changes from `staging` into `main` and create a release in `GitHub`. For transparency, **make sure to use the same
+version number** as set in the library itself (in [`greattunes/_version.py`](#greattunes/_version.py)) when defining the 
+release on `GitHub`. Furthermore, it is **important that the release has a tag**.
+
+Once a release is create with a tag, the code is built from the `main` branch and pushed to `PyPI` for finish the 
+release using a CD [workflow script](#.github/workflows/prod.workflow.yml).
 
 ## Testing strategy
 
@@ -90,7 +127,7 @@ and perform style corrections if needed
 ~/greattunes$ /bin/sh -c "isort greattunes/**/*.py" # makes the changes (only command needed to update the code)
 ```
 
-### Pre-commit hooks are not used
+### Pre-commit hooks are not used due to incompatibility with `PyCharm`
 This package has been developed using `PyCharm` which does not have good support for `pre-commit` and consequently these 
 features have not been used.
 
