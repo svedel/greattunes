@@ -10,6 +10,7 @@ on:
     branches:
       - master
       - staging
+      - development
 
 jobs:
 
@@ -64,11 +65,11 @@ jobs:
         run: |
           python -m pytest tests/unit tests/integration --pythontestvers ${{ matrix.python-version }}
       - if: github.event_names == 'pull_request'
-        name: run sample problems
+        name: run sample problems (pull request)
         run: |
           python -m pytest tests/sample_problems
       - if: github.event_names != 'pull_request'
-        name: run sample problems
+        name: run sample problems (push)
         run: |
           python -m pytest tests/sample_problems
         continue-on-error: true
@@ -78,9 +79,14 @@ jobs:
           pip install --upgrade nbconvert
           pip install --upgrade ipython
           pip install --upgrade greattunes
-      - name: Run notebooks
+      - name: Run notebooks (pull request)
+        if: github.event_names == 'pull_request'
         run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
         continue-on-error: false
+      - name: Run notebooks (push)
+        if: github.event_names != 'pull_request'
+        run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
+        continue-on-error: true
 
 
 
