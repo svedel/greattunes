@@ -86,7 +86,9 @@ class TuneSession(Initializers, AcqFunction):
         }
 
         # list available acquisition functions
-        AcqFunction.__init__(self)  # creates ACQ_FUNC_LIST attribute by running constructor of AcqFunc parent class
+        AcqFunction.__init__(
+            self
+        )  # creates ACQ_FUNC_LIST attribute by running constructor of AcqFunc parent class
 
         # define sampling functions. initialize as iterative, which means using ask-tell (either manual or automatic).
         # Will be updated if method "auto" is used (use when sampling function known)

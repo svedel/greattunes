@@ -24,16 +24,28 @@ class AcqFunction:
         from botorch import acquisition
         from inspect import isclass, getmembers
 
-        IGNORE_LIST = ["AcquisitionFunction", "AnalyticAquisitionFunction", "MultiObjectiveMCAcquisitionFunction",
-                       "MultiObjectiveAnalyticAcquisitionFunction", "MCAcquisitionFunction", "CostAwareUtility",
-                       "GenericCostAwareUtility", "InverseCostWeightedUtility", "FixedFeatureAcquisitionFunction",
-                       "GenericMCObjective", "IdentityMCObjective", "LinearMCObjective", "OneShotAcquisitionFunction",
-                       "ScalarizedObjective"]
+        IGNORE_LIST = [
+            "AcquisitionFunction",
+            "AnalyticAquisitionFunction",
+            "MultiObjectiveMCAcquisitionFunction",
+            "MultiObjectiveAnalyticAcquisitionFunction",
+            "MCAcquisitionFunction",
+            "CostAwareUtility",
+            "GenericCostAwareUtility",
+            "InverseCostWeightedUtility",
+            "FixedFeatureAcquisitionFunction",
+            "GenericMCObjective",
+            "IdentityMCObjective",
+            "LinearMCObjective",
+            "OneShotAcquisitionFunction",
+            "ScalarizedObjective",
+        ]
 
-        ACQ_FUNC_LIST = [cl[0] for cl in getmembers(acquisition, isclass) if cl[0] not in IGNORE_LIST]
+        ACQ_FUNC_LIST = [
+            cl[0] for cl in getmembers(acquisition, isclass) if cl[0] not in IGNORE_LIST
+        ]
 
         return ACQ_FUNC_LIST
-
 
     def set_acq_func(self):
         """
