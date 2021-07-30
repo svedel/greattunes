@@ -17,7 +17,7 @@ class TuneSession(Initializers, AcqFunction):
         self,
         covars,
         model="SingleTaskGP",
-        acq_func="EI",
+        acq_func="ExpectedImprovement",
         random_start=True,
         random_step_cadence=10,
         **kwargs,
@@ -31,7 +31,7 @@ class TuneSession(Initializers, AcqFunction):
         variable. Currently only allows for continuous variables. Aspiration: Data type of input will be preserved and
         code be adapted to accommodate both integer and categorical variables.
         :param model str: sets surrogate model (currently allow "SingleTaskGP" and "Custom")
-        :param acq_func (str): sets acquisition function (currently allows only "EI")
+        :param acq_func (str): sets acquisition function (currently allows only "ExpectedImprovement")
         :param random_start (bool): determines whether to start from random. If set to True and previously obtained
         data provided via train_X and train_Y, there will still be random samples at start
         :param random_step_cadence (int/None): proposes a random datapoint (not determined by Bayesian optimization)
@@ -84,6 +84,9 @@ class TuneSession(Initializers, AcqFunction):
             "type": acq_func,
             "object": None,
         }
+
+        # list available acquisition functions
+        AcqFunction.__init__(self)  # creates ACQ_FUNC_LIST attribute by running constructor of AcqFunc parent class
 
         # define sampling functions. initialize as iterative, which means using ask-tell (either manual or automatic).
         # Will be updated if method "auto" is used (use when sampling function known)

@@ -135,7 +135,7 @@ x_max = 1  # upper limit
 covars = [(x_start, x_min, x_max)]
 
 # initialize the class
-cls = TuneSession(covars=covars, model="SingleTaskGP", acq_func="EI")
+cls = TuneSession(covars=covars, model="SingleTaskGP", acq_func="ExpectedImprovement")
 ```
 
 #### Step 2: Solve the problem
@@ -472,7 +472,7 @@ These acquisition functions are currently available
 
 | Acquisition function name | Comments |
 | ------------------------- | -------- |
-| `"EI"` | Expected improvement acquisition function. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"ExpectedImprovement"` | Expected improvement acquisition function. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
 
 ### Closed-loop: the `.auto` method
 

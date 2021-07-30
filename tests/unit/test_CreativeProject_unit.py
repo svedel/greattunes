@@ -200,7 +200,7 @@ def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_
     cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y, nu=nu)
 
     # the expected output for __repr__
-    deep_str = f"covars={covars!r}, model='SingleTaskGP', acq_func='EI'"
+    deep_str = f"covars={covars!r}, model='SingleTaskGP', acq_func='ExpectedImprovement'"
 
     if train_X is not None:
         deep_str += f", train_X={train_X!r}"
@@ -221,7 +221,7 @@ def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_
     assert captured.out == str_repr
 
     # build output for __str__
-    deep_str = f"covars={covars}, model='SingleTaskGP', acq_func='EI'"
+    deep_str = f"covars={covars}, model='SingleTaskGP', acq_func='ExpectedImprovement'"
 
     if train_X is not None:
         deep_str += f", train_X={train_X}"

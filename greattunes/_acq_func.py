@@ -10,6 +10,31 @@ class AcqFunction:
     all functionality for acquisition functions
     """
 
+    def __init__(self):
+        # list of available acquisition functions
+        # this is kept as a separate method because all acquisition functions are loaded during method execution, but
+        # those should not be loaded as default each time AcqFunction is initialized
+        self.ACQ_FUNC_LIST = self.acq_funcs_list()
+
+    def acq_funcs_list(self):
+        """
+        dynamically create a list of all available acquisition functions for the framework
+        """
+
+        from botorch import acquisition
+        from inspect import isclass, getmembers
+
+        IGNORE_LIST = ["AcquisitionFunction", "AnalyticAquisitionFunction", "MultiObjectiveMCAcquisitionFunction",
+                       "MultiObjectiveAnalyticAcquisitionFunction", "MCAcquisitionFunction", "CostAwareUtility",
+                       "GenericCostAwareUtility", "InverseCostWeightedUtility", "FixedFeatureAcquisitionFunction",
+                       "GenericMCObjective", "IdentityMCObjective", "LinearMCObjective", "OneShotAcquisitionFunction",
+                       "ScalarizedObjective"]
+
+        ACQ_FUNC_LIST = [cl[0] for cl in getmembers(acquisition, isclass) if cl[0] not in IGNORE_LIST]
+
+        return ACQ_FUNC_LIST
+
+
     def set_acq_func(self):
         """
         set the acquisition function
@@ -28,18 +53,17 @@ class AcqFunction:
                 "(self.train_Y is None)"
             )
 
-        LIST_ACQ_FUNCS = ["EI"]
-        if not self.acq_func["type"] in LIST_ACQ_FUNCS:
+        if not self.acq_func["type"] in self.ACQ_FUNC_LIST:
             raise Exception(
                 "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: unsupported acquisition function "
                 "name provided. '"
                 + self.acq_func["type"]
                 + "' not in list of supported acquisition functions ["
-                + ", ".join(LIST_ACQ_FUNCS)
+                + ", ".join(self.ACQ_FUNC_LIST)
                 + "]."
             )
 
-        if self.acq_func["type"] == "EI":
+        if self.acq_func["type"] == "ExpectedImprovement":
             self.acq_func["object"] = ExpectedImprovement(
                 model=self.model["model"], best_f=self.train_Y.max().item()
             )
