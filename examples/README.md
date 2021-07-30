@@ -2,7 +2,7 @@
 
 ## Overview
 The examples in this folder all illustrate ways to leverage the framework in actual situations. Emphasis is on 
-end-to-end frameworks, including "all the glue stuff". 
+end-to-end solution notebooks including "all the glue stuff" required to make it work. 
 
 ### Basic examples
 #### Univariate systems
@@ -11,7 +11,7 @@ end-to-end frameworks, including "all the glue stuff".
 #### Multivariate systems
 3. [Maximize a multivariate function using either closed-loop or iterative approach](#Example-3:-Maximize-a-multivariate-function-using-either-closed-loop-or-iterative-approach)
 4. [Optimize a noisy, multivariate system](#Example-4:-Optimize-a-noisy,-multivariate-system)
-#### Advanced examples
+### Advanced examples
 5. [Stop optimization early when convergence seems to be reached based on relative improvement in best response](#Example-5:-Stop-optimization-early-when-convergence-seems-to-be-reached-based-on-relative-improvement-in-best-response)
 6. [Functions with integer covariates](#Example-6:-Functions-with-integer-covariates)
 7. [Make the best brownie](#Example-7:-Make-the-best-brownie)
