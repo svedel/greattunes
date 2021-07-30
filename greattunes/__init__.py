@@ -31,7 +31,8 @@ class TuneSession(Initializers, AcqFunction):
         variable. Currently only allows for continuous variables. Aspiration: Data type of input will be preserved and
         code be adapted to accommodate both integer and categorical variables.
         :param model str: sets surrogate model (currently allow "SingleTaskGP" and "Custom")
-        :param acq_func (str): sets acquisition function (currently allows only "ExpectedImprovement")
+        :param acq_func (str): sets acquisition function (list of available acquisition functions available as
+        self.ACQ_FUNC_LIST)
         :param random_start (bool): determines whether to start from random. If set to True and previously obtained
         data provided via train_X and train_Y, there will still be random samples at start
         :param random_step_cadence (int/None): proposes a random datapoint (not determined by Bayesian optimization)
