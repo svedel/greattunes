@@ -12,11 +12,35 @@ Version for this release: 0.0.6
 ### Added
 * CI/CD stuff:
   * Added automatic execution of all examples notebooks as part of CI/CD flow.
+  
+* A long list of new acquisition functions. 
+  * Corresponds to implementations of the following acquisition functions from `BoTorch`, all working out-of-the-box in 
+    `greattunes`. For more details, please consult the 
+    [`BoTorch` documentation](https://botorch.org/api/acquisition.html#)
+    * `ExpectedImprovement`
+    * `NoisyExpectedImprovement`
+    * `PosteriorMean`
+    * `ProbabilityOfImprovement`
+    * `qExpectedImprovement`
+    * `qKnowledgeGradient`
+    * `qMaxValueEntropy`
+    * `qNoisyExpectedImprovement`
+    * `qProbabilityOfImprovement`
+    * `qSimpleRegret`
+    * `qUpperConfidenceBound`
+    * `UpperConfidenceBound`
+  * All available acquisition functions added as attribute `ACQ_FUNC_LIST` to `TuneSession`.
+  
+* Extended [`CONTRIBUTING.md`](CONTRIBUTING.md) with details of how to contribute 
+
 ### Changed
+* Acquisition functions
+  * Acquisition function Expected Improvement has been renamed from `EI` to `ExpectedImprovement`. This the latter going
+  forward as argument `acq_func` to `TuneSession` to invoke Expected Improvement acquisition function. 
 ### Deprecated
 ### Removed
 ### Fixed
-* Added repo logo as a static link to `GitHub` so it shows also on `PyPI
+* Added repo logo as a static link to `GitHub` so it shows also on `PyPI`
 
 ## [0.0.5] - July 15, 2021
 
