@@ -13,7 +13,7 @@ Version for this release: 0.0.6
 * CI/CD stuff:
   * Added automatic execution of all examples notebooks as part of CI/CD flow.
   
-* A long list of new acquisition functions. 
+* New acquisition functions. 
   * Corresponds to implementations of the following acquisition functions from `BoTorch`, all working out-of-the-box in 
     `greattunes`. For more details, please consult the 
     [`BoTorch` documentation](https://botorch.org/api/acquisition.html#)
@@ -31,6 +31,15 @@ Version for this release: 0.0.6
     * `qUpperConfidenceBound`
     * `UpperConfidenceBound`
   * All available acquisition functions added as attribute `ACQ_FUNC_LIST` to `TuneSession`.
+  * Acqusition function settings parameters and samplers (for Monte Carlo-based methods) can be provided to `TuneSession`
+  during class initialization as `kwargs`. Will default to pre-configured settings if none provided. Specifically, the 
+    following parameters can be configured via `kwargs`:
+      * `beta` - tradeoff parameter for acquisition functions `UpperConfidenceBound`, `qUpperConfidenceBound`
+      * `num_fantasies` - number of realizations for generating estimates for acquisition functions
+            `qKnowledgeGradient`, `NoisyExpectedImprovement`
+        
+      * `sampler` - sampler for Monte Carlo methods, should be an initialized sampler from `BoTorch` (details in 
+        [`BoTorch` documentation](https://botorch.org/api/sampling.html)).
   
 * Extended [`CONTRIBUTING.md`](CONTRIBUTING.md) with details of how to contribute 
 

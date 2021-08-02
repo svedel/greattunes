@@ -1,6 +1,7 @@
 import pytest
 import botorch
 import torch
+from botorch.sampling import SobolQMCNormalSampler
 from greattunes._acq_func import AcqFunction
 from greattunes.utils import DataSamplers
 
@@ -177,6 +178,11 @@ def test_acq_func_set_acq_func_works(
                  "likelihood": lh,
                  "loglikelihood": ll,
                  }
+
+    # define a few attributes which would normally be provided by TuneSession class
+    cls.beta = 0.2
+    cls.num_fantasies = 64
+    cls.sampler = SobolQMCNormalSampler(1024)
 
     # set the acquisition function
     cls.set_acq_func()

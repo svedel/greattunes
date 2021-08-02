@@ -14,7 +14,6 @@ from botorch.acquisition import (
     qUpperConfidenceBound,
     UpperConfidenceBound,
 )
-from botorch.sampling import SobolQMCNormalSampler
 from botorch.optim import optimize_acqf
 
 from greattunes.utils import DataSamplers
@@ -96,8 +95,13 @@ class AcqFunction:
             self.acq_func["object"] = ExpectedImprovement(
                 model=self.model["model"], best_f=self.train_Y.max().item()
             )
+
         elif self.acq_func["type"] == "NoisyExpectedImprovement":
-            NUM_FANTASIES = 20  # number of repeat noisy models being avaraged over
+
+            # get number of realizations (NUM_FANTASIES) from attribute
+            NUM_FANTASIES = self.num_fantasies
+
+            # set acquisition function
             self.acq_func["object"] = NoisyExpectedImprovement(
                 model=self.model["model"],
                 X_observed=self.train_X,
@@ -105,46 +109,56 @@ class AcqFunction:
             )
         elif self.acq_func["type"] == "PosteriorMean":
             self.acq_func["object"] = PosteriorMean(model=self.model["model"])
+
         elif self.acq_func["type"] == "ProbabilityOfImprovement":
             self.acq_func["object"] = ProbabilityOfImprovement(
                 model=self.model["model"], best_f=self.train_Y.max().item()
             )
+
         elif self.acq_func["type"] == "qExpectedImprovement":
-            sampler = SobolQMCNormalSampler(1024)
+            sampler = self.sampler
             self.acq_func["object"] = qExpectedImprovement(
                 model=self.model["model"],
                 best_f=self.train_Y.max().item(),
                 sampler=sampler,
             )
+
         elif self.acq_func["type"] == "qNoisyExpectedImprovement":
-            sampler = SobolQMCNormalSampler(1024)
+            sampler = self.sampler
             self.acq_func["object"] = qNoisyExpectedImprovement(
                 model=self.model["model"], X_baseline=self.train_X, sampler=sampler
             )
+
         elif self.acq_func["type"] == "qProbabilityOfImprovement":
-            sampler = SobolQMCNormalSampler(1024)
+            sampler = self.sampler
             self.acq_func["object"] = qProbabilityOfImprovement(
                 model=self.model["model"],
                 best_f=self.train_Y.max().item(),
                 sampler=sampler,
             )
         elif self.acq_func["type"] == "qSimpleRegret":
-            sampler = SobolQMCNormalSampler(1024)
+            sampler = self.sampler
             self.acq_func["object"] = qSimpleRegret(
                 model=self.model["model"], sampler=sampler
             )
+
         elif self.acq_func["type"] == "qUpperConfidenceBound":
-            # TODO: make BETA a parameter which can be set by user via kwarg during class initialization
-            BETA = 0.2
-            sampler = SobolQMCNormalSampler(1024)
+            BETA = self.beta
+            sampler = self.sampler
             self.acq_func["object"] = qUpperConfidenceBound(
                 model=self.model["model"], beta=BETA, sampler=sampler
             )
+
         elif self.acq_func["type"] == "qKnowledgeGradient":
-            NUM_FANTASIES = 64
+
+            # get number of realizations (NUM_FANTASIES) from attribute
+            NUM_FANTASIES = self.num_fantasies
+
+            # set the acquisition function model
             self.acq_func["object"] = qKnowledgeGradient(
                 model=self.model["model"], num_fantasies=NUM_FANTASIES
             )
+
         elif self.acq_func["type"] == "qMaxValueEntropy":
             # generate candidates randomly
             candidate_set = torch.rand(1000, self.covar_bounds.size(1))
@@ -155,6 +169,7 @@ class AcqFunction:
             self.acq_func["object"] = qMaxValueEntropy(
                 model=self.model["model"], candidate_set=candidate_set
             )
+
         elif self.acq_func["type"] == "qMultiFidelityMaxValueEntropy":
             # generate candidates randomly
             candidate_set = torch.rand(1000, self.covar_bounds.size(1))
@@ -165,12 +180,13 @@ class AcqFunction:
             self.acq_func["object"] = qMultiFidelityMaxValueEntropy(
                 model=self.model["model"], candidate_set=candidate_set
             )
+
         elif self.acq_func["type"] == "UpperConfidenceBound":
-            # TODO: make BETA a parameter which can be set by user via kwarg during class initialization
-            BETA = 0.2
+            BETA = self.beta
             self.acq_func["object"] = UpperConfidenceBound(
                 model=self.model["model"], beta=BETA
             )
+
         else:
             raise Exception(
                 "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: acquisition function '"

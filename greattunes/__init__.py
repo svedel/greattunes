@@ -39,16 +39,21 @@ class TuneSession(Initializers, AcqFunction):
         every 'random_step_cadence' iterations. Runs no random datapoints if set to None. This helps in finding the
         global optimum.
         :kwargs
-            - train_X (torch.tensor of dtype=torch.double): design matrix of covariates (batch_shape X num_obs X
-            num_training_features OR num_obs X num_training_features)
-            - train_Y (torch.tensor of dtype=torch.double): observations (batch_shape X num_obs X num_output_models
-            [allows for batched models] OR num_obs X num_output_models)
+            - beta (float): tradeoff parameter for acquisition functions UpperConfidenceBound, qUpperConfidenceBound
             - kernel (str): kernel used to define custom GP models (not currently in use)
             - nu (float): kernel parameter for Matern kernel
+            - num_fantasies (int): number of realizations for generating estimates for acquisition functions
+            qKnowledgeGradient, NoisyExpectedImprovement
             - num_initial_random (int): number of initial random points. Only changes anything if 'random_start' is
             True
             - random_sampling_method (str): sampling method for random points. Options: "random" and "latin_hcs" (latin
             hypercube sampling)
+            - sampler (BoTorch acqusition sampler object): sampler for picking datapoints for series of acquisition
+            functions. Details on available samplers on https://botorch.org/api/sampling.html.
+            - train_X (torch.tensor of dtype=torch.double): design matrix of covariates (batch_shape X num_obs X
+            num_training_features OR num_obs X num_training_features)
+            - train_Y (torch.tensor of dtype=torch.double): observations (batch_shape X num_obs X num_output_models
+            [allows for batched models] OR num_obs X num_output_models)
         """
 
         # === Computational settings ===
@@ -58,7 +63,47 @@ class TuneSession(Initializers, AcqFunction):
         # data type for tensors
         self.dtype = torch.double
 
-        # === Data initialization ===
+        # === Parameter initialization ===
+
+        # define kernel --- THIS SHOULD BE DONE MORE ELEGANTLY. If not present as input, these will be set to None
+        self.nu = kwargs.get("nu")  # get value of nu for Matern kernel
+
+        # define acquisition function parameters
+        # number of realizations to average in qKnowledgeGradient, NoisyExpectedImprovement
+        # if no input provided and models requiring it are picked, select a number for it
+        self.num_fantasies = kwargs.get("num_fantasies")
+        if (
+            acq_func in ["qKnowledgeGradient", "NoisyExpectedImprovement"]
+            and self.num_fantasies is None
+        ):
+            self.num_fantasies = 20
+            if acq_func == "qKnowledgeGradient":
+                self.num_fantasies = 64
+
+        # tradeoff parameter for UpperConfidenceBound, qUpperConfidenceBound
+        self.beta = kwargs.get("beta")
+        if (
+            acq_func in ["UpperConfidenceBound", "qUpperConfidenceBound"]
+            and self.beta is None
+        ):
+            self.beta = 0.2
+
+        # sampler for picking data points
+        # if none provided but one is needed, pick a SobolQMCNormal sampler from BoTorch
+        self.sampler = kwargs.get("sampler")
+        list_acqf_sampler = [
+            "qExpectedImprovement",
+            "qNoisyExpectedImprovement",
+            "qProbabilityOfImprovement",
+            "qSimpleRegret",
+            "qUpperConfidenceBound",
+        ]
+        if acq_func in list_acqf_sampler and self.sampler is None:
+            from botorch.sampling import SobolQMCNormalSampler
+
+            self.sampler = SobolQMCNormalSampler(1024)
+
+        # === Model and optimization initialization ===
         # initialize the data (initial guess) and bounds on covars
         (
             self.initial_guess,
@@ -76,9 +121,6 @@ class TuneSession(Initializers, AcqFunction):
             "covars_sampled_iter": 0,
             "response_sampled_iter": 0,
         }
-
-        # define kernel --- THIS SHOULD BE DONE MORE ELEGANTLY. If not present as input, these will be set to None
-        self.nu = kwargs.get("nu")  # get value of nu for Matern kernel
 
         # define acquisition function
         self.acq_func = {
