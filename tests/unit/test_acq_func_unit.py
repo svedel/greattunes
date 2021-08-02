@@ -79,8 +79,7 @@ def test_acq_func_set_acq_func_fails_wrong_acqfunc_name(ref_model_and_training_d
         assert cls.set_acq_func()
     assert str(e.value) == "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: unsupported acquisition " \
                            "function name provided. '" + cls.acq_func["type"] + "' not in list of supported " \
-                           "acquisition functions [AnalyticAcquisitionFunction, ConstrainedExpectedImprovement, " \
-                            "ConstrainedMCObjective, ExpectedImprovement, MCAcquisitionObjective, " \
+                           "acquisition functions [ConstrainedExpectedImprovement, ExpectedImprovement, " \
                             "NoisyExpectedImprovement, PosteriorMean, ProbabilityOfImprovement, UpperConfidenceBound, "\
                             "qExpectedImprovement, qKnowledgeGradient, qMaxValueEntropy, " \
                             "qMultiFidelityMaxValueEntropy, qNoisyExpectedImprovement, qProbabilityOfImprovement, " \
@@ -105,7 +104,7 @@ def test_acq_func_set_acq_func_fails_acqfunc_not_yet_implemented(ref_model_and_t
     # the acq func
     cls = AcqFunction()
     cls.acq_func = {
-        "type": "qMultiFidelityMaxValueEntropy",  # define the type of acquisition function
+        "type": "ConstrainedExpectedImprovement",  # define the type of acquisition function
         "object": None
     }
 

@@ -7,6 +7,7 @@ from botorch.acquisition import (
     qExpectedImprovement,
     qKnowledgeGradient,
     qMaxValueEntropy,
+    qMultiFidelityMaxValueEntropy,
     qNoisyExpectedImprovement,
     qProbabilityOfImprovement,
     qSimpleRegret,
@@ -40,10 +41,12 @@ class AcqFunction:
 
         IGNORE_LIST = [
             "AcquisitionFunction",
-            "AnalyticAquisitionFunction",
+            "AnalyticAcquisitionFunction",
+            "ConstrainedMCObjective",
             "MultiObjectiveMCAcquisitionFunction",
             "MultiObjectiveAnalyticAcquisitionFunction",
             "MCAcquisitionFunction",
+            "MCAcquisitionObjective",
             "CostAwareUtility",
             "GenericCostAwareUtility",
             "InverseCostWeightedUtility",
@@ -150,6 +153,16 @@ class AcqFunction:
                 + (self.covar_bounds[1] - self.covar_bounds[0]) * candidate_set
             )
             self.acq_func["object"] = qMaxValueEntropy(
+                model=self.model["model"], candidate_set=candidate_set
+            )
+        elif self.acq_func["type"] == "qMultiFidelityMaxValueEntropy":
+            # generate candidates randomly
+            candidate_set = torch.rand(1000, self.covar_bounds.size(1))
+            candidate_set = (
+                self.covar_bounds[0]
+                + (self.covar_bounds[1] - self.covar_bounds[0]) * candidate_set
+            )
+            self.acq_func["object"] = qMultiFidelityMaxValueEntropy(
                 model=self.model["model"], candidate_set=candidate_set
             )
         elif self.acq_func["type"] == "UpperConfidenceBound":

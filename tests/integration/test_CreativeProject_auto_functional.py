@@ -113,6 +113,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
         "qExpectedImprovement",
         "qKnowledgeGradient",
         "qMaxValueEntropy",
+        "qMultiFidelityMaxValueEntropy",
         "qNoisyExpectedImprovement",
         "qProbabilityOfImprovement",
         "qSimpleRegret",

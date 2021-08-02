@@ -24,6 +24,7 @@ Version for this release: 0.0.6
     * `qExpectedImprovement`
     * `qKnowledgeGradient`
     * `qMaxValueEntropy`
+    * `qMultiFidelityMaxValueEntropy`
     * `qNoisyExpectedImprovement`
     * `qProbabilityOfImprovement`
     * `qSimpleRegret`
