@@ -40,7 +40,7 @@ def test__initialize_from_covars_unit_works(covars, monkeypatch):
         pass
     monkeypatch.setattr(cls, "_Initializers__initialize_covars_dict_of_dicts", mock__initialize_covars_dict_of_dicts)
 
-    # attributes which will be generated in CreativeProject.__init__
+    # attributes which will be generated in TuneSession.__init__
     cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cls.dtype = torch.double
 
@@ -71,7 +71,7 @@ def test__initialize_from_covars_unit_fails():
     # instantiate class
     cls = Initializers()
 
-    # attributes which will be generated in CreativeProject.__init__
+    # attributes which will be generated in TuneSession.__init__
     cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cls.dtype = torch.double
 
@@ -123,7 +123,7 @@ def test_Initializers__initialize_best_response_first_add(custom_models_simple_t
     cls.covar_details = covar_details
     cls.covar_mapped_names = covar_mapped_names
 
-    # define required attributes for test to pass (IRL set in CreativeProject which is a child of Initializers)
+    # define required attributes for test to pass (IRL set in TuneSession which is a child of Initializers)
     cls.dtype = torch.double
     cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

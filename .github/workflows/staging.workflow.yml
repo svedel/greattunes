@@ -8,6 +8,35 @@ on:
       - staging
 
 jobs:
+  run-example-notebooks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@staging  # does this take the code from master of repo?
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install dependencies for running notebooks
+        run: |
+          pip install --upgrade jupyter nbconvert ipython
+          pip install -e .  # install greattunes from checked-out code
+      - name: Run notebooks
+        run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
+          #jupyter nbconvert --to notebook --execute examples/*.ipynb
+          # identify all notebooks in folder
+          #import os
+          #homepath = os.getcwd()
+          #nbpath = os.path.join(homepath, "examples")
+          #notebooks = [f for f in os.listdir(nbpath) if "ipynb" in f]
+          ## run notebooks
+          #for i in range(len(notebooks)):
+          #  nb = os.path.join(nbpath,notebooks[i])
+          #  fn = nb[:-5] + "py"
+          #  os.system(f"jupyter nbconvert --to script {nb}")  # convert to python script
+          #  os.system("python {fn}")
+        continue-on-error: false
+
   build-n-publish:
     runs-on: ubuntu-latest
 

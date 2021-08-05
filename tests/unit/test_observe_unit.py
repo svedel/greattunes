@@ -13,7 +13,7 @@ def test_observe_get_and_verify_response_input_unit(tmp_observe_class, method, t
     """
     test that _get_and_verify_response_input works for self.sampling["method"] = "iteratuve" or "functions". Leverage
     monkeypatching and create false class to mock that greattunes._observe will be called inside
-    CreativeProject class in greattunes.__init__. Rely on manual input for "iterative" option
+    TuneSession class in greattunes.__init__. Rely on manual input for "iterative" option
     """
 
     # # define class
@@ -80,7 +80,7 @@ def test_get_and_verify_response_input_kwarg_input_works(tmp_observe_class, kwar
     """
     test that _get_and_verify_response_input works for self.sampling["method"] = "iterative" with programmatically
     provided input. Leverage monkeypatching for utils.__get_covars_from_kwargs and create false class to mock that
-    greattunes._observe will be called inside CreativeProject class in greattunes.__init__
+    greattunes._observe will be called inside TuneSession class in greattunes.__init__
     """
 
     # set device for torch

@@ -1,9 +1,7 @@
-![alt text](figs/greattunes.png)
+![greattunes](https://raw.githubusercontent.com/svedel/greattunes/dev/extend_model_list/figs/greattunes.png)
 
-#![CI/CD pipeline status](https://github.com/svedel/creative-brain/workflows/CI%20CD%20workflow/badge.svg)
-
-[![Tests, code format and style checks](https://github.com/svedel/greattunes/actions/workflows/testing.yml/badge.svg)](https://github.com/svedel/greattunes/actions/workflows/testing.yml)
-[![Publish python package greattunes to PyPI](https://github.com/svedel/greattunes/actions/workflows/prod.workflow.yml/badge.svg)](https://github.com/svedel/greattunes/actions/workflows/prod.workflow.yml)
+[![Tests](https://github.com/svedel/greattunes/actions/workflows/testing.yml/badge.svg)](https://github.com/svedel/greattunes/actions/workflows/testing.yml)
+[![Automatic publish to PyPI](https://github.com/svedel/greattunes/actions/workflows/prod.workflow.yml/badge.svg)](https://github.com/svedel/greattunes/actions/workflows/prod.workflow.yml)
 
 **Easy-to-use Bayesian optimization library** made available for either closed-loop or user-driven (manual) optimization of either 
 known or unknown objective functions. Drawing on `PyTorch` (`GPyTorch`), `BOTorch` and with proprietary extensions.
@@ -125,7 +123,7 @@ The critical things to define in this step are
 
 ```python
 # import library
-from creative_project import CreativeProject
+from greattunes import TuneSession
 
 # === Step 1: define the input ===
 
@@ -137,7 +135,7 @@ x_max = 1  # upper limit
 covars = [(x_start, x_min, x_max)]
 
 # initialize the class
-cls = CreativeProject(covars=covars, model="SingleTaskGP", acq_func="EI")
+cls = TuneSession(covars=covars, model="SingleTaskGP", acq_func="ExpectedImprovement")
 ```
 
 #### Step 2: Solve the problem
@@ -151,10 +149,10 @@ Here we will work with a known objective function to optimize
 # === Step 2: solve the problem ===
 
 # univariate function to optimize
-import torch
+import numpy as np
 
 def f(x):
-    return -(6 * x - 2) ** 2 * torch.sin(12 * x - 4)
+    return -(6 * x - 2) ** 2 * np.sin(12 * x - 4)
 ```
 Beware that the number of covariates (including their range) specified by `covars` under Step 1 must comply with the
 functional dependence of the objective function (`x` in the case above).
@@ -162,7 +160,7 @@ functional dependence of the objective function (`x` in the case above).
 We are now ready to solve the problem. We will run for `max_iter`=20 iterations.
 ```python
 # run the auto-method
-    cc.auto(response_samp_func=f, max_iter=max_iter)
+cls.auto(response_samp_func=f, max_iter=max_iter)
 ```
 
 Had we worked with an objective function `f` which could not be formulated explicitly, the right entrypoint would have
@@ -201,7 +199,7 @@ of the covariates, the framework cannot proceed to optimization. Here's an examp
 covars = [(0.5, 0, 1), (2,1,4)]  # each tuple defines one covariate; the tuple entries are (initial guess, min, max)
 
 # initialize the class
-cls = CreativeProject(covars=covars, ...)
+cls = TuneSession(covars=covars, ...)
 ``` 
 This is also illustrated for a single-variable situation in [Step 1: Define the problem](#Step-1:-Define-the-problem) 
 above.
@@ -362,7 +360,7 @@ illustrated below for the following cases
 ```python
 # import
 import torch
-from creative_project import CreativeProject
+from greattunes import TuneSession
 
 ### ------ Case 1 - multiple observations (multivariate) ------ ###
 
@@ -374,7 +372,7 @@ X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
 Y = torch.tensor([[33],[37.8]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+cls = TuneSession(covars=covars,train_X=X, train_Y=Y)
 
 ### ------ Case 2 - single observation (univariate) ------ ###
 
@@ -386,7 +384,7 @@ X = torch.tensor([[1]], dtype=torch.double)
 Y = torch.tensor([[33]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+cls = TuneSession(covars=covars,train_X=X, train_Y=Y)
 
 ### ------ Case 3 - single observation (multivariate) ------ ###
 
@@ -398,7 +396,7 @@ X = torch.tensor([[1, 2, 3]], dtype=torch.double)
 Y = torch.tensor([[33]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars,train_X=X, train_Y=Y)
+cls = TuneSession(covars=covars,train_X=X, train_Y=Y)
 ```
 
 #### Random initialization
@@ -414,7 +412,7 @@ historical data has been added or not (default is `random_start = True`).
 
 # import
 import torch
-from creative_project import CreativeProject
+from greattunes import TuneSession
 
 ### ------ Case 1 - No historical data ------ ###
 
@@ -426,7 +424,7 @@ X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
 Y = torch.tensor([[33],[37.8]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars, random_start=True)
+cls = TuneSession(covars=covars, random_start=True)
 
 ### ------ Case 2 - With historical data ------ ###
 
@@ -438,7 +436,7 @@ X = torch.tensor([[1, 2, 3],[3, 4.4, 5]], dtype=torch.double)
 Y = torch.tensor([[33],[37.8]], dtype=torch.double)
 
 # initialize class
-cls = CreativeProject(covars=covars,train_X=X, train_Y=Y, random_start=True)
+cls = TuneSession(covars=covars,train_X=X, train_Y=Y, random_start=True)
 ```
 
 ##### Parameters for random start 
@@ -466,7 +464,7 @@ class initialization
 | Model name | Parameters | Comments |
 | ---------- | ---------- | -------- |
 | `"SingleTaskGP"` | N/A | A single-task exact kernel for Gaussian process regression. Follow this link for [more details](https://botorch.org/api/models.html#module-botorch.models.gp_regression). |
-| `"Custom"` | `nu` | A custom Matérn kernel with parameter `nu` (a float). For more details on Matérn kernels see [wiki page](https://en.wikipedia.org/wiki/Mat%C3%A9rn_covariance_function), and see the source code for the model in [`creative_project\custom_models`](greattunes/custom_models). |
+| `"Custom"` | `nu` | A custom Matérn kernel with parameter `nu` (a float). For more details on Matérn kernels see [wiki page](https://en.wikipedia.org/wiki/Mat%C3%A9rn_covariance_function), and see the source code for the model in [`greattunes\custom_models`](greattunes/custom_models). |
 
 #### Acquisition functions
 
@@ -474,7 +472,7 @@ These acquisition functions are currently available
 
 | Acquisition function name | Comments |
 | ------------------------- | -------- |
-| `"EI"` | Expected improvement acquisition function. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"ExpectedImprovement"` | Expected improvement acquisition function. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
 
 ### Closed-loop: the `.auto` method
 
@@ -499,7 +497,7 @@ max_iter = 100
 rel_tol = 1e-10
 
 # run the auto-method
-cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol)
+cls.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol)
 ```
 
 In most cases the best results are found by requiring the `rel_tol` limit to be satisfied for multiple consecutive
@@ -517,7 +515,7 @@ rel_tol = 1e-10
 rel_tol_steps = 5
 
 # run the auto-method
-cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
+cls.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
 ```
 
 Best practises on using `rel_tol` and `rel_tol_steps` are provided in Example 5 in [examples](examples).
@@ -543,20 +541,20 @@ new data point to sample the system response and provide both this value and the
 be different from proposed values) back via `.tell`.
 
 ```python
-# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+# in below, "cc" is an instantiated version of TuneSession class (identical initialization as when using .auto method) 
 max_iter = 20
 
 for i in range(max_iter):
   
     # generate candidate
-    cc.ask()  # new candidate is last row in cc.proposed_X
+    cls.ask()  # new candidate is last row in cc.proposed_X
 
     # sample response (beware results must be formulated as torch tensors)
     observed_covars = <from measurement or from cc.proposed_X>
     observed_response = <from measurement or from specified objective function>
 
     # report response
-    cc.tell(covars=observed_covars, response=observed_response)
+    cls.tell(covars=observed_covars, response=observed_response)
 ```
 
 #### Providing input via prompt
@@ -564,16 +562,16 @@ for i in range(max_iter):
 Observations of covariates and response can be provided manually to `.tell`. To do so, simply call `.tell` without any 
 arguments at each iteration (all book keeping will be handled on backend)
 ```python
-# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+# in below, "cc" is an instantiated version of TuneSession class (identical initialization as when using .auto method) 
 max_iter = 20
 
 for i in range(max_iter):
   
     # generate candidate
-    cc.ask()  # new candidate is last row in cc.proposed_X
+    cls.ask()  # new candidate is last row in cc.proposed_X
 
     # report response
-    cc.tell()
+    cls.tell()
 ```
 
 In this case, the user will be prompted to provide input manually. There will be 3 attempts to provide covariates 
@@ -589,7 +587,7 @@ from an instrument.
 Observed covariates and observed responses are sometimes off. To override the latest datapoint for either, simply 
 provide it again in the same iteration. This will automatically override the latest reported value 
 ```python
-# in below, "cc" is an instantiated version of CreativeProject class (identical initialization as when using .auto method) 
+# in below, "cc" is an instantiated version of TuneSession class (identical initialization as when using .auto method) 
 # further assumes that at least on full iteration has been taken
 
 # define a response
@@ -597,20 +595,20 @@ def f(x):
   ...
 
 # generate candidate
-cc.ask()  # new candidate is last row in cc.proposed_X
+cls.ask()  # new candidate is last row in cc.proposed_X
 
 # first result
 observed_results = torch.tensor([[it.item() for it in cc.proposed_X[-1]]], dtype=torch.double)
 observed_response = torch.tensor([[f(cc.proposed_X[-1]).item()]], dtype=torch.double)
 
 # report first response
-cc.tell(covars=observed_results, response=observed_response)
+cls.tell(covars=observed_results, response=observed_response)
 
 # second result
 observed_response_second = observed_response + 1
 
 # update response
-cc.tell(covars=observed_results, response=observed_response_second)
+cls.tell(covars=observed_results, response=observed_response_second)
 ```
 
 ## Contributing
@@ -671,6 +669,7 @@ exploitation in different ways.
 ### References
 A list of Bayesian optimization references for later use
 * [Wikipedia entry on Bayesian optimization](https://en.wikipedia.org/wiki/Bayesian_optimization)
+* [`BoTorch` introduction to Bayesian optimization](https://botorch.org/docs/overview)
 * [borealis.ai](https://www.borealisai.com/en/blog/tutorial-8-bayesian-optimization/)
 * [bayesopt, SigOpt page](http://bayesopt.github.io/)
 * [Towards Data Science](https://towardsdatascience.com/quick-start-to-gaussian-process-regression-36d838810319)

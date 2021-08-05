@@ -592,10 +592,10 @@ class Initializers(Validators):
     ):
         """
         set details for how to randomize at start
-        :param random_start (bool): input from user (set during CreativeProject.__init__)
-        :param num_initial_random (int/None): provided as kwarg input from user (set during CreativeProject.__init__)
+        :param random_start (bool): input from user (set during TuneSession.__init__)
+        :param num_initial_random (int/None): provided as kwarg input from user (set during TuneSession.__init__)
         :param random_sampling_method (str/None): sampling method for random points. Options: "random" and "latin_hcs"
-        (latin hypercube sampling). Provided as kwarg input from user (set during CreativeProject.__init__)
+        (latin hypercube sampling). Provided as kwarg input from user (set during TuneSession.__init__)
         :param (attributes)
             - self.train_X (tensor/None): user-provided data for covariates. Only present if data passes validation
             - self.train_Y (tensor/None): user-provided data for response. Only present if data passes validation

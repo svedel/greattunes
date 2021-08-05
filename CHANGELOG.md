@@ -9,6 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Version for this release: 0.0.6
 
+### Added
+* CI/CD stuff:
+  * Added automatic execution of all examples notebooks as part of CI/CD flow.
+  
+* New acquisition functions. 
+  * Corresponds to implementations of the following acquisition functions from `BoTorch`, all working out-of-the-box in 
+    `greattunes`. For more details, please consult the 
+    [`BoTorch` documentation](https://botorch.org/api/acquisition.html#)
+    * `ExpectedImprovement`
+    * `NoisyExpectedImprovement`
+    * `PosteriorMean`
+    * `ProbabilityOfImprovement`
+    * `qExpectedImprovement`
+    * `qKnowledgeGradient`
+    * `qMaxValueEntropy`
+    * `qMultiFidelityMaxValueEntropy`
+    * `qNoisyExpectedImprovement`
+    * `qProbabilityOfImprovement`
+    * `qSimpleRegret`
+    * `qUpperConfidenceBound`
+    * `UpperConfidenceBound`
+  * All available acquisition functions added as attribute `ACQ_FUNC_LIST` to `TuneSession`.
+  * Acqusition function settings parameters and samplers (for Monte Carlo-based methods) can be provided to `TuneSession`
+  during class initialization as `kwargs`. Will default to pre-configured settings if none provided. Specifically, the 
+    following parameters can be configured via `kwargs`:
+      * `beta` - tradeoff parameter for acquisition functions `UpperConfidenceBound`, `qUpperConfidenceBound`
+      * `num_fantasies` - number of realizations for generating estimates for acquisition functions
+            `qKnowledgeGradient`, `NoisyExpectedImprovement`
+        
+      * `sampler` - sampler for Monte Carlo methods, should be an initialized sampler from `BoTorch` (details in 
+        [`BoTorch` documentation](https://botorch.org/api/sampling.html)).
+  
+* Extended [`CONTRIBUTING.md`](CONTRIBUTING.md) with details of how to contribute 
+
+### Changed
+* Acquisition functions
+  * Acquisition function Expected Improvement has been renamed from `EI` to `ExpectedImprovement`. This the latter going
+  forward as argument `acq_func` to `TuneSession` to invoke Expected Improvement acquisition function. 
+### Deprecated
+### Removed
+### Fixed
+* Added repo logo as a static link to `GitHub` so it shows also on `PyPI`
+
 ## [0.0.5] - July 15, 2021
 
 Version for this release: 0.0.5
@@ -75,7 +118,7 @@ Version number for this release: 0.0.3
     * `random_step_cadence`: the cadence of random sampling after initialization (default: 10)
 
 ### Changed
-In `CreativeProject` class initialization:
+In `TuneSession` class initialization:
 * If historical data is added via `train_X`, `train_Y`
   * `proposed_X` has been changed to be a zero tensor of the same size as `train_X`. This replaces an empty tensor for 
     `proposed_X`, which confusingly could take any values.
@@ -127,7 +170,7 @@ Version number for first release: 0.0.1
 ### Added
 * `setup.py` to wrap repo as a package.
 * `CHANGELOG.md` to keep track of changes going forward.
-* `__str__` and `__repr__` methods to core user-facing method `creative_project.CreativeProject` for improved 
+* `__str__` and `__repr__` methods to core user-facing method `creative_project.TuneSession` for improved 
 developer and user experience.
 
 ### Changed

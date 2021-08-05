@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import torch
 import numpy as np
-from greattunes import CreativeProject
+from greattunes import TuneSession
 
 
 @pytest.mark.parametrize(
@@ -28,7 +28,7 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input, model=model_type)
+    cc = TuneSession(covars=x_input, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -75,7 +75,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
         return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (-(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
 
     # initialize class instance
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = TuneSession(covars=covars, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -104,6 +104,57 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
 
 
 @pytest.mark.parametrize(
+"acq_func_choice",
+    [
+        "ExpectedImprovement",
+       # "NoisyExpectedImprovement",
+        "PosteriorMean",
+        "ProbabilityOfImprovement",
+        "qExpectedImprovement",
+        "qKnowledgeGradient",
+        "qMaxValueEntropy",
+        "qMultiFidelityMaxValueEntropy",
+        "qNoisyExpectedImprovement",
+        "qProbabilityOfImprovement",
+        "qSimpleRegret",
+        "qUpperConfidenceBound",
+        "UpperConfidenceBound"
+    ]
+)
+def test_CreativeProject_auto_multivariate_acquisition_funcs(acq_func_choice):
+    """
+    test that all acquisition functions work for solving the problem. Focus of this test is not on convergence rate,
+    only that the acquisition functions can be used to iterate
+    """
+
+    MAX_ITER = 5
+    MAX_RESPONSE = 250
+    ERROR_LIM = 1.0
+    THEORETICAL_MAX_COVAR = 1.0
+
+    # define data
+    covars = [(0.5, 0, 1),
+              (0.5, 0, 1)]  # covariates come as a list of tuples (one per covariate: (<initial_guess>, <min>, <max>))
+
+    # define response function
+    def f(x):
+        return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (
+                    -(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
+
+    # initialize class instance
+    cc = TuneSession(covars=covars, model="SingleTaskGP", acq_func=acq_func_choice)
+
+    # run the auto-method
+    cc.auto(response_samp_func=f, max_iter=MAX_ITER)
+
+    # assert that the correct maximum and covariate values for that spot are identified
+    for it in range(len(covars)):
+        assert abs(cc.covars_best_response_value[-1, it].item() - THEORETICAL_MAX_COVAR) / THEORETICAL_MAX_COVAR \
+               <= ERROR_LIM
+    assert abs(cc.best_response_value[-1].item() - MAX_RESPONSE) / MAX_RESPONSE <= ERROR_LIM
+
+
+@pytest.mark.parametrize(
     "max_iter, rel_tol, rel_tol_steps, num_iterations_exp",
     [
         [50, 0.01, None, 2],  # test that iteration stops if relative improvement in one step is below rel_tol
@@ -129,7 +180,7 @@ def test_CreativeProject_auto_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input)
+    cc = TuneSession(covars=x_input)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
@@ -189,7 +240,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input)
+    cc = TuneSession(covars=x_input)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)

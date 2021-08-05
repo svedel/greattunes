@@ -1,5 +1,19 @@
 import torch
-from botorch.acquisition import ExpectedImprovement
+from botorch.acquisition import (
+    ExpectedImprovement,
+    NoisyExpectedImprovement,
+    PosteriorMean,
+    ProbabilityOfImprovement,
+    qExpectedImprovement,
+    qKnowledgeGradient,
+    qMaxValueEntropy,
+    qMultiFidelityMaxValueEntropy,
+    qNoisyExpectedImprovement,
+    qProbabilityOfImprovement,
+    qSimpleRegret,
+    qUpperConfidenceBound,
+    UpperConfidenceBound,
+)
 from botorch.optim import optimize_acqf
 
 from greattunes.utils import DataSamplers
@@ -9,6 +23,45 @@ class AcqFunction:
     """
     all functionality for acquisition functions
     """
+
+    def __init__(self):
+        # list of available acquisition functions
+        # this is kept as a separate method because all acquisition functions are loaded during method execution, but
+        # those should not be loaded as default each time AcqFunction is initialized
+        self.ACQ_FUNC_LIST = self.acq_funcs_list()
+
+    def acq_funcs_list(self):
+        """
+        dynamically create a list of all available acquisition functions for the framework
+        """
+
+        from botorch import acquisition
+        from inspect import isclass, getmembers
+
+        IGNORE_LIST = [
+            "AcquisitionFunction",
+            "AnalyticAcquisitionFunction",
+            "ConstrainedMCObjective",
+            "MultiObjectiveMCAcquisitionFunction",
+            "MultiObjectiveAnalyticAcquisitionFunction",
+            "MCAcquisitionFunction",
+            "MCAcquisitionObjective",
+            "CostAwareUtility",
+            "GenericCostAwareUtility",
+            "InverseCostWeightedUtility",
+            "FixedFeatureAcquisitionFunction",
+            "GenericMCObjective",
+            "IdentityMCObjective",
+            "LinearMCObjective",
+            "OneShotAcquisitionFunction",
+            "ScalarizedObjective",
+        ]
+
+        ACQ_FUNC_LIST = [
+            cl[0] for cl in getmembers(acquisition, isclass) if cl[0] not in IGNORE_LIST
+        ]
+
+        return ACQ_FUNC_LIST
 
     def set_acq_func(self):
         """
@@ -28,20 +81,117 @@ class AcqFunction:
                 "(self.train_Y is None)"
             )
 
-        LIST_ACQ_FUNCS = ["EI"]
-        if not self.acq_func["type"] in LIST_ACQ_FUNCS:
+        if not self.acq_func["type"] in self.ACQ_FUNC_LIST:
             raise Exception(
                 "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: unsupported acquisition function "
                 "name provided. '"
                 + self.acq_func["type"]
                 + "' not in list of supported acquisition functions ["
-                + ", ".join(LIST_ACQ_FUNCS)
+                + ", ".join(self.ACQ_FUNC_LIST)
                 + "]."
             )
 
-        if self.acq_func["type"] == "EI":
+        if self.acq_func["type"] == "ExpectedImprovement":
             self.acq_func["object"] = ExpectedImprovement(
                 model=self.model["model"], best_f=self.train_Y.max().item()
+            )
+
+        elif self.acq_func["type"] == "NoisyExpectedImprovement":
+
+            # get number of realizations (NUM_FANTASIES) from attribute
+            NUM_FANTASIES = self.num_fantasies
+
+            # set acquisition function
+            self.acq_func["object"] = NoisyExpectedImprovement(
+                model=self.model["model"],
+                X_observed=self.train_X,
+                num_fantasies=NUM_FANTASIES,
+            )
+        elif self.acq_func["type"] == "PosteriorMean":
+            self.acq_func["object"] = PosteriorMean(model=self.model["model"])
+
+        elif self.acq_func["type"] == "ProbabilityOfImprovement":
+            self.acq_func["object"] = ProbabilityOfImprovement(
+                model=self.model["model"], best_f=self.train_Y.max().item()
+            )
+
+        elif self.acq_func["type"] == "qExpectedImprovement":
+            sampler = self.sampler
+            self.acq_func["object"] = qExpectedImprovement(
+                model=self.model["model"],
+                best_f=self.train_Y.max().item(),
+                sampler=sampler,
+            )
+
+        elif self.acq_func["type"] == "qNoisyExpectedImprovement":
+            sampler = self.sampler
+            self.acq_func["object"] = qNoisyExpectedImprovement(
+                model=self.model["model"], X_baseline=self.train_X, sampler=sampler
+            )
+
+        elif self.acq_func["type"] == "qProbabilityOfImprovement":
+            sampler = self.sampler
+            self.acq_func["object"] = qProbabilityOfImprovement(
+                model=self.model["model"],
+                best_f=self.train_Y.max().item(),
+                sampler=sampler,
+            )
+        elif self.acq_func["type"] == "qSimpleRegret":
+            sampler = self.sampler
+            self.acq_func["object"] = qSimpleRegret(
+                model=self.model["model"], sampler=sampler
+            )
+
+        elif self.acq_func["type"] == "qUpperConfidenceBound":
+            BETA = self.beta
+            sampler = self.sampler
+            self.acq_func["object"] = qUpperConfidenceBound(
+                model=self.model["model"], beta=BETA, sampler=sampler
+            )
+
+        elif self.acq_func["type"] == "qKnowledgeGradient":
+
+            # get number of realizations (NUM_FANTASIES) from attribute
+            NUM_FANTASIES = self.num_fantasies
+
+            # set the acquisition function model
+            self.acq_func["object"] = qKnowledgeGradient(
+                model=self.model["model"], num_fantasies=NUM_FANTASIES
+            )
+
+        elif self.acq_func["type"] == "qMaxValueEntropy":
+            # generate candidates randomly
+            candidate_set = torch.rand(1000, self.covar_bounds.size(1))
+            candidate_set = (
+                self.covar_bounds[0]
+                + (self.covar_bounds[1] - self.covar_bounds[0]) * candidate_set
+            )
+            self.acq_func["object"] = qMaxValueEntropy(
+                model=self.model["model"], candidate_set=candidate_set
+            )
+
+        elif self.acq_func["type"] == "qMultiFidelityMaxValueEntropy":
+            # generate candidates randomly
+            candidate_set = torch.rand(1000, self.covar_bounds.size(1))
+            candidate_set = (
+                self.covar_bounds[0]
+                + (self.covar_bounds[1] - self.covar_bounds[0]) * candidate_set
+            )
+            self.acq_func["object"] = qMultiFidelityMaxValueEntropy(
+                model=self.model["model"], candidate_set=candidate_set
+            )
+
+        elif self.acq_func["type"] == "UpperConfidenceBound":
+            BETA = self.beta
+            self.acq_func["object"] = UpperConfidenceBound(
+                model=self.model["model"], beta=BETA
+            )
+
+        else:
+            raise Exception(
+                "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: acquisition function '"
+                + self.acq_func["type"]
+                + "' has not yet been implemented."
             )
 
     def __initialize_acq_func(self):

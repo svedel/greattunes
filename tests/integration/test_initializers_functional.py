@@ -162,7 +162,7 @@ def test_Initializers__initialize_best_response_functional(custom_models_simple_
     cls.covar_details = covar_details
     cls.covar_mapped_names = covar_mapped_names
 
-    # define required attributes for test to pass (IRL set in CreativeProject which is a child of Initializers)
+    # define required attributes for test to pass (IRL set in TuneSession which is a child of Initializers)
     cls.dtype = torch.double
     cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
