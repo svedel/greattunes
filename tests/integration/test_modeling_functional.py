@@ -6,7 +6,7 @@ from greattunes._modeling import _set_GP_model
     "model_type, nu",
     [
         ["SingleTaskGP", None],
-        ["Custom", 1.5]
+        ["SimpleCustomMaternGP", 1.5]
     ]
 )
 def test_modeling__set_GP_model_functional(training_data_covar_complex, tmp_modeling_class, model_type, nu):

@@ -2,7 +2,33 @@ from botorch.fit import fit_gpytorch_model
 from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from greattunes.custom_models.simple_matern_model import SimpleCustomMaternGP
-from greattunes.transformed_kernel_models.GPregression import SingleTaskGP_transformed
+from greattunes.transformed_kernel_models.GPregression import (
+    SingleTaskGP_transformed,
+    FixedNoiseGP_transformed,
+)
+from .utils import classes_from_file
+
+
+def _models_list():
+    """
+    returns a list of all available model types
+    """
+
+    # get all transformed botorch models
+    transf_models = classes_from_file(
+        "greattunes.transformed_kernel_models.GPregression"
+    )
+    transf_models = [
+        x.split("_")[0] for x in transf_models
+    ]  # remove "_transformed" appendix on names
+
+    # get all custom models
+    # TODO: pick up any file in greattunes.custom_models and extract all classes define in it
+    cust_models = classes_from_file("greattunes.custom_models.simple_matern_model")
+
+    model_list = transf_models + cust_models
+
+    return model_list
 
 
 def _set_GP_model(self, **kwargs):
@@ -37,7 +63,7 @@ def _set_GP_model(self, **kwargs):
         ll = ExactMarginalLogLikelihood(lh, model_obj)
 
     # Custom is a custom model based on Matérn kernel
-    elif self.model["model_type"] == "Custom":
+    elif self.model["model_type"] == "SimpleCustomMaternGP":
 
         nu = kwargs.get("nu")
 
@@ -61,7 +87,7 @@ def _set_GP_model(self, **kwargs):
     # add stored model if present
     if "model" in self.model:
         if self.model["model"] is not None:
-            if self.model["model_type"] != "Custom":
+            if self.model["model_type"] != "SimpleCustomMaternGP":
                 if self.model["model"].state_dict() is not None:
 
                     model_dict = model_obj.state_dict()

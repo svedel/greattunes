@@ -10,8 +10,8 @@ from greattunes import TuneSession
     [
         [10, 4.81856, 5e-2, "SingleTaskGP"],
         [30, 6.02073, 1e-3, "SingleTaskGP"],
-        [10, 5.49629, 0.51, "Custom"],
-        [50, 6.02073, 2.5e-2, "Custom"],
+        [10, 5.49629, 0.51, "SimpleCustomMaternGP"],
+        [50, 6.02073, 2.5e-2, "SimpleCustomMaternGP"],
     ]
 )
 def test_CreativeProject_auto_univariate_functional(max_iter, max_response, error_lim, model_type):
@@ -59,7 +59,7 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
     [
         [10, 250, 1.1, "SingleTaskGP"],
         [50, 250, 1, "SingleTaskGP"],
-        [10, 250, 96e-1, "Custom"],
+        [10, 250, 96e-1, "SimpleCustomMaternGP"],
     ]
 )
 def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, error_lim, model_type):

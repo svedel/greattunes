@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import torch
+import importlib, inspect, torch
 from greattunes.data_format_mappings import (
     pretty2tensor_covariate,
     pretty2tensor_response,
@@ -229,3 +229,19 @@ class DataSamplers:
 
         # return
         return candidates
+
+
+def classes_from_file(file_path):
+    """
+    returns names of all classes defined in the file given by 'file_path'
+    """
+
+    class_names = []
+
+    for name, cls in inspect.getmembers(
+        importlib.import_module(file_path), inspect.isclass
+    ):
+        if cls.__module__ == file_path:
+            class_names.append(name)
+
+    return class_names

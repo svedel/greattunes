@@ -30,7 +30,7 @@ class TuneSession(Initializers, AcqFunction):
         :param covars (list of tuples): each entry (tuple) must contain (<initial_guess>, <min>, <max>) for each input
         variable. Currently only allows for continuous variables. Aspiration: Data type of input will be preserved and
         code be adapted to accommodate both integer and categorical variables.
-        :param model str: sets surrogate model (currently allow "SingleTaskGP" and "Custom")
+        :param model str: sets surrogate model (currently allow "SingleTaskGP" and "SimpleCustomMaternGP")
         :param acq_func (str): sets acquisition function (list of available acquisition functions available as
         self.ACQ_FUNC_LIST)
         :param random_start (bool): determines whether to start from random. If set to True and previously obtained
@@ -111,34 +111,41 @@ class TuneSession(Initializers, AcqFunction):
         ) = self._Initializers__initialize_from_covars(covars)
         self.covars = covars  # store provided 'covars' as hidden attribute
 
-        # define the model
-        self.model = {
-            "model_type": model,
-            "model": None,
-            "likelihood": None,
-            "loglikelihood": None,
-            "covars_proposed_iter": 0,
-            "covars_sampled_iter": 0,
-            "response_sampled_iter": 0,
-        }
+        # define list of all models
+        from ._modeling import _models_list
 
-        # define acquisition function
-        self.acq_func = {
-            "type": acq_func,
-            "object": None,
-        }
+        self.MODEL_LIST = _models_list()
+
+        # define the model
+        # self.model = {
+        #    "model_type": model,
+        #    "model": None,
+        #    "likelihood": None,
+        #    "loglikelihood": None,
+        #    "covars_proposed_iter": 0,
+        #    "covars_sampled_iter": 0,
+        #    "response_sampled_iter": 0,
+        # }
+        self.model = self.initialize_model(model=model)
 
         # list available acquisition functions
         AcqFunction.__init__(
             self
         )  # creates ACQ_FUNC_LIST attribute by running constructor of AcqFunc parent class
 
+        # define acquisition function
+        # self.acq_func = {
+        #    "type": acq_func,
+        #    "object": None,
+        # }
+        self.acq_func = self.initialize_acq_func(acq_func=acq_func)
+
         # define sampling functions. initialize as iterative, which means using ask-tell (either manual or automatic).
         # Will be updated if method "auto" is used (use when sampling function known)
         sampling_type = "iterative"
         self.sampling = {"method": sampling_type, "response_func": None}
 
-        # initialize data for training and storage:
+        # === initialize data for training and storage ===
         #     - self.train_X (num_covars X num_obs): observed design matrix
         #     - self.train_Y (1 X num_obs): observed response
         #     - self.proposed_X (num_covars X num_obs): matrix of proposed new covars datapoints to sample at each
@@ -160,6 +167,7 @@ class TuneSession(Initializers, AcqFunction):
             random_sampling_method=kwargs.get("random_sampling_method"),
         )
 
+        # === random iterations to improve convergence ===
         # set cadence for random iterations, i.e. iterations in which the candidate datapoint proposed is obtained
         # from random sampling instead of from Bayesian optimization. A randomly generated datapoint is taken every
         # 'random_step' iterations.
@@ -174,6 +182,7 @@ class TuneSession(Initializers, AcqFunction):
             )
         self.random_step_cadence = random_step_cadence
 
+        # === initialize best candidate ===
         # best observed candidate (best response) [self.best_response_value 1 X num_obs tensor], together with
         # corresponding covariates [self.covariates_best_response_value num_covars X num_obs tensor]
         self._Initializers__initialize_best_response()

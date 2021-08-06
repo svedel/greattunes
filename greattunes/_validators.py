@@ -365,3 +365,21 @@ class Validators:
                     continue_iterating = False
 
         return continue_iterating
+
+    @staticmethod
+    def __validate_model_acceptable(model, model_list):
+
+        valid = False
+
+        if not model in model_list:
+            raise Exception(
+                "greattunes._validators.__validate_model_acceptable:"
+                + model
+                + " is not among approved options ("
+                + ", ".join(model_list)
+                + ")"
+            )
+        else:
+            valid = True
+
+        return valid
