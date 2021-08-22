@@ -7,6 +7,7 @@ from greattunes.custom_models.simple_matern_model import SimpleCustomMaternGP
 from greattunes.transformed_kernel_models.GPregression import (
     SingleTaskGP_transformed,
     FixedNoiseGP_transformed,
+    HeteroskedasticSingleTaskGP_transformed,
 )
 from .utils import classes_from_file
 
@@ -87,6 +88,29 @@ def _set_GP_model(self, **kwargs):
         # define the "loss" function
         ll = ExactMarginalLogLikelihood(lh, model_obj)
 
+    # FixedNoiseGP is a BoTorch alternative that also includes a fixed noise estimate on the observations train_Y
+    elif self.model["model_type"] == "HeteroskedasticSingleTaskGP":
+
+        # get noise
+        noise = self._mapped_noise_from_model()
+
+        # set up the model
+        # model_obj = FixedNoiseGP_transformed(
+        #    self.train_X, self.train_Y, self.train_Yvar, self.GP_kernel_mapping_covar_identification
+        # )
+        model_obj = HeteroskedasticSingleTaskGP_transformed(
+            self.train_X,
+            self.train_Y,
+            noise,
+            self.GP_kernel_mapping_covar_identification,
+        )
+
+        # the likelihood
+        lh = model_obj.likelihood
+
+        # define the "loss" function
+        ll = ExactMarginalLogLikelihood(lh, model_obj)
+
     # Custom is a custom model based on Matérn kernel
     elif self.model["model_type"] == "SimpleCustomMaternGP":
 
@@ -106,7 +130,7 @@ def _set_GP_model(self, **kwargs):
         raise Exception(
             "greattunes._modeling._set_GP_model: unknown 'model_type' ("
             + self.model["model_type"]
-            + ") provided. Must be in following list ['Custom', 'SingleTaskGP']"
+            + ") provided. Must be in following list " + str(_models_list())   # ['Custom', 'SingleTaskGP']
         )
 
     # add stored model if present

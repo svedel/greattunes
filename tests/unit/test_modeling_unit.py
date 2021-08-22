@@ -30,7 +30,7 @@ def test_modeling__set_GP_model_fail_unit(training_data_covar_complex, tmp_model
         output_text = cls._set_GP_model(nu=nu)
     assert str(e.value) == "greattunes._modeling._set_GP_model: unknown 'model_type' " \
                            "(" + cls.model["model_type"] + ") provided. Must be in following list " \
-                                                            "['Custom', 'SingleTaskGP']"
+                            "['FixedNoiseGP', 'HeteroskedasticSingleTaskGP', 'SingleTaskGP', 'SimpleCustomMaternGP']"
 
 
 @pytest.mark.parametrize(

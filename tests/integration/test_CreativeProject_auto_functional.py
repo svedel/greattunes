@@ -264,7 +264,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
 
 @pytest.mark.parametrize(
     "model_choice",
-    ["SingleTaskGP", "FixedNoiseGP", "SimpleCustomMaternGP"]
+    ["SingleTaskGP", "FixedNoiseGP", "SimpleCustomMaternGP", "HeteroskedasticSingleTaskGP"]
 )
 def test_CreativeProject_auto_multivariate_model_types(model_choice):
     """
@@ -286,7 +286,7 @@ def test_CreativeProject_auto_multivariate_model_types(model_choice):
                 -(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
 
     # initialize class instance
-    if model_choice in ["FixedNoiseGP"]:
+    if model_choice in ["FixedNoiseGP", "HeteroskedasticSingleTaskGP"]:
         cc = TuneSession(covars=covars, model=model_choice, acq_func="ExpectedImprovement", train_Yvar=0.25)
     else:
         cc = TuneSession(covars=covars, model=model_choice, acq_func="ExpectedImprovement")

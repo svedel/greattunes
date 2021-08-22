@@ -268,7 +268,7 @@ def test_CreativeProject_model_attributes_exist(covars_for_custom_models_simple_
         "UpperConfidenceBound",
     ]
 
-    refs_models = ["SimpleCustomMaternGP", "SingleTaskGP", "FixedNoiseGP"]
+    refs_models = ["SimpleCustomMaternGP", "SingleTaskGP", "FixedNoiseGP", "HeteroskedasticSingleTaskGP"]
 
     assert set(cls.ACQ_FUNC_LIST) == set(ref_acq_funcs)
     assert set(cls.MODEL_LIST) == set(refs_models)
