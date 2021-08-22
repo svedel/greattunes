@@ -65,17 +65,20 @@ def _set_GP_model(self, **kwargs):
         ll = ExactMarginalLogLikelihood(lh, model_obj)
 
     # FixedNoiseGP is a BoTorch alternative that also includes a fixed noise estimate on the observations train_Y
-    if self.model["model_type"] == "FixedNoiseGP":
+    elif self.model["model_type"] == "FixedNoiseGP":
 
         # get noise
-        noise = self._mapped_noise_from_model(self)
+        noise = self._mapped_noise_from_model()
 
         # set up the model
-        #model_obj = FixedNoiseGP_transformed(
+        # model_obj = FixedNoiseGP_transformed(
         #    self.train_X, self.train_Y, self.train_Yvar, self.GP_kernel_mapping_covar_identification
-        #)
+        # )
         model_obj = FixedNoiseGP_transformed(
-            self.train_X, self.train_Y, noise, self.GP_kernel_mapping_covar_identification
+            self.train_X,
+            self.train_Y,
+            noise,
+            self.GP_kernel_mapping_covar_identification,
         )
 
         # the likelihood
@@ -151,19 +154,22 @@ def _mapped_noise_from_model(self):
     :return: train_YVar_mapped (tensor, float, same size as self.train_Yvar) containing noise
     """
 
-
     # case 1: is a single-entry tensor (dimension-0 tensor or dimension-1 tensor)
     if isinstance(self.train_Yvar, torch.DoubleTensor):
         if len(list(self.train_Yvar.size())) <= 1:
             train_Yvar_mapped = self.train_Yvar.expand_as(self.train_Y)
         else:
-            raise Exception("greattunes.greattunes._observe._mapped_noise_from_model: tensor provided for 'train_Yvar'"
-                            " has unacceptable dimensions. Only tensors of dimension 0 or 1 are accepted, provided "
-                            "tensor has dimension " + str(len(list(self.train_Yvar.size()))) + ".")
+            raise Exception(
+                "greattunes.greattunes._observe._mapped_noise_from_model: tensor provided for 'train_Yvar'"
+                " has unacceptable dimensions. Only tensors of dimension 0 or 1 are accepted, provided "
+                "tensor has dimension " + str(len(list(self.train_Yvar.size()))) + "."
+            )
 
     # case 2: a single number (float)
     elif isinstance(self.train_Yvar, float) or isinstance(self.train_Yvar, int):
-        train_Yvar_mapped = torch.tensor(self.train_Yvar, dtype=self.dtype, device=self.device).expand_as(self.train_Y)
+        train_Yvar_mapped = torch.tensor(
+            self.train_Yvar, dtype=self.dtype, device=self.device
+        ).expand_as(self.train_Y)
 
     # case 3: a function
     # expects to operate on the pretty response data (self.y_data)
@@ -175,10 +181,23 @@ def _mapped_noise_from_model(self):
 
     # error case
     else:
-        raise Exception("greattunes.greattunes._observe._mapped_noise_from_model: provided object for 'train_Yvar' is"
-                        " not acceptable. It must be either (i) a tensor of dimension 0 or 1, (ii) a float or int, or "
-                        "(iii) a function which operates on self.y_data. Provided object is of type " +
-                        str(type(self.train_Yvar)) + ".")
+        # special case where no train_Yvar provided for FixedNoise, Heteroskedactic noise, requires another exception raise to user
+        if (self.train_Yvar is None) & (
+            self.model["model_type"] in ["FixedNoiseGP", "HeteroskedasticSingleTaskGP"]
+        ):
+            raise Exception(
+                "greattunes.greattunes._observe._mapped_noise_from_model: selected model type "
+                + self.model["model_type"]
+                + " requires noise level to be provided in TuneSession initiation via "
+                "'train_Yvar' kwarg, but none was provided."
+            )
+        else:
+            raise Exception(
+                "greattunes.greattunes._observe._mapped_noise_from_model: provided object for 'train_Yvar' "
+                "is not acceptable. It must be either (i) a tensor of dimension 0 or 1, (ii) a float or "
+                "int, or (iii) a function which operates on self.y_data. Provided object is of type "
+                + str(type(self.train_Yvar))
+                + "."
+            )
 
     return train_Yvar_mapped
-

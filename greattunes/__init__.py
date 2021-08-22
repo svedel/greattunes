@@ -54,6 +54,8 @@ class TuneSession(Initializers, AcqFunction):
             num_training_features OR num_obs X num_training_features)
             - train_Y (torch.tensor of dtype=torch.double): observations (batch_shape X num_obs X num_output_models
             [allows for batched models] OR num_obs X num_output_models)
+            - train_Yvar (torch.tensor of dtype=torch.double): observations of noise in the same shape as 'train_Y'.
+            Used by some models which include observation noise (FixedNoiseGP, HeteroskedacticSingleTaskGP)
         """
 
         # === Computational settings ===
@@ -88,29 +90,7 @@ class TuneSession(Initializers, AcqFunction):
         ):
             self.beta = 0.2
 
-        # sampler for picking data points
-        # if none provided but one is needed, pick a SobolQMCNormal sampler from BoTorch
-        self.sampler = kwargs.get("sampler")
-        list_acqf_sampler = [
-            "qExpectedImprovement",
-            "qNoisyExpectedImprovement",
-            "qProbabilityOfImprovement",
-            "qSimpleRegret",
-            "qUpperConfidenceBound",
-        ]
-        if acq_func in list_acqf_sampler and self.sampler is None:
-            from botorch.sampling import SobolQMCNormalSampler
-
-            self.sampler = SobolQMCNormalSampler(1024)
-
         # === Model and optimization initialization ===
-        # initialize the data (initial guess) and bounds on covars
-        (
-            self.initial_guess,
-            self.covar_bounds,
-        ) = self._Initializers__initialize_from_covars(covars)
-        self.covars = covars  # store provided 'covars' as hidden attribute
-
         # define list of all models
         from ._modeling import _models_list
 
@@ -145,7 +125,30 @@ class TuneSession(Initializers, AcqFunction):
         sampling_type = "iterative"
         self.sampling = {"method": sampling_type, "response_func": None}
 
-        # === initialize data for training and storage ===
+        # sampler for picking data points
+        # if none provided but one is needed, pick a SobolQMCNormal sampler from BoTorch
+        self.sampler = kwargs.get("sampler")
+        list_acqf_sampler = [
+            "qExpectedImprovement",
+            "qNoisyExpectedImprovement",
+            "qProbabilityOfImprovement",
+            "qSimpleRegret",
+            "qUpperConfidenceBound",
+        ]
+        if acq_func in list_acqf_sampler and self.sampler is None:
+            from botorch.sampling import SobolQMCNormalSampler
+
+            self.sampler = SobolQMCNormalSampler(1024)
+
+        # === data for training ===
+        # initialize the data (initial guess) and bounds on covars
+        (
+            self.initial_guess,
+            self.covar_bounds,
+        ) = self._Initializers__initialize_from_covars(covars)
+        self.covars = covars  # store provided 'covars' as hidden attribute
+
+        # initialize data for training and storage
         #     - self.train_X (num_covars X num_obs): observed design matrix
         #     - self.train_Y (1 X num_obs): observed response
         #     - self.proposed_X (num_covars X num_obs): matrix of proposed new covars datapoints to sample at each
@@ -156,9 +159,15 @@ class TuneSession(Initializers, AcqFunction):
             train_X=kwargs.get("train_X"), train_Y=kwargs.get("train_Y")
         )
 
-        # initialize pretty data (for user interaction)
+        # user-provided noise levels (if needed)
+        # if no 'train_Yvar' is provided but the selected model needs it, then it will throw an error. That is expected
+        # behavior
+        self.train_Yvar = kwargs.get("train_Yvar")
+
+        # === initialize pretty data (for user interaction) ===
         self.x_data, self.y_data = self._Initializers__initialize_pretty_data()
 
+        # === Random start settings ===
         # set plan for initialization with random samples. In some cases (if train_X, train_Y is accepted) will not set
         # any random initial points
         self._Initializers__initialize_random_start(
@@ -236,7 +245,7 @@ class TuneSession(Initializers, AcqFunction):
         _read_covars_manual_input,
         _print_candidate_to_prompt,
     )
-    from ._modeling import _set_GP_model
+    from ._modeling import _set_GP_model, _mapped_noise_from_model
     from ._best_response import (
         _find_max_response_value,
         _update_max_response_value,

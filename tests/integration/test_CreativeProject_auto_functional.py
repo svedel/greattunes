@@ -107,7 +107,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
 "acq_func_choice",
     [
         "ExpectedImprovement",
-       # "NoisyExpectedImprovement",
+        "NoisyExpectedImprovement",
         "PosteriorMean",
         "ProbabilityOfImprovement",
         "qExpectedImprovement",
@@ -142,7 +142,10 @@ def test_CreativeProject_auto_multivariate_acquisition_funcs(acq_func_choice):
                     -(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
 
     # initialize class instance
-    cc = TuneSession(covars=covars, model="SingleTaskGP", acq_func=acq_func_choice)
+    if acq_func_choice == "NoisyExpectedImprovement":
+        cc = TuneSession(covars=covars, model="FixedNoiseGP", acq_func=acq_func_choice, train_Yvar=0.25)
+    else:
+        cc = TuneSession(covars=covars, model="SingleTaskGP", acq_func=acq_func_choice)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=MAX_ITER)
@@ -257,3 +260,42 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
     outtext += "Corresponding covariate values resulting in max_Y:\n\t" + pd.DataFrame({"covar0": [covar_max_resp]}).to_string(index=False).replace("\n", "\n\t") + "\n"
 
     assert captured.out == outtext
+
+
+@pytest.mark.parametrize(
+    "model_choice",
+    ["SingleTaskGP", "FixedNoiseGP", "SimpleCustomMaternGP"]
+)
+def test_CreativeProject_auto_multivariate_model_types(model_choice):
+    """
+    tests that each implemented model type can be run
+    """
+
+    MAX_ITER = 5
+    MAX_RESPONSE = 250
+    ERROR_LIM = 1.0
+    THEORETICAL_MAX_COVAR = 1.0
+
+    # define data
+    covars = [(0.5, 0, 1),
+              (0.5, 0, 1)]  # covariates come as a list of tuples (one per covariate: (<initial_guess>, <min>, <max>))
+
+    # define response function
+    def f(x):
+        return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (
+                -(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
+
+    # initialize class instance
+    if model_choice in ["FixedNoiseGP"]:
+        cc = TuneSession(covars=covars, model=model_choice, acq_func="ExpectedImprovement", train_Yvar=0.25)
+    else:
+        cc = TuneSession(covars=covars, model=model_choice, acq_func="ExpectedImprovement")
+
+    # run the auto-method
+    cc.auto(response_samp_func=f, max_iter=MAX_ITER)
+
+    # assert that the correct maximum and covariate values for that spot are identified
+    for it in range(len(covars)):
+        assert abs(cc.covars_best_response_value[-1, it].item() - THEORETICAL_MAX_COVAR) / THEORETICAL_MAX_COVAR \
+               <= ERROR_LIM
+    assert abs(cc.best_response_value[-1].item() - MAX_RESPONSE) / MAX_RESPONSE <= ERROR_LIM

@@ -66,7 +66,11 @@ def test_modeling__mapped_noise_from_model_works(y_data, train_Yvar):
     # run the method
     train_Yvar_mapped = cls._mapped_noise_from_model()
 
+    # assert size
     assert y_data.shape[0] == train_Yvar_mapped.size()[0]
+
+    # assert output type
+    assert isinstance(train_Yvar_mapped, torch.DoubleTensor)
 
     # special case for cases which are not functions, to assert level of noise
     if not isinstance(cls.train_Yvar, types.FunctionType):
@@ -102,6 +106,8 @@ def test_modeling__mapped_noise_from_model_fails(y_data, train_Yvar):
 
             self.dtype = torch.double
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+            self.model = {"model_type": "SingleTaskGP"}
 
         from greattunes._modeling import _mapped_noise_from_model
 
