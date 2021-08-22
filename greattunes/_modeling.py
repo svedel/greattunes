@@ -130,7 +130,8 @@ def _set_GP_model(self, **kwargs):
         raise Exception(
             "greattunes._modeling._set_GP_model: unknown 'model_type' ("
             + self.model["model_type"]
-            + ") provided. Must be in following list " + str(_models_list())   # ['Custom', 'SingleTaskGP']
+            + ") provided. Must be in following list "
+            + str(_models_list())  # ['Custom', 'SingleTaskGP']
         )
 
     # add stored model if present

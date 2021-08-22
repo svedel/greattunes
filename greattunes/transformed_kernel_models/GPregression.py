@@ -8,7 +8,7 @@ Optimization with Gaussian processes, Neurocomputing vol. 380, 7 March 2020, pp.
 (https://arxiv.org/pdf/1805.03463.pdf, https://www.sciencedirect.com/science/article/abs/pii/S0925231219315619)
 """
 
-from botorch.models import FixedNoiseGP, SingleTaskGP, HeteroskedasticSingleTaskGP
+from botorch.models import FixedNoiseGP, HeteroskedasticSingleTaskGP, SingleTaskGP
 from gpytorch.distributions.multivariate_normal import MultivariateNormal
 
 from greattunes.transformed_kernel_models.transformation import GP_kernel_transform
