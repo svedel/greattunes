@@ -240,3 +240,35 @@ def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_
 
     # assert for __str__
     assert captured.out == str_repr
+
+
+def test_CreativeProject_model_attributes_exist(covars_for_custom_models_simple_training_data_4elements):
+    """
+    tests that model attributes exist when the TuneSession class is initialized
+    """
+
+    covars = covars_for_custom_models_simple_training_data_4elements
+
+    cls = TuneSession(covars=covars)
+
+    ref_acq_funcs = [
+        "ConstrainedExpectedImprovement",
+        "ExpectedImprovement",
+        "NoisyExpectedImprovement",
+        "PosteriorMean",
+        "ProbabilityOfImprovement",
+        "qExpectedImprovement",
+        "qKnowledgeGradient",
+        "qMaxValueEntropy",
+        "qMultiFidelityMaxValueEntropy",
+        "qNoisyExpectedImprovement",
+        "qProbabilityOfImprovement",
+        "qSimpleRegret",
+        "qUpperConfidenceBound",
+        "UpperConfidenceBound",
+    ]
+
+    refs_models = ["SimpleCustomMaternGP", "SingleTaskGP", "FixedNoiseGP", "HeteroskedasticSingleTaskGP"]
+
+    assert set(cls.ACQ_FUNC_LIST) == set(ref_acq_funcs)
+    assert set(cls.MODEL_LIST) == set(refs_models)
