@@ -371,7 +371,7 @@ class Validators:
 
         valid = False
 
-        if not model in model_list:
+        if model not in model_list:
             raise Exception(
                 "greattunes._validators.__validate_model_acceptable:"
                 + model
