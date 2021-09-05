@@ -1,6 +1,6 @@
 # deployment workflow to PyPI
 
-name: Publish python package greattunes to PyPI
+name: Publish to PyPI
 
 on:
   release:

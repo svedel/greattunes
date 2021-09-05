@@ -97,8 +97,8 @@ def covars_initialization_data():
 def training_data_covar_complex(covars_initialization_data):
     """
     defines simple training data that corresponds to covar_complex (covars_initialization_data[1]), where covar_complex
-    is the right format for initialization of the full user-facing class CreativeProject
-    (greattunes.CreativeProject)
+    is the right format for initialization of the full user-facing class TuneSession
+    (greattunes.TuneSession)
     """
 
     covars = covars_initialization_data[1]
@@ -242,7 +242,7 @@ def tmp_best_response_class():
 
         # import methods
         from greattunes._best_response import _find_max_response_value, _update_max_response_value, \
-            current_best, _update_proposed_data
+            current_best, _update_proposed_data, _find_best_predicted, _evaluate_model, best_predicted
 
     cls = TmpClass()
 

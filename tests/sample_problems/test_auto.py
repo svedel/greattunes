@@ -1,7 +1,7 @@
 import torch
 import pytest
 import numpy as np
-from greattunes import CreativeProject
+from greattunes import TuneSession
 from scipy.stats import multivariate_normal
 
 
@@ -10,7 +10,7 @@ from scipy.stats import multivariate_normal
     [
         [10, 4.81856, 5e-2, "SingleTaskGP"],
         [50, 6.02073, 1e-3, "SingleTaskGP"],
-        [50, 5.99716, 9e-3, "Custom"],
+        [50, 5.99716, 9e-3, "SimpleCustomMaternGP"],
     ]
 )
 def test_sample_problems_auto_1d_maximization(max_iter, max_response, error_lim, model_type, capsys):
@@ -28,7 +28,7 @@ def test_sample_problems_auto_1d_maximization(max_iter, max_response, error_lim,
         return -(6 * x["covar0"].iloc[0] - 2) ** 2 * np.sin(12 * x["covar0"].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input, model=model_type)
+    cc = TuneSession(covars=x_input, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -54,9 +54,9 @@ def test_sample_problems_auto_1d_maximization(max_iter, max_response, error_lim,
     "max_iter, rel_tol, rel_tol_steps, num_iterations_exp, response_error_lim, covar_error_lim, model_type",
     [
         [50, 1e-12, None, 2, 1.5, 0.5, "SingleTaskGP"],  # test that iteration stops if relative improvement in one step is below rel_tol
-        [50, 1e-12, None, 2, 1.5, 0.5, "Custom"],  # test that iteration stops if relative improvement in one step is below rel_tol
+        [50, 1e-12, None, 2, 1.5, 0.5, "SimpleCustomMaternGP"],  # test that iteration stops if relative improvement in one step is below rel_tol
         [50, 1e-10, 5, 8, 2e-1, 0.07, "SingleTaskGP"],  # same as second case above but with realistic rel_tol
-        [50, 1e-10, 5, 15, 9e-2, 0.04, "Custom"],  # same as second case above but with realistic rel_tol
+        [50, 1e-10, 5, 15, 9e-2, 0.04, "SimpleCustomMaternGP"],  # same as second case above but with realistic rel_tol
     ]
 )
 def test_sample_problems_auto_1d_maximization_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num_iterations_exp,
@@ -81,7 +81,7 @@ def test_sample_problems_auto_1d_maximization_rel_tol_test(max_iter, rel_tol, re
         return -(6 * x["covar0"].iloc[0] - 2) ** 2 * np.sin(12 * x["covar0"].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input, model=model_type)
+    cc = TuneSession(covars=x_input, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
@@ -151,7 +151,7 @@ def test_sample_problems_auto_2d_maximization(max_iter, error_lim, x0_0, x1_0):
     covars2d = [(x0_0, -5, 5.0), (x1_0, -5, 5.0)]
 
     # initialize class instance
-    cc2 = CreativeProject(covars=covars2d)
+    cc2 = TuneSession(covars=covars2d)
 
     # run the auto-method
     cc2.auto(response_samp_func=f2, max_iter=max_iter)
@@ -475,7 +475,7 @@ def test_full_multicategorical_problem():
     }
 
     # initialize class instance
-    cc = CreativeProject(covars=covars_brownie)
+    cc = TuneSession(covars=covars_brownie)
 
     # number of iterations
     max_iter = 100

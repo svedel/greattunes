@@ -1,6 +1,7 @@
 import pytest
 import botorch
 import torch
+from botorch.sampling import SobolQMCNormalSampler
 from greattunes._acq_func import AcqFunction
 from greattunes.utils import DataSamplers
 
@@ -16,7 +17,7 @@ def test_acq_func_set_acq_func_fails(custom_models_simple_training_data_4element
     # the acq func
     cls = AcqFunction()
     cls.acq_func = {
-        "type": "EI", # define the type of acquisition function
+        "type": "ExpectedImprovement", # define the type of acquisition function
         "object": None
     }
 
@@ -79,12 +80,17 @@ def test_acq_func_set_acq_func_fails_wrong_acqfunc_name(ref_model_and_training_d
         assert cls.set_acq_func()
     assert str(e.value) == "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: unsupported acquisition " \
                            "function name provided. '" + cls.acq_func["type"] + "' not in list of supported " \
-                           "acquisition functions [EI]."
+                           "acquisition functions [ConstrainedExpectedImprovement, ExpectedImprovement, " \
+                            "NoisyExpectedImprovement, PosteriorMean, ProbabilityOfImprovement, UpperConfidenceBound, "\
+                            "qExpectedImprovement, qKnowledgeGradient, qMaxValueEntropy, " \
+                            "qMultiFidelityMaxValueEntropy, qNoisyExpectedImprovement, qProbabilityOfImprovement, " \
+                            "qSimpleRegret, qUpperConfidenceBound]."
 
 
-def test_acq_func_set_acq_func_works(ref_model_and_training_data):
+def test_acq_func_set_acq_func_fails_acqfunc_not_yet_implemented(ref_model_and_training_data):
     """
-    test that set_acq_func works with model and training data are provided correctly
+    test that set_acq_func does not set acquisition function if an acquisition function is chosen which is yet to be
+    implemented
     """
 
     # load data and model
@@ -99,7 +105,7 @@ def test_acq_func_set_acq_func_works(ref_model_and_training_data):
     # the acq func
     cls = AcqFunction()
     cls.acq_func = {
-        "type": "EI",  # define the type of acquisition function
+        "type": "ConstrainedExpectedImprovement",  # define the type of acquisition function
         "object": None
     }
 
@@ -109,6 +115,74 @@ def test_acq_func_set_acq_func_works(ref_model_and_training_data):
                  "likelihood": lh,
                  "loglikelihood": ll,
                  }
+
+    with pytest.raises(Exception) as e:
+        assert cls.set_acq_func()
+    assert str(e.value) == "greattunes.greattunes._acq_func.AcqFunction.set_acq_func: acquisition function '" \
+                           + cls.acq_func["type"] + "' has not yet been implemented."
+
+
+@pytest.mark.parametrize(
+    "acq_func_choice",
+    [
+        "ExpectedImprovement",
+       # "NoisyExpectedImprovement",
+        "PosteriorMean",
+        "ProbabilityOfImprovement",
+        "qExpectedImprovement",
+        "qKnowledgeGradient",
+        "qMaxValueEntropy",
+        "qNoisyExpectedImprovement",
+        "qProbabilityOfImprovement",
+        "qSimpleRegret",
+        "qUpperConfidenceBound",
+        "UpperConfidenceBound"
+    ]
+)
+def test_acq_func_set_acq_func_works(
+        ref_model_and_training_data,
+        covars_for_custom_models_simple_training_data_4elements,
+        acq_func_choice
+):
+    """
+    test that set_acq_func works with model and training data are provided correctly.
+
+    the list of available acquisition functions can be seen in _acq_func.set_acq_func
+    """
+
+    # load data and model
+    train_X = ref_model_and_training_data[0]
+    train_Y = ref_model_and_training_data[1]
+
+    # the covariates defining the model
+    covars = covars_for_custom_models_simple_training_data_4elements
+    covar_bounds = torch.tensor([[covars[0][1]], [covars[0][2]]], dtype=torch.double)
+
+    # load pretrained model
+    model_obj = ref_model_and_training_data[2]
+    lh = ref_model_and_training_data[3]
+    ll = ref_model_and_training_data[4]
+
+    # the acq func
+    cls = AcqFunction()
+    cls.acq_func = {
+        "type": acq_func_choice,  # define the type of acquisition function
+        "object": None
+    }
+
+    # set attributes needed for test: train_Y to not None, model to None
+    cls.covar_bounds = covar_bounds
+    cls.train_X = train_X
+    cls.train_Y = train_Y
+    cls.model = {"model": model_obj,
+                 "likelihood": lh,
+                 "loglikelihood": ll,
+                 }
+
+    # define a few attributes which would normally be provided by TuneSession class
+    cls.beta = 0.2
+    cls.num_fantasies = 64
+    cls.sampler = SobolQMCNormalSampler(1024)
 
     # set the acquisition function
     cls.set_acq_func()
@@ -139,7 +213,7 @@ def test_acq_func_identify_new_candidate_nodatacount_unit(covars_for_custom_mode
     # the acq func
     cls = AcqFunction()
     cls.acq_func = {
-        "type": "EI",  # define the type of acquisition function
+        "type": "ExpectedImprovement",  # define the type of acquisition function
         "object": None
     }
 

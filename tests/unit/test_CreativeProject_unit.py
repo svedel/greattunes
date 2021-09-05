@@ -1,6 +1,6 @@
 import pytest
 import torch
-from greattunes import CreativeProject
+from greattunes import TuneSession
 
 
 @pytest.mark.parametrize("nu", [None, 2.5])
@@ -9,7 +9,7 @@ def test_CreativeProject__init__covars_notrainingdata_works(covars_for_custom_mo
                                                             covar_details_covars_for_custom_models_simple_training_data_4elements,
                                                             monkeypatch):
     """
-    test CreativeProject class initialization under conditions where it should work (no data provided). Kwarg nu is
+    test TuneSession class initialization under conditions where it should work (no data provided). Kwarg nu is
     tested for None and numerical value
     """
 
@@ -27,11 +27,11 @@ def test_CreativeProject__init__covars_notrainingdata_works(covars_for_custom_mo
         self.covar_mapped_names = covar_mapped_names
         return torch.tensor(guesses, dtype=torch.double), torch.tensor([lb, ub], dtype=torch.double)
     monkeypatch.setattr(
-        CreativeProject, "_Initializers__initialize_from_covars", mock__initialize_from_covars
+        TuneSession, "_Initializers__initialize_from_covars", mock__initialize_from_covars
     )
 
     # set up class
-    cls = CreativeProject(covars=covars, nu=nu)
+    cls = TuneSession(covars=covars, nu=nu)
 
     # assert class settings
     assert cls.device == torch.device(type='cpu')
@@ -86,7 +86,7 @@ def test_CreativeProject__init__covars_trainingdata_works(covars_for_custom_mode
         self.covar_mapped_names = covar_mapped_names
         return torch.tensor(guesses, dtype=torch.double), torch.tensor([lb, ub], dtype=torch.double)
     monkeypatch.setattr(
-        CreativeProject, "_Initializers__initialize_from_covars", mock__initialize_from_covars
+        TuneSession, "_Initializers__initialize_from_covars", mock__initialize_from_covars
     )
 
     # monkeypatch training data initialization
@@ -95,7 +95,7 @@ def test_CreativeProject__init__covars_trainingdata_works(covars_for_custom_mode
         self.train_Y = train_Y
         return True
     monkeypatch.setattr(
-        CreativeProject, "_Initializers__initialize_training_data", mock__initialize_training_data
+        TuneSession, "_Initializers__initialize_training_data", mock__initialize_training_data
     )
 
     # monkeypatch best response initialization
@@ -105,11 +105,11 @@ def test_CreativeProject__init__covars_trainingdata_works(covars_for_custom_mode
         self.best_response_value = tmp_val
         return True
     monkeypatch.setattr(
-        CreativeProject, "_Initializers__initialize_best_response", mock__initialize_best_response
+        TuneSession, "_Initializers__initialize_best_response", mock__initialize_best_response
     )
 
     # initialize class
-    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+    cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y)
 
     # assert training data set
     assert cls.train_X is not None
@@ -144,7 +144,7 @@ covar_details_covars_for_custom_models_simple_training_data_4elements,
         self.covar_mapped_names = covar_mapped_names
         return torch.tensor(guesses, dtype=torch.double), torch.tensor([lb, ub], dtype=torch.double)
     monkeypatch.setattr(
-        CreativeProject, "_Initializers__initialize_from_covars", mock__initialize_from_covars
+        TuneSession, "_Initializers__initialize_from_covars", mock__initialize_from_covars
     )
 
     # monkeypatch training data initialization
@@ -153,7 +153,7 @@ covar_details_covars_for_custom_models_simple_training_data_4elements,
         self.train_Y = train_Y
         return True
     monkeypatch.setattr(
-        CreativeProject, "_Initializers__initialize_training_data", mock__initialize_training_data
+        TuneSession, "_Initializers__initialize_training_data", mock__initialize_training_data
     )
 
     # monkeypatch best response initialization
@@ -163,11 +163,11 @@ covar_details_covars_for_custom_models_simple_training_data_4elements,
         self.best_response_value = tmp_val
         return True
     monkeypatch.setattr(
-        CreativeProject, "_Initializers__initialize_best_response", mock__initialize_best_response
+        TuneSession, "_Initializers__initialize_best_response", mock__initialize_best_response
     )
 
     # initialize class
-    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+    cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y)
 
     # assert training data
     assert cls.train_X is None
@@ -197,10 +197,10 @@ def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_
     covars = covars_for_custom_models_simple_training_data_4elements
 
     # initiate class
-    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y, nu=nu)
+    cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y, nu=nu)
 
     # the expected output for __repr__
-    deep_str = f"covars={covars!r}, model='SingleTaskGP', acq_func='EI'"
+    deep_str = f"covars={covars!r}, model='SingleTaskGP', acq_func='ExpectedImprovement'"
 
     if train_X is not None:
         deep_str += f", train_X={train_X!r}"
@@ -211,7 +211,7 @@ def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_
     if nu is not None:
         deep_str += f", nu={nu!r}"
 
-    str_repr =  f"CreativeProject(" + deep_str + f")\n"  # adding \n at end since this is part of string representation
+    str_repr =  f"TuneSession(" + deep_str + f")\n"  # adding \n at end since this is part of string representation
 
     # capture the output for __repr__
     print(repr(cls))
@@ -221,7 +221,7 @@ def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_
     assert captured.out == str_repr
 
     # build output for __str__
-    deep_str = f"covars={covars}, model='SingleTaskGP', acq_func='EI'"
+    deep_str = f"covars={covars}, model='SingleTaskGP', acq_func='ExpectedImprovement'"
 
     if train_X is not None:
         deep_str += f", train_X={train_X}"
@@ -232,7 +232,7 @@ def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_
     if nu is not None:
         deep_str += f", nu={nu}"
 
-    str_repr = f"CreativeProject(" + deep_str + f")\n"  # adding \n at end since this is part of string representation
+    str_repr = f"TuneSession(" + deep_str + f")\n"  # adding \n at end since this is part of string representation
 
     # capture the output for __str__
     print(cls)
@@ -240,3 +240,35 @@ def test_test_CreativeProject__init__str_repr_unit(train_X, train_Y, nu, covars_
 
     # assert for __str__
     assert captured.out == str_repr
+
+
+def test_CreativeProject_model_attributes_exist(covars_for_custom_models_simple_training_data_4elements):
+    """
+    tests that model attributes exist when the TuneSession class is initialized
+    """
+
+    covars = covars_for_custom_models_simple_training_data_4elements
+
+    cls = TuneSession(covars=covars)
+
+    ref_acq_funcs = [
+        "ConstrainedExpectedImprovement",
+        "ExpectedImprovement",
+        "NoisyExpectedImprovement",
+        "PosteriorMean",
+        "ProbabilityOfImprovement",
+        "qExpectedImprovement",
+        "qKnowledgeGradient",
+        "qMaxValueEntropy",
+        "qMultiFidelityMaxValueEntropy",
+        "qNoisyExpectedImprovement",
+        "qProbabilityOfImprovement",
+        "qSimpleRegret",
+        "qUpperConfidenceBound",
+        "UpperConfidenceBound",
+    ]
+
+    refs_models = ["SimpleCustomMaternGP", "SingleTaskGP", "FixedNoiseGP", "HeteroskedasticSingleTaskGP"]
+
+    assert set(cls.ACQ_FUNC_LIST) == set(ref_acq_funcs)
+    assert set(cls.MODEL_LIST) == set(refs_models)

@@ -23,7 +23,7 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
         max_iter = 50
 
         # initialize the class
-        cls = CreativeProject(covars=covars)
+        cls = TuneSession(covars=covars)
 
         # define the response function
         # x is a two-element vector, with one per covariate in 'covars'
@@ -134,7 +134,7 @@ def auto(self, response_samp_func, max_iter=100, rel_tol=None, rel_tol_steps=Non
         self.model["response_sampled_iter"] += 1
 
         # update surrogate model
-        # self.nu is None except for case where self.model["model_type"] = "Custom", however is not called for any
+        # self.nu is None except for case where self.model["model_type"] = "SimpleCustomMaternGP", however is not called for any
         # other case
         model_retrain_success_str = self._set_GP_model(nu=self.nu)
         print("\t" + model_retrain_success_str + "...")
@@ -158,7 +158,7 @@ def ask(self):
         covars = [(1, 0, 2), (12, 6, 14)]
 
         # initialize the class
-        cls = CreativeProject(covars=covars)
+        cls = TuneSession(covars=covars)
 
         # define the response function
         # x is a two-element vector, with one per covariate in 'covars'
@@ -231,7 +231,7 @@ def tell(self, **kwargs):
         covars = [(1, 0, 2), (12, 6, 14)]
 
         # initialize the class
-        cls = CreativeProject(covars=covars)
+        cls = TuneSession(covars=covars)
 
         # define the response function
         # x is a two-element vector, with one per covariate in 'covars'
@@ -277,7 +277,7 @@ def tell(self, **kwargs):
 
     # retrain the GP model
     # updates the prior and likelihood models behind the scenes
-    # self.nu is None except for case where self.model["model_type"] = "Custom", however is not called for any other
+    # self.nu is None except for case where self.model["model_type"] = "SimpleCustomMaternGP", however is not called for any other
     # case
     model_retrain_succes_str = self._set_GP_model(nu=self.nu)
 

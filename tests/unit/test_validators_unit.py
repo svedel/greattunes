@@ -164,7 +164,7 @@ def test_Validators__continue_iterating_rel_tol_conditions_works(best_response_v
         larger than rel_tol
 
     The tests will be executed by creating an instance of class Validators and adding best_response_value as attribute
-    to this class. In actual application, Validators is a parent class to the main class CreativeProject, which itself
+    to this class. In actual application, Validators is a parent class to the main class TuneSession, which itself
     has best_response_value as an attribute.
     """
 
