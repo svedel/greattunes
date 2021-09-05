@@ -34,10 +34,12 @@ A short primer on Bayesian optimization is provided in [this section](#a-primer-
   optimized.  
 * **Observed covariates can vary from the proposed covariates:** The optimization routine at each iteration proposes 
   new covariate data points to investigate, but there is no requirement that this is also the observed data point.
-  At each iteration step, proposed covariates, observed covariates and observed response are 3 separate entities.
+  At each iteration step, proposed covariates, observed covariates and observed response are 3 separate entities. That
+  that noisy or unexpected measurement points will be fully useful (no introduce any errors), even if they vary a lot 
+  from the proposed covariate data points.
 * **Data stored in class instance:** Data for *proposed covariate data points*, *observed covariates* and *observed 
   responses* is stored in the instantiated class object.
-* **Data format and type validation:** Input data is validated at all iterations.
+* **Data format and type validation:** Input data is validated at each iteration.
 * **Observations of covariates and response can be overridden during execution:** If an observation of either covariates 
   or response seems incorrect, the framework allows overriding the previous observation.  
 * **Consistency in number of covariates and observations:** It is assumed that there is consistency in the number of 
@@ -458,21 +460,36 @@ sampled datapoints (in between points sampled via Bayesian optimization).
 
 #### Kernels for Gaussian process surrogate model
 
-The following kernels for Gaussian process surrogate model are implemented. Listed parameters are provided as input to 
-class initialization
+The following kernels for Gaussian process surrogate model are implemented. Model type and listed parameters are 
+provided as input to class initialization, i.e. during initialization of `TuneSession`
 
 | Model name | Parameters | Comments |
 | ---------- | ---------- | -------- |
 | `"SingleTaskGP"` | N/A | A single-task exact kernel for Gaussian process regression. Follow this link for [more details](https://botorch.org/api/models.html#module-botorch.models.gp_regression). |
+| `"FixedNoiseGP"` | `train_Yvar` | A single-task exact kernel for Gaussian process regression assuming a fixed noise level. Follow this link for [more details](https://botorch.org/api/models.html#module-botorch.models.gp_regression). |
+| `"HeteroskedasticSingleTaskGP"` | `train_Yvar` | A single-task exact kernel for Gaussian process regression using a heteroskedastic noise model. Follow this link for [more details](https://botorch.org/api/models.html#module-botorch.models.gp_regression). |
 | `"SimpleCustomMaternGP"` | `nu` | A custom Matérn kernel with parameter `nu` (a float). For more details on Matérn kernels see [wiki page](https://en.wikipedia.org/wiki/Mat%C3%A9rn_covariance_function), and see the source code for the model in [`greattunes\custom_models`](greattunes/custom_models). |
 
 #### Acquisition functions
 
-These acquisition functions are currently available
+These acquisition functions are currently available. Parameters (if any) are provided during initialization of the 
+`TuneSession` class instance.
 
-| Acquisition function name | Comments |
-| ------------------------- | -------- |
-| `"ExpectedImprovement"` | Expected improvement acquisition function. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| Acquisition function name | Parameter | Comments |
+| ------------------------- | --------- | -------- |
+| `"ExpectedImprovement"` | N/A | Expected improvement acquisition function. This is the default for `greattunes`. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic) or Section 2 [in this paper](https://proceedings.neurips.cc/paper/2011/file/86e8f7ab32cfd12577bc2619bc635690-Paper.pdf). |
+| `"NoisyExpectedImprovement"` | `num_fantasies` (default: 20) | Expected improvement acquisition averaged over `num_fantasies` realizations of a single but noisy model. Requires that the Gaussian process model is of the type `FixedNoiseGP`. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"qExpectedImprovement"` | `sampler` (default: `botorch.sampling.SobolQMCNormalSampler`) | Monte Carlo-based expected improvement function. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"qNoisyExpectedImprovement"` | `sampler` (default: `botorch.sampling.SobolQMCNormalSampler`) | Monte Carlo-based noisy expected improvement function. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"PosteriorMean"` | N/A | Posterior mean. Requires the surrogate (Gaussian process) model to have a mean property (all implemented models do). For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"ProbabilityOfImprovement"` | N/A | Probability of improvement over the current best observed value, computed using the analytic formula under a Normal posterior distribution. Requires the outcome to be Gaussian. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"qProbabilityOfImprovement"` | `sampler` (default: `botorch.sampling.SobolQMCNormalSampler`) | Monte Carlo based probability of improvement method. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"qSimpleRegret"` | `sampler` (default: `botorch.sampling.SobolQMCNormalSampler`) | Monte Carlo method for simple regret. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"UpperConfidenceBound"` | `beta` (default: 0.2) | Analytic upper confidence bound that comprises of the posterior mean plus an additional term: the posterior standard deviation weighted by a trade-off parameter, `beta`. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic). |
+| `"qUpperConfidenceBound"` | `beta` (default: 0.2), `sampler` (default: `botorch.sampling.SobolQMCNormalSampler`) | Monte carlo based Upper Confidence Bound method. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic) or [here](https://arxiv.org/abs/1712.00424). |
+| `"qKnowledgeGradient"` | `num_fantasies` (default: 20) | Computes the Knowledge Gradient using realizations ("fantasies") for the outer expectation and either the model posterior mean or MC-sampling for the inner expectation. For a fixed number of realizations ("fantasies"), optimizes in a “one-shot” fashion. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic) or [here](https://epubs.siam.org/doi/10.1137/070693424?mobileUi=0&). |
+| `"qMaxValueEntropy"` | N/A | Uses max-value entropy search. This acquisition function computes the mutual information of max values and a candidate point. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic) or [here](https://arxiv.org/abs/1703.01968). |
+| `"qMultiFidelityMaxValueEntropy"` | N/A | Multi-fidelity max-value entropy search. For more details [see here](https://botorch.org/api/acquisition.html#module-botorch.acquisition.analytic) or [here](http://proceedings.mlr.press/v119/takeno20a.html). |
 
 ### Closed-loop: the `.auto` method
 
@@ -610,6 +627,12 @@ observed_response_second = observed_response + 1
 # update response
 cls.tell(covars=observed_results, response=observed_response_second)
 ```
+
+### Plotting and results presentation
+
+#### Pre-defined plots
+
+#### Result summaries
 
 ## Contributing
 We are happy if you would like to invest time in this project! Details are given in [CONTRIBUTING.md](CONTRIBUTING.md) 
