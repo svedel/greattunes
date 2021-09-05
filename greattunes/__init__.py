@@ -97,15 +97,6 @@ class TuneSession(Initializers, AcqFunction):
         self.MODEL_LIST = _models_list()
 
         # define the model
-        # self.model = {
-        #    "model_type": model,
-        #    "model": None,
-        #    "likelihood": None,
-        #    "loglikelihood": None,
-        #    "covars_proposed_iter": 0,
-        #    "covars_sampled_iter": 0,
-        #    "response_sampled_iter": 0,
-        # }
         self.model = self.initialize_model(model=model)
 
         # list available acquisition functions
@@ -114,10 +105,6 @@ class TuneSession(Initializers, AcqFunction):
         )  # creates ACQ_FUNC_LIST attribute by running constructor of AcqFunc parent class
 
         # define acquisition function
-        # self.acq_func = {
-        #    "type": acq_func,
-        #    "object": None,
-        # }
         self.acq_func = self.initialize_acq_func(acq_func=acq_func)
 
         # define sampling functions. initialize as iterative, which means using ask-tell (either manual or automatic).
@@ -251,6 +238,9 @@ class TuneSession(Initializers, AcqFunction):
         _update_max_response_value,
         current_best,
         _update_proposed_data,
+        best_predicted,
+        _evaluate_model,
+        _find_best_predicted,
     )
     from ._plot import (
         _covars_ref_plot_1d,
