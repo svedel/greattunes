@@ -22,8 +22,8 @@ jobs:
       - name: Install dependencies for running notebooks
         run: |
           pip install --upgrade jupyter nbconvert ipython
-          pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-          pip install -e .  # install greattunes from checked-out code
+          #pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+          pip install --find-links -e .  # install greattunes from checked-out code
       - name: Run notebooks
         run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
           #jupyter nbconvert --to notebook --execute examples/*.ipynb
