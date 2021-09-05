@@ -1,6 +1,9 @@
 import pandas as pd
 import pytest
 import torch
+from botorch.models import SingleTaskGP
+from gpytorch.mlls import ExactMarginalLogLikelihood
+from botorch.fit import fit_gpytorch_model
 
 
 def test_update_max_response_value_unit(custom_models_simple_training_data_4elements, tmp_best_response_class,
@@ -111,3 +114,59 @@ def test_update_max_response_value_multivariate_functional(training_data_covar_c
     for it in range(train_X.shape[1]):
         assert cls.covars_best_response_value[-1, it].item() == train_X[max_index, it].item()
     assert cls.best_response_value[-1].item() == train_Y[max_index].item()
+
+
+def test_best_predicted_integration(training_data_covar_complex, tmp_best_response_class, capsys):
+    """
+    test that best_predicted method runs produces the right prompt output
+    """
+
+    dtype = torch.double
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # data -- max at 2nd element
+    max_index = 1
+    covars = training_data_covar_complex[0]
+    train_X = training_data_covar_complex[1]
+    train_Y = training_data_covar_complex[2]
+    covar_details = training_data_covar_complex[3]
+    covar_mapped_names = training_data_covar_complex[4]
+
+    initial_guesses = torch.tensor([[x[0] for x in covars]], dtype=dtype, device=device)
+    covar_bounds = torch.tensor([[x[1] for x in covars], [x[2] for x in covars]], dtype=dtype, device=device)
+
+    # test class
+    cls = tmp_best_response_class
+
+    # add some attributes to tmp
+    cls.dtype = torch.double
+    cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # add attributes to class
+    cls.train_X = train_X
+    cls.proposed_X = train_X
+    cls.train_Y = train_Y
+    cls.covar_details = covar_details
+    cls.covar_mapped_names = covar_mapped_names
+    cls.initial_guesses = initial_guesses
+    cls.covar_bounds = covar_bounds
+
+    # define and train model
+    mymodel = SingleTaskGP(train_X=train_X, train_Y=train_Y)
+    ll = ExactMarginalLogLikelihood(mymodel.likelihood, mymodel)
+    fit_gpytorch_model(ll)
+
+    cls.model = {"model": mymodel}
+
+    # run the method
+    cls.best_predicted()
+
+    captured = capsys.readouterr()
+
+    # construct the expected output
+    outtext = "Best predicted response value Y (mean model): max_Y = 4.87768e+00\n" \
+              "Corresponding covariate values resulting in max_Y:\n\t    name\n\t-2.50338\n\n" \
+              "Best predicted response value Y (lower confidence region): max_Y = 2.87374e+00\n" \
+              "Corresponding covariate values resulting in max_Y:\n\t     name\n\t-2.500754\n"
+
+    assert captured.out == outtext

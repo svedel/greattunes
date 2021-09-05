@@ -238,6 +238,9 @@ class TuneSession(Initializers, AcqFunction):
         _update_max_response_value,
         current_best,
         _update_proposed_data,
+        best_predicted,
+        _evaluate_model,
+        _find_best_predicted,
     )
     from ._plot import (
         _covars_ref_plot_1d,
