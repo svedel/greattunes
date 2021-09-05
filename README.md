@@ -168,18 +168,21 @@ cls.auto(response_samp_func=f, max_iter=max_iter)
 Had we worked with an objective function `f` which could not be formulated explicitly, the right entrypoint would have
 been to use the `.ask`-`.tell` methods instead of `.auto`.
 
-### Key attributes
+### Key attributes and methods
 
-#### User-facing attributes: easily-accessible covariates and response
+#### User-facing attributes/methods: easily-accessible covariates and response
 The following key attributes are stored for each optimization as part of the instantiated class. These primary
-data structures for users are stored in `pandas` dataframes in pretty format.
+data structures for users are stored in `pandas` dataframes in pretty format. `current_best` and `best_predicted` are 
+methods which print their output to the prompt.
 
-| Attribute | Comments |
+| Attribute/method | Comments |
 | --------- | -------- |
 | `x_data` | All *observed* covariates with dimensions, one row per observation. If no names have been added to the covariates they will take the naems "covar0", "covar1", ... . Dimensions `num_observations` X `num_covariates`. |
 | `y_data` | All *observed* responses corresponding to the covariate points (rows) in `x_data`. Dimensions `num_observations` X 1. |
 | `best_response` | Best *observed* response value during optimization run, including current iteration. Dimensions `num_observations` X 1. |
 | `covars_best_response` | *Observed* covariates for best response value during optimization run, i.e. each row in `covars_best_response` generated the same row in `best_response`. Dimensions `num_observations` X `num_covariates`. |
+| `current_best()` | Returns the best *observed* response of the objective up to the current iteration. |
+| `best_predicted()` | Best *predicted* response from the surrogate model. Calculates for the mean model as well as for the lower confidence region (e.g. mean minus one standard deviation) of the full model. For both cases also returns the covariates resulting in the maximum. |
 
 #### Backend attributes
 In the backend the framework makes use of different data structures based on the `tensor` structure from `torch` which 
@@ -630,9 +633,18 @@ cls.tell(covars=observed_results, response=observed_response_second)
 
 ### Plotting and results presentation
 
+Some standard plots and standard methods for presenting the results have been included.
+
 #### Pre-defined plots
+* `plot_1d_latest()`: plots the latest retrained surrogate model (mean and variance), including all sampled data points.
+* `plot_convergence()`: plots the relative error between consecutive iterations.
+* `plot_best_objective()`: plots the best recorded value of the objective function as a function of the number of iterations.
 
 #### Result summaries
+These methods print their results to the prompt.
+
+* `current_best()`: returns the largest *observed* response value (observed in either previous or current iteration). Also returns the corresponding values of the covariates.
+* `best_predicted()`: returns the largest response *predicted* from the surrogate model trained on all available data. Two values are returned: the largest mean and the largest of the lower confidence region, i.e. the largest value of the mean minus the first standard deviation (note: heteroskedacticity is allowed, so the standard deviation will vary across different covariates). Also returns the corresponding covariate values. Uses the [Nelder-Mead method](https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method), a multivariate equivalent to bisection, to find maximum value of surrogate model.
 
 ## Contributing
 We are happy if you would like to invest time in this project! Details are given in [CONTRIBUTING.md](CONTRIBUTING.md) 
