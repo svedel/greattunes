@@ -235,12 +235,7 @@ def _evaluate_model(self, type, x):
 
 
 def _find_best_predicted(
-    self,
-    x_init,
-    type,
-    maximize=True,
-    max_iter=500,
-    simplex_std_lim=1e-3,
+    self, x_init, type, maximize=True, max_iter=500, simplex_std_lim=1e-3,
 ):
     """
     apply the Nelder-Mead simplex method to find maximum of the Gaussian process model in self.model["model"].
