@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@staging  # does this take the code from master of repo?
+      - uses: actions/checkout@v2  # does this take the code from master of repo?
+        with:
+          ref: 'staging'
       - name: Set up Python 3.8
         uses: actions/setup-python@v1
         with:
