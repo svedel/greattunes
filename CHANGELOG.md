@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] -
 
-Version for this release: 0.0.6
+Version for this release: 0.0.7
 
 ### Added
 * CI/CD stuff:
@@ -40,6 +40,11 @@ Version for this release: 0.0.6
         
       * `sampler` - sampler for Monte Carlo methods, should be an initialized sampler from `BoTorch` (details in 
         [`BoTorch` documentation](https://botorch.org/api/sampling.html)).
+
+* Added `best_predicted`-method to class, allowing user to see the best predicted result similar to the best observed 
+result. This can be called after each iteration, and will be printed to the prompt. Using the Nelder-Mead algorithm, the
+method will return the maximum mean value of the surrogate model as well as the maximum of the lower confidence
+region.
   
 * Extended [`CONTRIBUTING.md`](CONTRIBUTING.md) with details of how to contribute 
 
