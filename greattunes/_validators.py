@@ -59,7 +59,7 @@ class Validators:
     def __validate_num_covars(self, covars_array):
         """
         validate that entries in "covars_array" is equal to number of covars provided to "covars" during
-        class instance initialization of CreativeProject (from greattunes.__init__.py)
+        class instance initialization of TuneSession (from greattunes.__init__.py)
         :param covars_array (torch.tensor, pandas dataframe, numpy array; shape needs to be
         num_observations X num_covariates)
         :param
@@ -365,3 +365,21 @@ class Validators:
                     continue_iterating = False
 
         return continue_iterating
+
+    @staticmethod
+    def __validate_model_acceptable(model, model_list):
+
+        valid = False
+
+        if model not in model_list:
+            raise Exception(
+                "greattunes._validators.__validate_model_acceptable:"
+                + model
+                + " is not among approved options ("
+                + ", ".join(model_list)
+                + ")"
+            )
+        else:
+            valid = True
+
+        return valid

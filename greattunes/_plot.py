@@ -68,7 +68,7 @@ def plot_1d_latest(self, with_ylabel=True, **kwargs):
     iteration. All data up to that point will also be shown, i.e. the acquisition function used to obtain
     latest data point will be shown
     :param iteration (int): iteration number in optimization for which to plot
-    :param self (object): initiated instance of CreativeProject class with optimization having run for at least
+    :param self (object): initiated instance of TuneSession class with optimization having run for at least
         the number of iterations given by iteration
     :param kwargs:
         - gs: object of type matplotlib.gridspec.GridSpecFromSubplotSpec
@@ -234,8 +234,8 @@ def plot_best_objective(self):
 # def plot_GP_samples(self, num_realizations=25):
 #     """
 #     plot sample traces of individual realizations of the underlying Gaussian Process model stored in
-#     instantiated CreativeProject-object self
-#     :param self (object): initiated instance of CreativeProject class with optimization having run for at least
+#     instantiated TuneSession-object self
+#     :param self (object): initiated instance of TuneSession class with optimization having run for at least
 #         the number of iterations given by iteration
 #     :num_realizations (int): number of samples to plot
 #     """

@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import torch
 import numpy as np
-from greattunes import CreativeProject
+from greattunes import TuneSession
 
 
 @pytest.mark.parametrize(
@@ -10,8 +10,8 @@ from greattunes import CreativeProject
     [
         [10, 4.81856, 5e-2, "SingleTaskGP"],
         [30, 6.02073, 1e-3, "SingleTaskGP"],
-        [10, 5.49629, 0.51, "Custom"],
-        [50, 6.02073, 2.5e-2, "Custom"],
+        [10, 5.49629, 0.51, "SimpleCustomMaternGP"],
+        [50, 6.02073, 2.5e-2, "SimpleCustomMaternGP"],
     ]
 )
 def test_CreativeProject_auto_univariate_functional(max_iter, max_response, error_lim, model_type):
@@ -28,7 +28,7 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input, model=model_type)
+    cc = TuneSession(covars=x_input, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -59,7 +59,7 @@ def test_CreativeProject_auto_univariate_functional(max_iter, max_response, erro
     [
         [10, 250, 1.1, "SingleTaskGP"],
         [50, 250, 1, "SingleTaskGP"],
-        [10, 250, 96e-1, "Custom"],
+        [10, 250, 96e-1, "SimpleCustomMaternGP"],
     ]
 )
 def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, error_lim, model_type):
@@ -75,7 +75,7 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
         return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (-(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
 
     # initialize class instance
-    cc = CreativeProject(covars=covars, model=model_type)
+    cc = TuneSession(covars=covars, model=model_type)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -104,6 +104,60 @@ def test_CreativeProject_auto_multivariate_functional(max_iter, max_response, er
 
 
 @pytest.mark.parametrize(
+"acq_func_choice",
+    [
+        "ExpectedImprovement",
+        "NoisyExpectedImprovement",
+        "PosteriorMean",
+        "ProbabilityOfImprovement",
+        "qExpectedImprovement",
+        "qKnowledgeGradient",
+        "qMaxValueEntropy",
+        "qMultiFidelityMaxValueEntropy",
+        "qNoisyExpectedImprovement",
+        "qProbabilityOfImprovement",
+        "qSimpleRegret",
+        "qUpperConfidenceBound",
+        "UpperConfidenceBound"
+    ]
+)
+def test_CreativeProject_auto_multivariate_acquisition_funcs(acq_func_choice):
+    """
+    test that all acquisition functions work for solving the problem. Focus of this test is not on convergence rate,
+    only that the acquisition functions can be used to iterate
+    """
+
+    MAX_ITER = 5
+    MAX_RESPONSE = 250
+    ERROR_LIM = 1.0
+    THEORETICAL_MAX_COVAR = 1.0
+
+    # define data
+    covars = [(0.5, 0, 1),
+              (0.5, 0, 1)]  # covariates come as a list of tuples (one per covariate: (<initial_guess>, <min>, <max>))
+
+    # define response function
+    def f(x):
+        return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (
+                    -(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
+
+    # initialize class instance
+    if acq_func_choice == "NoisyExpectedImprovement":
+        cc = TuneSession(covars=covars, model="FixedNoiseGP", acq_func=acq_func_choice, train_Yvar=0.25)
+    else:
+        cc = TuneSession(covars=covars, model="SingleTaskGP", acq_func=acq_func_choice)
+
+    # run the auto-method
+    cc.auto(response_samp_func=f, max_iter=MAX_ITER)
+
+    # assert that the correct maximum and covariate values for that spot are identified
+    for it in range(len(covars)):
+        assert abs(cc.covars_best_response_value[-1, it].item() - THEORETICAL_MAX_COVAR) / THEORETICAL_MAX_COVAR \
+               <= ERROR_LIM
+    assert abs(cc.best_response_value[-1].item() - MAX_RESPONSE) / MAX_RESPONSE <= ERROR_LIM
+
+
+@pytest.mark.parametrize(
     "max_iter, rel_tol, rel_tol_steps, num_iterations_exp",
     [
         [50, 0.01, None, 2],  # test that iteration stops if relative improvement in one step is below rel_tol
@@ -129,7 +183,7 @@ def test_CreativeProject_auto_rel_tol_test(max_iter, rel_tol, rel_tol_steps, num
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input)
+    cc = TuneSession(covars=x_input)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter, rel_tol=rel_tol, rel_tol_steps=rel_tol_steps)
@@ -189,7 +243,7 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
         return -(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)
 
     # initialize class instance
-    cc = CreativeProject(covars=x_input)
+    cc = TuneSession(covars=x_input)
 
     # run the auto-method
     cc.auto(response_samp_func=f, max_iter=max_iter)
@@ -206,3 +260,42 @@ def test_CreativeProject_auto_printed_to_prompt(max_iter, max_resp, covar_max_re
     outtext += "Corresponding covariate values resulting in max_Y:\n\t" + pd.DataFrame({"covar0": [covar_max_resp]}).to_string(index=False).replace("\n", "\n\t") + "\n"
 
     assert captured.out == outtext
+
+
+@pytest.mark.parametrize(
+    "model_choice",
+    ["SingleTaskGP", "FixedNoiseGP", "SimpleCustomMaternGP", "HeteroskedasticSingleTaskGP"]
+)
+def test_CreativeProject_auto_multivariate_model_types(model_choice):
+    """
+    tests that each implemented model type can be run
+    """
+
+    MAX_ITER = 5
+    MAX_RESPONSE = 250
+    ERROR_LIM = 1.0
+    THEORETICAL_MAX_COVAR = 1.0
+
+    # define data
+    covars = [(0.5, 0, 1),
+              (0.5, 0, 1)]  # covariates come as a list of tuples (one per covariate: (<initial_guess>, <min>, <max>))
+
+    # define response function
+    def f(x):
+        return (-(6 * x['covar0'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar0'].iloc[0] - 4)) * (
+                -(6 * x['covar1'].iloc[0] - 2) ** 2 * np.sin(12 * x['covar1'].iloc[0] - 4))
+
+    # initialize class instance
+    if model_choice in ["FixedNoiseGP", "HeteroskedasticSingleTaskGP"]:
+        cc = TuneSession(covars=covars, model=model_choice, acq_func="ExpectedImprovement", train_Yvar=0.25)
+    else:
+        cc = TuneSession(covars=covars, model=model_choice, acq_func="ExpectedImprovement")
+
+    # run the auto-method
+    cc.auto(response_samp_func=f, max_iter=MAX_ITER)
+
+    # assert that the correct maximum and covariate values for that spot are identified
+    for it in range(len(covars)):
+        assert abs(cc.covars_best_response_value[-1, it].item() - THEORETICAL_MAX_COVAR) / THEORETICAL_MAX_COVAR \
+               <= ERROR_LIM
+    assert abs(cc.best_response_value[-1].item() - MAX_RESPONSE) / MAX_RESPONSE <= ERROR_LIM

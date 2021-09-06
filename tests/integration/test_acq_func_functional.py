@@ -72,7 +72,7 @@ def test_acq_func_identify_new_candidate_withdatacount_functional(covars_for_cus
                  }
 
     cls.acq_func = {
-        "type": "EI",  # define the type of acquisition function
+        "type": "ExpextedImprovement",  # define the type of acquisition function
         "object": ExpectedImprovement(model=cls.model["model"], best_f=train_Y.max().item())
     }
 

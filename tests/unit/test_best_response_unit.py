@@ -1,3 +1,6 @@
+from botorch.models import SingleTaskGP
+from gpytorch.mlls import ExactMarginalLogLikelihood
+from botorch.fit import fit_gpytorch_model
 import torch
 import pytest
 from greattunes._best_response import _find_max_response_value, _update_max_response_value
@@ -260,3 +263,123 @@ def test_update_proposed_data_fails(tmp_best_response_class, candidate, proposed
     with pytest.raises(AssertionError) as e:
         cls._update_proposed_data(candidate=candidate)
     assert str(e.value) == error_msg
+
+
+@pytest.mark.parametrize(
+    "maximize, result",
+    [
+        [True, 1],
+        [False, 0],
+    ]
+)
+def test_find_best_predicted_1d(tmp_best_response_class, monkeypatch, maximize, result):
+    """"
+    tests that the optimizing method indeed finds the maximum. Monkeypatching the function evaluation step
+    """
+
+    # defines temporary class
+    tmp = tmp_best_response_class
+
+    # add some attributes to tmp
+    tmp.dtype = torch.double
+    tmp.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # add function to maximize
+    def f(type, x):
+        return torch.sin(x**2)
+
+    monkeypatch.setattr(tmp, "_evaluate_model", f)
+
+    # initialize x and type (ignore type in this test)
+    #x_init = torch.rand(1).requires_grad_(True)
+    x_init = torch.rand(1, 1, dtype=torch.double)
+    type = "mean"
+
+    # run the method
+    y, x = tmp._find_best_predicted(x_init, type, maximize=maximize, max_iter=20)
+
+    # assert
+    assert abs(y-result) < 1e-3
+
+
+@pytest.mark.parametrize(
+    "maximize, result",
+    [
+        [True, 1],
+        [False, 0],
+    ]
+)
+def test_find_best_predicted_2d(tmp_best_response_class, monkeypatch, maximize, result):
+    """"
+    tests that the optimizing method indeed finds the maximum. Monkeypatching the function evaluation step
+    """
+
+    # defines temporary class
+    tmp = tmp_best_response_class
+
+    # add some attributes to tmp
+    tmp.dtype = torch.double
+    tmp.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # add function to maximize
+    def f(type, x):
+        return (torch.sin(x[:,0]**2)*torch.sin(x[:,1]**2)).unsqueeze(1)
+
+    monkeypatch.setattr(tmp, "_evaluate_model", f)
+
+    # initialize x and type (ignore type in this test)
+    #x_init = torch.rand(1, 2).requires_grad_(True)
+    x_init = torch.rand(1, 2, dtype=torch.double)
+    type = "mean"
+
+    # run the method
+    y,x = tmp._find_best_predicted(x_init, type, maximize=maximize, max_iter=20)
+
+    # assert
+    assert abs(y-result) < 1e-3
+
+
+@pytest.mark.parametrize(
+    "type, result",
+    [
+        ["mean", 1.2500295534805428],
+        ["lower_conf", -2.440432203804888],
+    ]
+)
+def test_evaluate_model(type, result):
+    """
+    test that method '_evaluate_model' works
+    """
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    dtype = torch.double
+
+    # define training data
+    train_X = torch.tensor([[1, 2, 3], [1, 2, 3]], dtype=dtype, device=device)
+    train_Y = torch.tensor([[1], [1.5]], dtype=dtype, device=device)
+
+    # define and train model
+    mymodel = SingleTaskGP(train_X=train_X, train_Y=train_Y)
+    ll = ExactMarginalLogLikelihood(mymodel.likelihood, mymodel)
+    fit_gpytorch_model(ll)
+
+    # construct temporary class
+    class Tmp:
+        def __init__(self, mymodel):
+            self.model = {"model": mymodel}
+
+        from greattunes._best_response import _evaluate_model
+
+    cls = Tmp(mymodel)
+
+    # data point to investigate
+    x = torch.tensor([[2, 3, 4]], dtype=dtype, device=device)
+
+    # run method
+    y = cls._evaluate_model(type=type, x=x)
+
+    # assert
+    assert isinstance(y, torch.DoubleTensor)
+
+    ERROR_LIM = 1e-8
+    assert abs(y.item()-result) <= ERROR_LIM

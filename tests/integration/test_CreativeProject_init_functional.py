@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 import torch
-from greattunes import CreativeProject
+from greattunes import TuneSession
 
 
 @pytest.mark.parametrize(
@@ -18,12 +18,12 @@ from greattunes import CreativeProject
     ])
 def test_CreativeProject__init__covars_notrainingdata_fails_functional(covars, error_msg):
     """
-    test CreativeProject class initialization under conditions where it should work (no data provided)
+    test TuneSession class initialization under conditions where it should work (no data provided)
     """
 
     with pytest.raises(Exception) as e:
         # set up class
-        assert CreativeProject(covars=covars)
+        assert TuneSession(covars=covars)
     assert str(e.value) == error_msg
 
 
@@ -39,7 +39,7 @@ def test_CreativeProject__init__covars_trainingdata_works_functional(
     train_Y = custom_models_simple_training_data_4elements[1]
 
     # initialize class
-    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+    cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y)
 
     # assert covars are set up correctly
     assert cls.initial_guess[0].item() == covars[0][0]
@@ -72,7 +72,7 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_works_functiona
     train_Y = training_data_covar_complex[2]
 
     # initialize class
-    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+    cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y)
 
     # assert covars are set up correctly
     assert cls.initial_guess[0][1].item() == covars[1][0]
@@ -126,7 +126,7 @@ def test_CreativeProject__init__covars_trainingdata_multivariate_fails_functiona
     train_Y = training_data_covar_complex[2]
     train_X = torch.cat((train_X_tmp, torch.tensor([[-1.1], [-0.5], [-2.2]], dtype=torch.double)), dim=1)
 
-    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+    cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y)
 
     assert cls.train_X is None
     assert cls.train_Y is None
@@ -143,7 +143,7 @@ def test_CreativeProject__init__covars_dict_of_dicts_works():
     train_X_interrogate = pd.DataFrame({'covar0':[2, 1], 'covar1': [-0.7, 1.1], 'covar2': ["red", "blue"]})
     train_Y = torch.tensor([[1.1], [3.5]], dtype=torch.double, device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
-    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y)
+    cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y)
 
     # test that attributes have been created
     assert hasattr(cls, "train_X")
@@ -174,7 +174,7 @@ def test_CreativeProject__init__initialize_random_start_works(random_start, num_
     """
     test that initialization of random start parameters works. There are 4 different cases treated by
     '__initialize_random_start', which are exhaustively tested by unit and integration tests for _initializers.py. Hence
-    purpose of present tests is only to ensure that the method also works when initalizing from CreativeProject, and
+    purpose of present tests is only to ensure that the method also works when initalizing from TuneSession, and
     thus we are running with reduced test load
     """
 
@@ -182,8 +182,8 @@ def test_CreativeProject__init__initialize_random_start_works(random_start, num_
     covars = [(1, 0, 4), (3.4, -1.2, 6), (12, 11, 17.8)]
 
     # initialize class
-    cls = CreativeProject(covars=covars, train_X=train_X, train_Y=train_Y, random_start=random_start,
-                          num_initial_random=num_initial_random, random_sampling_method=random_sampling_method)
+    cls = TuneSession(covars=covars, train_X=train_X, train_Y=train_Y, random_start=random_start,
+                      num_initial_random=num_initial_random, random_sampling_method=random_sampling_method)
 
     # assert
     assert cls.random_sampling_method == method_sampling_res

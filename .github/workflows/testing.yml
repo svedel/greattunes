@@ -9,12 +9,14 @@ on:
   pull_request:
     branches:
       - master
+      - staging
+      - development
 
 jobs:
 
   tests:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.7, 3.8]
@@ -63,15 +65,29 @@ jobs:
         run: |
           python -m pytest tests/unit tests/integration --pythontestvers ${{ matrix.python-version }}
       - if: github.event_names == 'pull_request'
-        name: run sample problems
+        name: run sample problems (pull request)
         run: |
           python -m pytest tests/sample_problems
       - if: github.event_names != 'pull_request'
-        name: run sample problems
+        name: run sample problems (push)
         run: |
           python -m pytest tests/sample_problems
         continue-on-error: true
-      #- name: build package
-      #  run: python3 setup.py bdist_wheel
+      - name: Install dependencies for running notebooks
+        run: |
+          pip install --upgrade jupyter
+          pip install --upgrade nbconvert
+          pip install --upgrade ipython
+          # install greattunes from checked-out code
+          pip install -e .
+      - name: Run notebooks (pull request)
+        if: github.event_names == 'pull_request'
+        run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
+        continue-on-error: false
+      - name: Run notebooks (push)
+        if: github.event_names != 'pull_request'
+        run: for FILE in examples/*.ipynb; do jupyter nbconvert --to notebook --execute "$FILE"; done
+        continue-on-error: true
+
 
 
